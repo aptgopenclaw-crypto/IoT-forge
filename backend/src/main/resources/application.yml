@@ -3,17 +3,17 @@ server:
 
 spring:
   application:
-    name: taipei-iot
+    name: iot_forge
 
   profiles:
     active: dev
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydb?currentSchema=iot_workflowdb
+    url: jdbc:postgresql://localhost:5432/mydb?currentSchema=iot_forgedb
     username: postgres
     password: ${DB_PASSWORD}
     hikari:
-      schema: iotdb
+      schema: iot_forgedb
       maximum-pool-size: 10
 
   jpa:
@@ -21,14 +21,14 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        default_schema: iot_workflowdb
+        default_schema: iot_forgedb
 
   flyway:
     enabled: true
     out-of-order: true
     schemas:
-      - iot_workflowdb
-    default-schema: iot_workflowdb
+      - iot_forgedb
+    default-schema: iot_forgedb
     locations: classpath:db/migration
 
   data:

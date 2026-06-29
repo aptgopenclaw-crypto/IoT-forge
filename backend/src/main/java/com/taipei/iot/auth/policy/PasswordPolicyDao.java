@@ -70,4 +70,27 @@ public class PasswordPolicyDao {
 			.executeUpdate();
 	}
 
+	/**
+	 * Delete all tenant overrides for a given key whose integer value is strictly below
+	 * {@code floorValue}. The platform sentinel row is never deleted. Returns the number
+	 * of deleted rows.
+	 * <p>
+	 * Used by {@link PasswordPolicyService#updatePlatformDefault} as a post-write scan to
+	 * enforce spec D-4: when the platform floor is raised, any tenant override still
+	 * below the new floor is automatically cleaned up so the new platform default takes
+	 * effect. The regex guard {@code setting_value ~ '^\d+$'} prevents CAST errors from
+	 * non-numeric data that might exist in the general {@code system_settings} table for
+	 * other purposes.
+	 */
+	@Transactional
+	public int deleteBelowFloor(String key, int floorValue) {
+		return em
+			.createNativeQuery("DELETE FROM system_settings WHERE setting_key = :k AND tenant_id <> :platform "
+					+ "AND setting_value ~ '^\\d+$' AND CAST(setting_value AS INTEGER) < :floor")
+			.setParameter("k", key)
+			.setParameter("platform", PasswordPolicyResolver.PLATFORM_SENTINEL)
+			.setParameter("floor", floorValue)
+			.executeUpdate();
+	}
+
 }

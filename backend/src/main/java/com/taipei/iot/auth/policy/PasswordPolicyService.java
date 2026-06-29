@@ -76,6 +76,20 @@ public class PasswordPolicyService {
 		}
 		dao.upsert(PasswordPolicyResolver.PLATFORM_SENTINEL, key.getKey(), req.getValue(), "平台預設：" + key.getKey());
 		log.info("Platform password policy updated: {} = {}", key.getKey(), req.getValue());
+
+		// Post-write scan: clean up tenant overrides now below the new floor (spec D-4
+		// invariant enforcement). When the platform raises a floor, any tenant override
+		// with an INT value strictly below the new value is automatically deleted so the
+		// new platform default takes effect globally — the tenant's policy can only be as
+		// weak as the platform permits.
+		if (key.getType() == PasswordPolicyKey.PolicyType.INT) {
+			int newFloor = Integer.parseInt(req.getValue());
+			int cleaned = dao.deleteBelowFloor(key.getKey(), newFloor);
+			if (cleaned > 0) {
+				log.warn("Platform raised {} to {} — cleaned up {} tenant override(s) below new floor", key.getKey(),
+						newFloor, cleaned);
+			}
+		}
 	}
 
 	@Transactional
