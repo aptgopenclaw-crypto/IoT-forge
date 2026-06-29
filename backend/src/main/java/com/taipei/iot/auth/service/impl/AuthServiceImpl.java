@@ -718,7 +718,7 @@ public class AuthServiceImpl implements AuthService {
 		// Once user→tenant lookup is available here we can switch to the tenant's policy.
 		passwordValidator.validate(null, request.getNewPassword(),
 				new com.taipei.iot.user.service.PasswordValidator.UserContext(user.getEmail(), user.getEmail()));
-		passwordValidator.checkNotRecentlyUsed(null, user.getUserId(), request.getNewPassword());
+		passwordValidator.checkNotRecentlyUsedForReset(null, user.getUserId(), request.getNewPassword());
 
 		String encodedPassword = passwordEncoder.encode(request.getNewPassword());
 		user.setPasswordHash(encodedPassword);
@@ -793,7 +793,7 @@ public class AuthServiceImpl implements AuthService {
 
 		passwordValidator.validate(policyTenantId, request.getNewPassword(),
 				new com.taipei.iot.user.service.PasswordValidator.UserContext(user.getEmail(), user.getEmail()));
-		passwordValidator.checkNotRecentlyUsed(policyTenantId, user.getUserId(), request.getNewPassword());
+		passwordValidator.checkNotRecentlyUsedForReset(policyTenantId, user.getUserId(), request.getNewPassword());
 
 		// 4. Persist new password + clear expiry state.
 		String encodedPassword = passwordEncoder.encode(request.getNewPassword());

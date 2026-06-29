@@ -674,7 +674,7 @@ class AuthServiceTest {
 		assertNotNull(singleTenantUser.getPasswordChangedAt());
 		// Policy validation must have run with the resolved single-tenant id
 		verify(passwordValidator).validate(eq("TENANT_A"), eq("NewPass!23"), any());
-		verify(passwordValidator).checkNotRecentlyUsed(eq("TENANT_A"), eq("user-admin-001"), eq("NewPass!23"));
+		verify(passwordValidator).checkNotRecentlyUsedForReset(eq("TENANT_A"), eq("user-admin-001"), eq("NewPass!23"));
 	}
 
 	@Test
@@ -1042,7 +1042,7 @@ class AuthServiceTest {
 
 		verify(resetPasswordTokenClaimer).claim(anyString());
 		verify(passwordValidator).validate(any(), eq("NewPass1234"), any());
-		verify(passwordValidator).checkNotRecentlyUsed(any(), eq("user-admin-001"), eq("NewPass1234"));
+		verify(passwordValidator).checkNotRecentlyUsedForReset(any(), eq("user-admin-001"), eq("NewPass1234"));
 		verify(passwordHistoryRepository).save(any());
 		verify(changePasswordLogRepository).save(argThat(log -> "RESET".equals(log.getChangeType())));
 	}

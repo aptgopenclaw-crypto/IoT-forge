@@ -149,4 +149,31 @@ public class PasswordValidator {
 		}
 	}
 
+	/**
+	 * [N-9] Reset-specific history check — uses {@code password.history_count_for_reset}
+	 * instead of the (typically larger) {@code password.history_count} that applies to
+	 * user self-initiated password changes.
+	 *
+	 * <p>
+	 * Admin-initiated resets (forgot-password reset, force-change after expiry / admin
+	 * reset) are already controlled actions; a lower history N improves UX without
+	 * meaningful security trade-off. A value of 0 disables the check entirely.
+	 *
+	 * @see #checkNotRecentlyUsed
+	 */
+	public void checkNotRecentlyUsedForReset(@Nullable String tenantId, String userId, String rawPassword) {
+		PasswordPolicy policy = policyResolver.resolve(tenantId);
+		int historyCount = policy.getHistoryCountForReset();
+		if (historyCount <= 0) {
+			return;
+		}
+		List<PasswordHistoryEntity> recent = passwordHistoryRepository.findByUserIdOrderByCreateTimeDesc(userId,
+				PageRequest.of(0, historyCount));
+		for (PasswordHistoryEntity history : recent) {
+			if (passwordEncoder.matches(rawPassword, history.getPasswordHash())) {
+				throw new BusinessException(ErrorCode.PASSWORD_RECENTLY_USED);
+			}
+		}
+	}
+
 }

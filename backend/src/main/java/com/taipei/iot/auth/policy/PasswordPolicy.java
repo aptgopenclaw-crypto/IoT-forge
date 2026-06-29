@@ -32,6 +32,13 @@ public class PasswordPolicy {
 
 	int historyCount;
 
+	/**
+	 * [N-9] History count used for admin-initiated password resets (reset-password /
+	 * force-change-password). 0 = disabled (no history check on reset). Distinct from
+	 * {@link #historyCount} which applies to user self-initiated changes.
+	 */
+	int historyCountForReset;
+
 	// ── Phase 2 ──────────────────────────────────────────────────────────
 	/** Maximum password length; defends against DoS via huge inputs. */
 	int maxLength;
@@ -86,6 +93,9 @@ public class PasswordPolicy {
 		}
 		if (historyCount > 0) {
 			out.add("不可與前 " + historyCount + " 次密碼相同");
+		}
+		if (historyCountForReset > 0 && historyCountForReset != historyCount) {
+			out.add("管理員重設時，不可與前 " + historyCountForReset + " 次密碼相同");
 		}
 		if (expireDays > 0) {
 			out.add("每 " + expireDays + " 天需更換密碼");

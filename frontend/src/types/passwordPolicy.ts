@@ -13,6 +13,7 @@ export interface PasswordPolicyDto {
   requireDigit: boolean
   requireSpecial: boolean
   historyCount: number
+  historyCountForReset: number
 
   // Phase 2
   maxLength: number

@@ -31,7 +31,7 @@
 
 ## 二、v2 遺留 3 項狀態複查
 
-### N-3 CSRF for refresh / logout — 🔴 **仍未處理**
+### N-3 CSRF for refresh / logout — ✅ 已完成（2026-06-29）
 - 檔案：[SecurityConfig.java](backend/src/main/java/com/taipei/iot/config/SecurityConfig.java#L61) 仍 `csrf.disable()`
 - 現況：`/v1/auth/refresh`、`/v1/auth/logout`、`/v1/auth/idle-logout`、`DELETE /v1/auth/sessions/{id}` 全部仰賴 SameSite=Lax cookie，無 CSRF token 或 custom header 驗證
 - 風險升級：v3 新增 `/v1/auth/sessions/*` 端點後，攻擊面又擴大；強制登出（DoS）攻擊可行
@@ -43,7 +43,7 @@
 - 風險：一旦部署到 Nginx/LB 後面，所有「登入 IP / session IP / rate limit」全部塌縮成 proxy IP，等同 rate limit 失效、稽核失去意義
 - 建議：標記為「部署前必做」release blocker；application.yml 加 `server.forward-headers-strategy=NATIVE`，Nginx 設 `set_real_ip_from` 白名單
 
-### N-9 password history N 在 reset vs change — 🟠 **仍未分離**
+### N-9 password history N 在 reset vs change — ✅ 已完成（2026-06-29）
 - 檔案：`PasswordValidator.checkNotRecentlyUsed` 仍使用同一個 `policy.getHistoryCount()`
 - 現況：resetPassword 傳 tenantId=null（用平台預設 policy）、forceChangePassword 傳 policyTenantId，但兩者最終都查同一張 password_history、同一個 N
 - 建議：在 `PasswordPolicy` 引入 `historyCountForReset`（預設 ≤ historyCountForChange），改善 UX 同時保留主安全目標
@@ -103,7 +103,7 @@
 
 ### 🔴 高風險
 
-#### [V3-H6] 平台 floor 提升後，既有租戶覆寫不會被回溯校正 → spec D-4 不變式被破壞
+#### [V3-H6] 平台 floor 提升後，既有租戶覆寫不會被回溯校正 → spec D-4 不變式被破壞 ✅ 已完成（2026-06-29）
 - 檔案：[PasswordPolicyService.java:62-77](backend/src/main/java/com/taipei/iot/auth/policy/PasswordPolicyService.java#L62)（`updatePlatformDefault`）
 - 證據：`updatePlatformDefault` 只 `dao.upsert(PLATFORM_SENTINEL, ...)`，完全沒有掃描現有 tenant override 並重新驗證
 - 風險路徑：原本平台 `min_length=8`、租戶 A override=8 → SUPER_ADMIN 把平台預設改為 12 → 租戶 A 的 override 仍是 8，`PasswordPolicyResolver.pick()` 以 tenant 值優先 → 租戶 A 實際生效規則仍為 8。整個「平台只能設下限、租戶不能弱化」承諾失效

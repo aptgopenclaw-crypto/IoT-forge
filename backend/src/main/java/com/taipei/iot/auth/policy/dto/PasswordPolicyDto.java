@@ -27,6 +27,8 @@ public class PasswordPolicyDto {
 
 	int historyCount;
 
+	int historyCountForReset;
+
 	int maxLength;
 
 	int minSpecialChars;
