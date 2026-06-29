@@ -1,0 +1,54 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+
+  datasource:
+    password: ${DB_PASSWORD:Kali1234!}   # test profile 本機開發預設值；正式環境仍由環境變數覆蓋
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+tenant:
+  mode: single
+
+jwt:
+  secret: test-only-secret-do-not-use-in-production-at-least-256-bits-long-here
+  access-token-expiration: 1800000
+  refresh-token-expiration: 604800000
+  temporary-token-expiration: 300000
+
+captcha:
+  ttl: 300
+  length: 4
+  skip-verification: true
+
+auth:
+  cookie:
+    secure: false
+    same-site: Lax
+    domain: ""
+    path: /
+    max-age: 604800
+
+app:
+  security:
+    lock:
+      max-fail-count: 5
+      lock-duration-minutes: 10
+  default-id: DEFAULT
+
+user:
+  password:
+    min-length: 8
+    require-uppercase: true
+    require-lowercase: true
+    require-digit: true
+    max-age-days: 90
+    history-count: 5
+
+cors:
+  allowed-origins: http://localhost:5173

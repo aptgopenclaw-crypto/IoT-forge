@@ -1,0 +1,187 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: taipei-iot
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb?currentSchema=iot_workflowdb
+    username: postgres
+    password: ${DB_PASSWORD}
+    hikari:
+      schema: iotdb
+      maximum-pool-size: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: iot_workflowdb
+
+  flyway:
+    enabled: true
+    out-of-order: true
+    schemas:
+      - iot_workflowdb
+    default-schema: iot_workflowdb
+    locations: classpath:db/migration
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      timeout: ${REDIS_TIMEOUT:2000ms}
+      # [F-4] Redis Sentinel 高可用配置（啟用時註解掉上方 host/port，改用 sentinel 區塊）
+      # sentinel:
+      #   master: ${REDIS_SENTINEL_MASTER:mymaster}
+      #   nodes: ${REDIS_SENTINEL_NODES:sentinel1:26379,sentinel2:26379,sentinel3:26379}
+      #   password: ${REDIS_SENTINEL_PASSWORD:}
+      # [F-4] Redis Cluster 配置（與 sentinel 二擇一）
+      # cluster:
+      #   nodes: ${REDIS_CLUSTER_NODES:node1:6379,node2:6379,node3:6379}
+      #   max-redirects: ${REDIS_CLUSTER_MAX_REDIRECTS:3}
+      lettuce:
+        pool:
+          max-active: ${REDIS_MAX_ACTIVE:20}
+          max-idle: ${REDIS_MAX_IDLE:10}
+          min-idle: ${REDIS_MIN_IDLE:5}
+          max-wait: ${REDIS_MAX_WAIT:1000ms}
+        shutdown-timeout: 1s
+
+  servlet:
+    multipart:
+      max-file-size: ${FILE_MAX_SIZE:10MB}
+      max-request-size: ${FILE_MAX_REQUEST_SIZE:15MB}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: 1800000
+  refresh-token-expiration: 604800000
+  temporary-token-expiration: 300000
+
+captcha:
+  ttl: 300
+  length: 4
+  skip-verification: true  # 生產環境必須為 false；test profile 覆蓋為 true 以跳過驗證碼驗證
+  turnstile:
+    secret-key: ${TURNSTILE_SECRET_KEY:}   # Cloudflare Dashboard → Turnstile → Site → Secret Key
+    site-key: ${TURNSTILE_SITE_KEY:}       # Cloudflare Dashboard → Turnstile → Site → Site Key
+
+auth:
+  cookie:
+    secure: true
+    same-site: Lax
+    domain: ""
+    path: /
+    max-age: 604800
+
+app:
+  frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
+  auth:
+    config-secret-key: ${AUTH_CONFIG_SECRET_KEY:}
+  security:
+    lock:
+      max-fail-count: 5
+      lock-duration-minutes: 10
+    # [Platform/Tenant Separation ADR-007 / Phase 3.1.4] ScopeEnforcementFilter
+    # 模式：enforce（預設，違規回 403/10031）｜ warning（僅 log，作為上線後 rollback 緊急開關）
+    scope-enforcement:
+      mode: ${SCOPE_ENFORCEMENT_MODE:enforce}
+
+tenant:
+  mode: ${TENANT_MODE:multi}
+  default-id: ${TENANT_DEFAULT_ID:DEFAULT}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+
+file:
+  storage:
+    local:
+      root-dir: ${FILE_STORAGE_ROOT:./uploads}
+  validation:
+    # N-5：分類大小可由環境變數調整，無需改原始碼重編
+    # 圖片（jpg/jpeg/png/gif/bmp/webp）
+    max-image-size: ${FILE_MAX_IMAGE_SIZE:5242880}        # 5MB
+    # 文件（pdf/xlsx/docx/csv，亦為未知副檔名的 fallback）
+    max-document-size: ${FILE_MAX_DOCUMENT_SIZE:20971520} # 20MB
+    # 影音（mp4/wav/mp3）
+    max-media-size: ${FILE_MAX_MEDIA_SIZE:104857600}      # 100MB
+
+# 公告附件安全政策：縮小副檔名白名單以降低攻擊面（預設僅 PDF）
+# 可透過環境變數 ANNOUNCEMENT_ATTACHMENT_EXTS 覆寫（逗號分隔，小寫）
+announcement:
+  attachments:
+    allowed-extensions: ${ANNOUNCEMENT_ATTACHMENT_EXTS:pdf}
+
+virus-scan:
+  enabled: ${VIRUS_SCAN_ENABLED:false}
+  clamav:
+    host: ${CLAMAV_HOST:localhost}
+    port: ${CLAMAV_PORT:3310}
+    timeout: ${CLAMAV_TIMEOUT:5000}
+    # 必須與 clamd `StreamMaxLength` 一致；超過此值的檔案會在連線前被拒絕（fail-closed）
+    # 詳見 N-4：避免 clamd 靜默截斷導致尾部 payload 繞過掃描
+    stream-max-length: ${CLAMAV_STREAM_MAX_LENGTH:26214400}  # 25MB
+
+# F-4：Actuator health 暴露（/actuator/health 與 /actuator/health/clamav）
+# 僅啟用 health；其餘 endpoint 預設關閉。show-details=always 讓 SRE 監看 clamd host/port/streamMaxLength
+# 安全考量：SecurityConfig 允許 /actuator/health/** 匿名存取（LB probe 用途），
+# 其餘 actuator 端點需 SYSTEM_OPS 權限。show-details: never 避免洩漏內部元件狀態。
+management:
+  tracing:
+    enabled: true 
+    sampling:
+      probability: 1.0  # 設定為 1.0 代表 100% 的請求都會生成 traceId
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: false
+    shutdown:
+      enabled: false
+    env:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+user:
+  password:
+    min-length: 8
+    require-uppercase: true
+    require-lowercase: true
+    require-digit: true
+    max-age-days: ${PASSWORD_MAX_AGE:90}
+    history-count: 5
+
+# ── Phase 7: IoT / MQTT ──────────────────────────────────
+mqtt:
+  broker-url: ${MQTT_BROKER_URL:tcp://localhost:1883}
+  client-id: ${MQTT_CLIENT_ID:taipei-iot-server}
+  username: ${MQTT_USERNAME:}
+  password: ${MQTT_PASSWORD:}
+  telemetry-topic: device/+/telemetry
+  command-topic-prefix: device/
+  qos: 1
+  completion-timeout: 30000
+
+iot:
+  device-token:
+    header-name: X-Device-Token
+  no-signal-detection:
+    enabled: ${IOT_NO_SIGNAL_ENABLED:true}
+    interval-ms: ${IOT_NO_SIGNAL_INTERVAL:300000}

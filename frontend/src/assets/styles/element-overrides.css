@@ -1,0 +1,52 @@
+/* Global Element Plus component overrides — extracted from repeated :deep() blocks */
+
+/* ─── Form Input ─────────────────────────────────────────────────────── */
+
+.el-input__wrapper {
+  background-color: var(--bg-base);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.el-input__wrapper:hover {
+  border-color: var(--border-strong);
+}
+
+.el-input__wrapper.is-focus {
+  border-color: rgba(85, 179, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(85, 179, 255, 0.15);
+}
+
+.el-input__inner {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.el-input__inner::placeholder {
+  color: var(--text-muted);
+}
+
+/* ─── Form Label / Error ─────────────────────────────────────────────── */
+
+.el-form-item__label {
+  color: var(--text-label);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.el-form-item__error {
+  color: #FF6363;
+}
+
+/* ─── Table Header ───────────────────────────────────────────────────── */
+
+.el-table th.el-table__cell {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}

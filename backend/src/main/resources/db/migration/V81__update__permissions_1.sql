@@ -1,0 +1,61 @@
+-- Auto-generated SQL script #202606121250
+UPDATE iot_workflowdb.permissions
+	SET group_name='用戶管理'
+	WHERE permission_id='PERM_USER_CREATE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='用戶管理'
+	WHERE permission_id='PERM_USER_LIST';
+UPDATE iot_workflowdb.permissions
+	SET group_name='場域管理'
+	WHERE permission_id='PERM_TENANT_UPDATE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='場域管理'
+	WHERE permission_id='PERM_TENANT_CREATE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='場域管理'
+	WHERE permission_id='PERM_TENANT_LIST';
+UPDATE iot_workflowdb.permissions
+	SET group_name='用戶管理'
+	WHERE permission_id='PERM_USER_DELETE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='角色管理'
+	WHERE permission_id='PERM_ROLE_ASSIGN_PERM';
+UPDATE iot_workflowdb.permissions
+	SET group_name='角色管理'
+	WHERE permission_id='PERM_ROLE_CREATE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='角色管理'
+	WHERE permission_id='PERM_ROLE_LIST';
+UPDATE iot_workflowdb.permissions
+	SET group_name='稽核管理'
+	WHERE permission_id='PERM_AUDIT_LIST';
+UPDATE iot_workflowdb.permissions
+	SET group_name='選單管理'
+	WHERE permission_id='PERM_MENU_DELETE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='選單管理'
+	WHERE permission_id='PERM_MENU_UPDATE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='選單管理'
+	WHERE permission_id='PERM_MENU_CREATE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='選單管理'
+	WHERE permission_id='PERM_MENU_LIST';
+UPDATE iot_workflowdb.permissions
+	SET group_name='部門管理'
+	WHERE permission_id='PERM_DEPT_DELETE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='部門管理'
+	WHERE permission_id='PERM_DEPT_UPDATE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='部門管理'
+	WHERE permission_id='PERM_DEPT_CREATE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='部門管理'
+	WHERE permission_id='PERM_DEPT_LIST';
+UPDATE iot_workflowdb.permissions
+	SET group_name='用戶管理'
+	WHERE permission_id='PERM_USER_DISABLE';
+UPDATE iot_workflowdb.permissions
+	SET group_name='用戶管理'
+	WHERE permission_id='PERM_USER_UPDATE';

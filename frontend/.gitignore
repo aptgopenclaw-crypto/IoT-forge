@@ -1,0 +1,5 @@
+node_modules/
+
+# Local env overrides (secrets, personal config)
+.env.local
+.env.*.local

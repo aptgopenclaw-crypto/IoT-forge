@@ -1,0 +1,19 @@
+-- Auto-generated SQL script #202606121304
+UPDATE iot_workflowdb.menus
+	SET "name"='系統管理'
+	WHERE menu_id=10;
+UPDATE iot_workflowdb.menus
+	SET "name"='稽核中心'
+	WHERE menu_id=20;
+UPDATE iot_workflowdb.menus
+	SET "name"='部門管理'
+	WHERE menu_id=12;
+UPDATE iot_workflowdb.menus
+	SET "name"='角色管理'
+	WHERE menu_id=13;
+UPDATE iot_workflowdb.menus
+	SET "name"='操作紀錄'
+	WHERE menu_id=21;
+UPDATE iot_workflowdb.menus
+	SET "name"='選單管理'
+	WHERE menu_id=11;
