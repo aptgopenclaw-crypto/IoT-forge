@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Taipei IoT - ER Model</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f1117;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 24px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #7dd3fc;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 24px;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+    }
+    .dot {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #38bdf8;
+      border-left: 3px solid #38bdf8;
+      padding-left: 10px;
+      margin-bottom: 14px;
+    }
+    .diagram-wrap {
+      background: #1e2230;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .table-card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .table-card-header {
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+    .badge-auth    { background: #1e3a5f; color: #7dd3fc; }
+    .badge-rbac    { background: #1a3a2a; color: #6ee7b7; }
+    .badge-tenant  { background: #3a2a1a; color: #fcd34d; }
+    .badge-audit   { background: #2a1a3a; color: #c4b5fd; }
+    .badge-user    { background: #1f2a3f; color: #93c5fd; }
+    .badge-dept    { background: #1a2a2a; color: #67e8f9; }
+    .badge-notify  { background: #2a1a1f; color: #fda4af; }
+    .badge-setting { background: #1a2a1a; color: #86efac; }
+    .badge-platform{ background: #2a1f1a; color: #fdba74; }
+    table.cols {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+    table.cols th {
+      background: #151a27;
+      color: #94a3b8;
+      padding: 5px 10px;
+      text-align: left;
+      font-weight: 500;
+      border-bottom: 1px solid #2d3748;
+    }
+    table.cols td {
+      padding: 5px 10px;
+      border-bottom: 1px solid #1e2535;
+      color: #cbd5e1;
+    }
+    table.cols tr:last-child td { border-bottom: none; }
+    .pk { color: #fbbf24; font-weight: 700; }
+    .fk { color: #60a5fa; }
+    .nn { color: #f87171; font-size: 0.7rem; }
+    .type-tag { color: #a78bfa; font-size: 0.72rem; }
+  </style>
+</head>
+<body>
+  <h1>🗄️ Taipei IoT — ER Model</h1>
+  <p class="subtitle">從 Spring Boot JPA Entity 自動分析產生 · 共 16 張資料表</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="background:#1e3a5f;border:1px solid #7dd3fc"></span> Auth 認證</div>
+    <div class="legend-item"><span class="dot" style="background:#1a3a2a;border:1px solid #6ee7b7"></span> RBAC 權限</div>
+    <div class="legend-item"><span class="dot" style="background:#3a2a1a;border:1px solid #fcd34d"></span> Tenant 租戶</div>
+    <div class="legend-item"><span class="dot" style="background:#2a1a3a;border:1px solid #c4b5fd"></span> Audit 稽核</div>
+    <div class="legend-item"><span class="dot" style="background:#1f2a3f;border:1px solid #93c5fd"></span> User 用戶</div>
+    <div class="legend-item"><span class="dot" style="background:#1a2a2a;border:1px solid #67e8f9"></span> Dept 部門</div>
+    <div class="legend-item"><span class="dot" style="background:#2a1a1f;border:1px solid #fda4af"></span> Notification 通知</div>
+    <div class="legend-item"><span class="dot" style="background:#1a2a1a;border:1px solid #86efac"></span> Setting 設定</div>
+    <div class="legend-item"><span class="dot" style="background:#2a1f1a;border:1px solid #fdba74"></span> Platform 平台</div>
+  </div>
+
+  <!-- ER Diagram -->
+  <div class="section">
+    <div class="section-title">📊 關聯圖（ER Diagram）</div>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+erDiagram
+    tenant {
+        string tenant_id PK
+        string tenant_code
+        string tenant_name
+        string deployment_mode
+        jsonb  config
+        bool   enabled
+        ts     create_time
+        ts     update_time
+    }
+
+    users {
+        string user_id PK
+        string email
+        string password_hash
+        string display_name
+        string phone
+        bool   enabled
+        bool   locked
+        ts     locked_at
+        int    login_fail_count
+        bool   is_super_admin
+        ts     last_login_at
+        bool   deleted
+        ts     deleted_at
+        bool   notify_email_flag
+        bool   notify_sms_flag
+        ts     create_time
+        ts     update_time
+    }
+
+    roles {
+        string role_id PK
+        string code
+        string name
+        string description
+        bool   built_in
+        bool   enabled
+        string data_scope
+        ts     create_time
+        ts     update_time
+    }
+
+    permissions {
+        string permission_id PK
+        string code
+        string name
+        string group_name
+        int    sort_order
+    }
+
+    role_permissions {
+        string role_id PK "FK->roles"
+        string permission_id PK "FK->permissions"
+        string tenant_id FK
+    }
+
+    user_tenant_mapping {
+        long   id PK
+        string user_id FK
+        string tenant_id FK
+        string role_id FK
+        long   dept_id FK
+        string default_project_id
+        bool   enabled
+        ts     create_time
+        ts     update_time
+    }
+
+    dept_info {
+        long   dept_id PK
+        string tenant_id FK
+        long   pid
+        string dept_name
+        int    dept_sort
+        short  status
+        string hierarchy_path
+        string create_by
+        string update_by
+        ts     create_time
+        ts     update_time
+    }
+
+    menus {
+        long   menu_id PK
+        long   parent_id
+        string name
+        string menu_type
+        string route_name
+        string route_path
+        string component
+        string permission_code
+        string icon
+        int    sort_order
+        bool   visible
+        bool   keep_alive
+        string redirect
+        string scope
+        ts     create_time
+        ts     update_time
+    }
+
+    system_settings {
+        long   id PK
+        string tenant_id FK
+        string setting_key
+        string setting_value
+        string description
+        int    version
+        ts     created_at
+        ts     updated_at
+    }
+
+    notifications {
+        long   id PK
+        string tenant_id FK
+        string user_id FK
+        string type
+        string title
+        string content
+        string ref_type
+        string ref_id
+        bool   read
+        ts     read_at
+        ts     created_at
+        ts     updated_at
+        ts     archived_at
+    }
+
+    tenant_auth_config {
+        long   id PK
+        string tenant_id FK
+        string auth_type
+        bool   enabled
+        string config_json
+        bool   fallback_local
+        ts     created_at
+        ts     updated_at
+    }
+
+    user_session {
+        string session_id PK
+        string user_id FK
+        string tenant_id
+        string ip_address
+        string user_agent
+        ts     issued_at
+        ts     last_seen_at
+        ts     expires_at
+        bool   revoked
+        ts     revoked_at
+    }
+
+    user_reset_password_token {
+        string token_id PK
+        string user_id FK
+        string token_hash
+        ts     expired_at
+        bool   used
+        ts     create_time
+    }
+
+    password_history {
+        long   id PK
+        string user_id FK
+        string password_hash
+        ts     create_time
+    }
+
+    change_password_log {
+        long   id PK
+        string user_id FK
+        string change_type
+        string ip_address
+        ts     create_time
+    }
+
+    user_info_log {
+        long   id PK
+        string tenant_id FK
+        string action_type
+        string action_user_id
+        string target_user_id
+        string email
+        string display_name
+        string role_code
+        string dept_id
+        string detail
+        string impersonated_by
+        ts     create_time
+    }
+
+    user_event_log {
+        long   user_event_log_pk PK
+        string tenant_id
+        string user_id
+        string username
+        string email
+        string event_type
+        string api_endpoint
+        string payload
+        string error_code
+        string ip_address
+        string user_agent
+        long   execution_time
+        long   dept_id
+        string impersonated_by
+        ts     create_time
+    }
+
+    rev_info {
+        int    id PK
+        ts     timestamp
+        string action_user_id
+    }
+
+    impersonation_session {
+        string id PK
+        string operator_user_id FK
+        string target_tenant_id FK
+        string reason
+        string status
+        ts     started_at
+        ts     expires_at
+        ts     revoked_at
+        string revoked_by_user_id
+        ts     create_time
+        ts     update_time
+    }
+
+    tenant                  ||--o{ user_tenant_mapping    : "1 tenant : N mappings"
+    users                   ||--o{ user_tenant_mapping    : "1 user : N tenants"
+    roles                   ||--o{ user_tenant_mapping    : "1 role : N mappings"
+    dept_info               ||--o{ user_tenant_mapping    : "1 dept : N mappings"
+    tenant                  ||--o{ dept_info              : "1 tenant : N depts"
+    roles                   ||--o{ role_permissions       : "1 role : N role_permissions"
+    permissions             ||--o{ role_permissions       : "1 perm : N role_permissions"
+    tenant                  ||--o| tenant_auth_config     : "1 tenant : 0-1 auth_config"
+    tenant                  ||--o{ system_settings        : "1 tenant : N settings"
+    tenant                  ||--o{ notifications          : "1 tenant : N notifications"
+    users                   ||--o{ notifications          : "1 user : N notifications"
+    users                   ||--o{ user_session           : "1 user : N sessions"
+    users                   ||--o{ user_reset_password_token : "1 user : N tokens"
+    users                   ||--o{ password_history       : "1 user : N pwd history"
+    users                   ||--o{ change_password_log    : "1 user : N pwd logs"
+    tenant                  ||--o{ user_info_log          : "1 tenant : N user_info_logs"
+    tenant                  ||--o{ user_event_log         : "1 tenant : N event_logs"
+    tenant                  ||--o{ impersonation_session  : "1 tenant : N impersonations"
+    users                   ||--o{ impersonation_session  : "1 operator : N impersonations"
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Detail Cards -->
+  <div class="section">
+    <div class="section-title">📋 資料表欄位明細</div>
+    <div class="table-grid">
+
+      <!-- tenant -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#2a200a;">
+          <span>tenant</span>
+          <span class="badge badge-tenant">Tenant</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">tenant_id</td><td class="type-tag">VARCHAR(50) PK</td><td></td></tr>
+          <tr><td>tenant_code</td><td class="type-tag">VARCHAR(50) UK</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>tenant_name</td><td class="type-tag">VARCHAR(200)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>deployment_mode</td><td class="type-tag">VARCHAR(20)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>config</td><td class="type-tag">JSONB</td><td>功能設定</td></tr>
+          <tr><td>enabled</td><td class="type-tag">BOOL</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>create_time</td><td class="type-tag">TIMESTAMP</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>update_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- users -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1a2a;">
+          <span>users</span>
+          <span class="badge badge-auth">Auth</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">user_id</td><td class="type-tag">VARCHAR(50) PK</td><td></td></tr>
+          <tr><td>email</td><td class="type-tag">VARCHAR(200) UK</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>password_hash</td><td class="type-tag">VARCHAR(255)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>display_name</td><td class="type-tag">VARCHAR(200)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>phone</td><td class="type-tag">VARCHAR(50)</td><td></td></tr>
+          <tr><td>enabled / locked</td><td class="type-tag">BOOL</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>login_fail_count</td><td class="type-tag">INT</td><td>default=0</td></tr>
+          <tr><td>is_super_admin</td><td class="type-tag">BOOL</td><td>default=false</td></tr>
+          <tr><td>deleted</td><td class="type-tag">BOOL</td><td>軟刪除</td></tr>
+          <tr><td>notify_email_flag</td><td class="type-tag">BOOL</td><td>default=true</td></tr>
+          <tr><td>notify_sms_flag</td><td class="type-tag">BOOL</td><td>default=true</td></tr>
+          <tr><td>create_time / update_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- roles -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1f14;">
+          <span>roles</span>
+          <span class="badge badge-rbac">RBAC</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">role_id</td><td class="type-tag">VARCHAR(50) PK</td><td></td></tr>
+          <tr><td>code</td><td class="type-tag">VARCHAR(50) UK</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>name</td><td class="type-tag">VARCHAR(100)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>description</td><td class="type-tag">VARCHAR(500)</td><td></td></tr>
+          <tr><td>built_in</td><td class="type-tag">BOOL</td><td>default=true</td></tr>
+          <tr><td>enabled</td><td class="type-tag">BOOL</td><td>default=true</td></tr>
+          <tr><td>data_scope</td><td class="type-tag">VARCHAR(30)</td><td>default=ALL</td></tr>
+          <tr><td>create_time / update_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- permissions -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1f14;">
+          <span>permissions</span>
+          <span class="badge badge-rbac">RBAC</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">permission_id</td><td class="type-tag">VARCHAR(50) PK</td><td></td></tr>
+          <tr><td>code</td><td class="type-tag">VARCHAR(100) UK</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>name</td><td class="type-tag">VARCHAR(200)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>group_name</td><td class="type-tag">VARCHAR(100)</td><td></td></tr>
+          <tr><td>sort_order</td><td class="type-tag">INT</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- role_permissions -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1f14;">
+          <span>role_permissions</span>
+          <span class="badge badge-rbac">RBAC</span>
+          <span class="badge" style="background:#333;color:#aaa;font-size:0.65rem">複合PK</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk fk">role_id</td><td class="type-tag">VARCHAR(50) PK·FK</td><td>→ roles</td></tr>
+          <tr><td class="pk fk">permission_id</td><td class="type-tag">VARCHAR(50) PK·FK</td><td>→ permissions</td></tr>
+          <tr><td class="fk">tenant_id</td><td class="type-tag">VARCHAR(50)</td><td>NULL=全域</td></tr>
+        </table>
+      </div>
+
+      <!-- user_tenant_mapping -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1a2a;">
+          <span>user_tenant_mapping</span>
+          <span class="badge badge-auth">Auth</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td class="fk">user_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ users</td></tr>
+          <tr><td class="fk">tenant_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ tenant</td></tr>
+          <tr><td class="fk">role_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ roles</td></tr>
+          <tr><td class="fk">dept_id</td><td class="type-tag">BIGINT FK</td><td>→ dept_info</td></tr>
+          <tr><td>default_project_id</td><td class="type-tag">VARCHAR(50)</td><td></td></tr>
+          <tr><td>enabled</td><td class="type-tag">BOOL</td><td>default=true</td></tr>
+          <tr><td>create_time / update_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- dept_info -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1f1f;">
+          <span>dept_info</span>
+          <span class="badge badge-dept">Dept</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">dept_id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td class="fk">tenant_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ tenant</td></tr>
+          <tr><td>pid</td><td class="type-tag">BIGINT</td><td>父部門(自參照)</td></tr>
+          <tr><td>dept_name</td><td class="type-tag">VARCHAR(100)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>dept_sort</td><td class="type-tag">INT</td><td>default=0</td></tr>
+          <tr><td>status</td><td class="type-tag">SMALLINT</td><td>default=1</td></tr>
+          <tr><td>hierarchy_path</td><td class="type-tag">VARCHAR(500)</td><td>樹路徑</td></tr>
+          <tr><td>create_time / update_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- menus -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1f14;">
+          <span>menus</span>
+          <span class="badge badge-rbac">RBAC</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">menu_id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td>parent_id</td><td class="type-tag">BIGINT</td><td>自參照(樹)</td></tr>
+          <tr><td>name</td><td class="type-tag">VARCHAR(100)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>menu_type</td><td class="type-tag">VARCHAR(20)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>route_name / route_path</td><td class="type-tag">VARCHAR</td><td></td></tr>
+          <tr><td>component</td><td class="type-tag">VARCHAR(200)</td><td></td></tr>
+          <tr><td>permission_code</td><td class="type-tag">VARCHAR(100)</td><td></td></tr>
+          <tr><td>scope</td><td class="type-tag">VARCHAR(20)</td><td>PLATFORM/TENANT/PUBLIC</td></tr>
+          <tr><td>visible / keep_alive</td><td class="type-tag">BOOL</td><td></td></tr>
+          <tr><td>sort_order</td><td class="type-tag">INT</td><td>default=0</td></tr>
+          <tr><td>create_time / update_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- system_settings -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0f1f0f;">
+          <span>system_settings</span>
+          <span class="badge badge-setting">Setting</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td class="fk">tenant_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ tenant</td></tr>
+          <tr><td>setting_key</td><td class="type-tag">VARCHAR(100)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>setting_value</td><td class="type-tag">VARCHAR(500)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>description</td><td class="type-tag">VARCHAR(500)</td><td></td></tr>
+          <tr><td>version</td><td class="type-tag">INT</td><td>樂觀鎖</td></tr>
+          <tr><td>created_at / updated_at</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- notifications -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#1f0a0f;">
+          <span>notifications</span>
+          <span class="badge badge-notify">Notify</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td class="fk">tenant_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ tenant</td></tr>
+          <tr><td class="fk">user_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ users</td></tr>
+          <tr><td>type</td><td class="type-tag">VARCHAR(20)</td><td>ENUM</td></tr>
+          <tr><td>title</td><td class="type-tag">VARCHAR(200)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>content</td><td class="type-tag">VARCHAR(2000)</td><td></td></tr>
+          <tr><td>ref_type / ref_id</td><td class="type-tag">VARCHAR</td><td>關聯來源</td></tr>
+          <tr><td>read</td><td class="type-tag">BOOL</td><td>default=false</td></tr>
+          <tr><td>read_at / archived_at</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+          <tr><td>created_at / updated_at</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- tenant_auth_config -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#2a200a;">
+          <span>tenant_auth_config</span>
+          <span class="badge badge-tenant">Tenant</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td class="fk">tenant_id</td><td class="type-tag">VARCHAR UK·FK</td><td>→ tenant (1:1)</td></tr>
+          <tr><td>auth_type</td><td class="type-tag">VARCHAR</td><td>LOCAL/LDAP/OIDC/SAML</td></tr>
+          <tr><td>enabled</td><td class="type-tag">BOOL</td><td>default=true</td></tr>
+          <tr><td>config_json</td><td class="type-tag">TEXT</td><td>加密後儲存</td></tr>
+          <tr><td>fallback_local</td><td class="type-tag">BOOL</td><td>default=true</td></tr>
+          <tr><td>created_at / updated_at</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- user_session -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1a2a;">
+          <span>user_session</span>
+          <span class="badge badge-auth">Auth</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">session_id</td><td class="type-tag">VARCHAR(64) PK</td><td>= JWT jti</td></tr>
+          <tr><td class="fk">user_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ users</td></tr>
+          <tr><td>tenant_id</td><td class="type-tag">VARCHAR(50)</td><td>最近 tenant</td></tr>
+          <tr><td>ip_address</td><td class="type-tag">VARCHAR(64)</td><td></td></tr>
+          <tr><td>user_agent</td><td class="type-tag">VARCHAR(512)</td><td></td></tr>
+          <tr><td>issued_at / last_seen_at / expires_at</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+          <tr><td>revoked</td><td class="type-tag">BOOL</td><td></td></tr>
+          <tr><td>revoked_at</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- user_reset_password_token -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#0a1a2a;">
+          <span>user_reset_password_token</span>
+          <span class="badge badge-auth">Auth</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">token_id</td><td class="type-tag">VARCHAR(100) PK</td><td></td></tr>
+          <tr><td class="fk">user_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ users</td></tr>
+          <tr><td>token_hash</td><td class="type-tag">VARCHAR(64) UK</td><td>SHA-256</td></tr>
+          <tr><td>expired_at</td><td class="type-tag">TIMESTAMP</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>used</td><td class="type-tag">BOOL</td><td>default=false</td></tr>
+          <tr><td>create_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- password_history -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#1a1020;">
+          <span>password_history</span>
+          <span class="badge badge-user">User</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td class="fk">user_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ users</td></tr>
+          <tr><td>password_hash</td><td class="type-tag">VARCHAR(255)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>create_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- change_password_log -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#1a1020;">
+          <span>change_password_log</span>
+          <span class="badge badge-user">User</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td class="fk">user_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ users</td></tr>
+          <tr><td>change_type</td><td class="type-tag">VARCHAR(50)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>ip_address</td><td class="type-tag">VARCHAR(50)</td><td></td></tr>
+          <tr><td>create_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- user_info_log -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#1a1020;">
+          <span>user_info_log</span>
+          <span class="badge badge-user">User</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td class="fk">tenant_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ tenant</td></tr>
+          <tr><td>action_type</td><td class="type-tag">VARCHAR(20)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>action_user_id</td><td class="type-tag">VARCHAR(50)</td><td>操作者</td></tr>
+          <tr><td>target_user_id</td><td class="type-tag">VARCHAR(50)</td><td>被操作者</td></tr>
+          <tr><td>email / display_name</td><td class="type-tag">VARCHAR</td><td></td></tr>
+          <tr><td>role_code / dept_id</td><td class="type-tag">VARCHAR</td><td></td></tr>
+          <tr><td>impersonated_by</td><td class="type-tag">VARCHAR(50)</td><td>冒充操作者</td></tr>
+          <tr><td>create_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- user_event_log -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#1a0f2a;">
+          <span>user_event_log</span>
+          <span class="badge badge-audit">Audit</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">user_event_log_pk</td><td class="type-tag">BIGINT PK</td><td>auto</td></tr>
+          <tr><td>tenant_id</td><td class="type-tag">VARCHAR(50)</td><td></td></tr>
+          <tr><td>user_id / username / email</td><td class="type-tag">VARCHAR</td><td>快照</td></tr>
+          <tr><td>event_type</td><td class="type-tag">VARCHAR(50)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>api_endpoint</td><td class="type-tag">VARCHAR(100)</td><td></td></tr>
+          <tr><td>payload</td><td class="type-tag">VARCHAR(2000)</td><td></td></tr>
+          <tr><td>error_code / message</td><td class="type-tag">VARCHAR</td><td></td></tr>
+          <tr><td>ip_address / user_agent</td><td class="type-tag">VARCHAR</td><td></td></tr>
+          <tr><td>execution_time</td><td class="type-tag">BIGINT</td><td>ms</td></tr>
+          <tr><td>impersonated_by</td><td class="type-tag">VARCHAR(50)</td><td></td></tr>
+          <tr><td>create_time</td><td class="type-tag">TIMESTAMP WITH TZ</td><td></td></tr>
+        </table>
+      </div>
+
+      <!-- rev_info -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#1a0f2a;">
+          <span>rev_info</span>
+          <span class="badge badge-audit">Audit</span>
+          <span class="badge" style="background:#333;color:#aaa;font-size:0.65rem">Hibernate Envers</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">INT PK</td><td>revision序號</td></tr>
+          <tr><td>timestamp</td><td class="type-tag">BIGINT</td><td>Envers 自動</td></tr>
+          <tr><td>action_user_id</td><td class="type-tag">VARCHAR(50)</td><td>操作者</td></tr>
+        </table>
+      </div>
+
+      <!-- impersonation_session -->
+      <div class="table-card">
+        <div class="table-card-header" style="background:#1f180a;">
+          <span>impersonation_session</span>
+          <span class="badge badge-platform">Platform</span>
+        </div>
+        <table class="cols">
+          <tr><th>欄位</th><th>型別</th><th>說明</th></tr>
+          <tr><td class="pk">id</td><td class="type-tag">VARCHAR(50) PK</td><td></td></tr>
+          <tr><td class="fk">operator_user_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ users</td></tr>
+          <tr><td class="fk">target_tenant_id</td><td class="type-tag">VARCHAR(50) FK</td><td>→ tenant</td></tr>
+          <tr><td>reason</td><td class="type-tag">VARCHAR(500)</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>status</td><td class="type-tag">VARCHAR(20)</td><td>ACTIVE/REVOKED/EXPIRED</td></tr>
+          <tr><td>started_at / expires_at</td><td class="type-tag">TIMESTAMP</td><td class="nn">NOT NULL</td></tr>
+          <tr><td>revoked_at / revoked_by_user_id</td><td class="type-tag">TIMESTAMP/VARCHAR</td><td></td></tr>
+          <tr><td>create_time / update_time</td><td class="type-tag">TIMESTAMP</td><td></td></tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      er: { diagramPadding: 30, layoutDirection: 'TB', minEntityWidth: 80, useMaxWidth: true }
+    });
+  </script>
+</body>
+</html>

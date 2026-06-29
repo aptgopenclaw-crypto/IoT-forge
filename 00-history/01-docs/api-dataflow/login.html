@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>API Data Flow — POST /v1/noauth/login</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --border:#30363d; --text:#e6edf3;
+    --muted:#8b949e; --accent:#58a6ff; --read:#3fb950; --write:#f85149;
+    --cond:#d29922; --pk:#79c0ff; --fk:#ff7b72;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Helvetica,Arial,"Noto Sans CJK TC",sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.55}
+  .wrap{max-width:1280px;margin:0 auto;padding:24px}
+  h1{font-size:1.6rem;margin:0 0 4px;border-bottom:1px solid var(--border);padding-bottom:12px}
+  h2{font-size:1.15rem;margin:28px 0 10px;color:var(--accent)}
+  h3{font-size:0.95rem;margin:18px 0 8px;color:#c9d1d9}
+  .meta{color:var(--muted);font-size:0.85rem;margin:6px 0 18px}
+  .meta code{background:#21262d;padding:1px 6px;border-radius:4px;color:#e6edf3}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;
+         padding:16px;margin-bottom:18px}
+  .mermaid{background:#0a0e13;border-radius:6px;padding:14px;overflow:auto}
+  table{width:100%;border-collapse:collapse;font-size:0.85rem}
+  th,td{border:1px solid var(--border);padding:6px 10px;text-align:left;vertical-align:top}
+  th{background:#21262d;color:#c9d1d9;font-weight:600;white-space:nowrap}
+  td code{background:#0a0e13;padding:1px 6px;border-radius:3px;color:#e6edf3;font-size:0.8rem}
+  .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:0.7rem;
+       font-weight:700;letter-spacing:.3px}
+  .tag.r{background:rgba(63,185,80,.18);color:var(--read)}
+  .tag.w{background:rgba(248,81,73,.18);color:var(--write)}
+  .tag.c{background:rgba(210,153,34,.18);color:var(--cond)}
+  .tag.pk{background:rgba(121,192,255,.18);color:var(--pk)}
+  .tag.fk{background:rgba(255,123,114,.18);color:var(--fk)}
+  .legend{font-size:0.78rem;color:var(--muted);margin:6px 0 14px}
+  .legend .tag{margin-right:6px}
+  .branch{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .branch .card{background:#0a0e13;border:1px solid var(--border);border-radius:6px;padding:12px}
+  .branch .card .title{font-weight:700;color:var(--accent);margin-bottom:6px}
+  .branch .card ul{margin:6px 0 0 18px;padding:0;font-size:0.83rem}
+  .branch .card li{margin:3px 0}
+  .from{color:#ff7b72;text-decoration:line-through;opacity:.7}
+  .to{color:#3fb950;font-weight:700}
+  .arrow{color:var(--muted);margin:0 4px}
+  .note{font-size:0.78rem;color:var(--muted);font-style:italic;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📥 API Data Flow — <code>POST /v1/noauth/login</code></h1>
+  <div class="meta">
+    Controller: <code>AuthController#login</code> ・
+    Service: <code>AuthServiceImpl#login</code> ・
+    Provider: <code>LocalAuthProvider#authenticate</code>（AuthType=LOCAL）<br>
+    Rate limit: <code>10/min per IP</code> ・ Captcha 必要 ・ Refresh token 寫入 <code>HttpOnly Cookie</code>
+  </div>
+
+  <!-- ===== Sequence ===== -->
+  <h2>1. 流程序列圖（Sequence）</h2>
+  <div class="panel">
+    <div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant FE as Frontend
+  participant C  as AuthController
+  participant CAP as CaptchaService
+  participant AD as AuthDispatcher
+  participant LP as LocalAuthProvider
+  participant PEC as PasswordExpiryChecker
+  participant JWT as JwtUtil
+  participant DB as PostgreSQL
+  participant R as Redis
+
+  FE->>C: POST /v1/noauth/login {email,password,captchaId,captchaCode}
+  C->>CAP: verify(captchaId, code)
+  CAP->>R: GET captcha:{id}
+  R-->>CAP: expectedCode
+  CAP-->>C: ok / fail
+
+  C->>AD: dispatch(AuthenticationRequest)
+  AD->>LP: authenticate(email,password)
+  LP->>DB: SELECT * FROM users WHERE email=?
+  DB-->>LP: UserEntity
+  alt user.locked && lock 未過期
+    LP-->>C: throw ACCOUNT_LOCKED
+    C->>DB: INSERT user_event_log (LOGIN_FAIL × N tenants)
+  else 密碼錯誤
+    LP->>DB: UPDATE users SET login_fail_count++, [locked=true if >=5]
+    LP-->>C: throw LOGIN_FAIL
+    C->>DB: INSERT user_event_log
+  else 密碼正確
+    LP->>DB: UPDATE users SET login_fail_count=0, last_login_at=now()
+    LP-->>AD: AuthenticationResult{userId}
+  end
+
+  AD-->>C: AuthenticationResult
+  C->>DB: SELECT user_tenant_mapping WHERE user_id=? AND enabled=true
+  C->>DB: SELECT tenant WHERE id IN (...) AND enabled=true
+  C->>PEC: check(user, policyTenantId)
+  PEC->>DB: SELECT system_settings(password.*)
+  alt 需強制改密碼
+    C->>JWT: generatePasswordChangeToken
+    C->>DB: INSERT user_event_log (LOGIN_SUCCESS, "pwd change required")
+    C-->>FE: {accessToken=pwdChangeToken, passwordChangeRequired=true}
+  else SUPER_ADMIN
+    C->>JWT: generateAccessToken(scope=PLATFORM)
+    C->>DB: INSERT user_session (sessionId=jti, tenantId=null)
+    C->>DB: INSERT user_event_log
+    C-->>FE: {accessToken, refreshToken (Cookie), isSuperAdmin}
+  else 單一 tenant
+    C->>DB: SELECT permissions JOIN role_permissions
+    C->>JWT: generateAccessToken(scope=TENANT)
+    C->>DB: INSERT user_session
+    C->>DB: INSERT user_event_log
+    C-->>FE: {accessToken, refreshToken (Cookie), needsSelection=false}
+  else 多個 tenant
+    C->>JWT: generateTemporaryToken
+    C->>DB: INSERT user_event_log
+    C-->>FE: {accessToken=tempToken, needsSelection=true, tenantOptions[]}
+  end
+    </div>
+  </div>
+
+  <!-- ===== 資料表存取矩陣 ===== -->
+  <h2>2. 資料表存取矩陣</h2>
+  <div class="legend">
+    <span class="tag r">R</span> 讀取
+    <span class="tag w">W</span> 寫入
+    <span class="tag c">C</span> 條件 / where
+    <span class="tag pk">PK</span> 主鍵
+    <span class="tag fk">FK</span> 外鍵
+  </div>
+
+  <div class="panel">
+  <table>
+    <tr>
+      <th>順序</th><th>Table</th><th>操作</th>
+      <th>欄位</th><th>用途 / 條件</th><th>呼叫點</th>
+    </tr>
+    <tr>
+      <td>1</td><td><code>users</code></td>
+      <td><span class="tag r">R</span></td>
+      <td><code>user_id</code> <span class="tag pk">PK</span>,
+          <code>email</code> <span class="tag c">C</span>,
+          <code>password_hash</code>, <code>enabled</code>, <code>locked</code>,
+          <code>locked_at</code>, <code>login_fail_count</code>,
+          <code>display_name</code>, <code>is_super_admin</code></td>
+      <td>以 email 查帳號；檢查 enabled / locked / 密碼</td>
+      <td><code>LocalAuthProvider:50</code></td>
+    </tr>
+    <tr>
+      <td>2a</td><td><code>users</code></td>
+      <td><span class="tag w">W</span></td>
+      <td><code>login_fail_count++</code>,
+          <code>locked=true</code>(條件), <code>locked_at=now()</code>(條件)</td>
+      <td>密碼錯誤路徑：累計失敗、達 <code>max-fail-count=5</code> 自動鎖定</td>
+      <td><code>LocalAuthProvider:79-88</code></td>
+    </tr>
+    <tr>
+      <td>2b</td><td><code>users</code></td>
+      <td><span class="tag w">W</span></td>
+      <td><code>locked=false</code>, <code>locked_at=null</code>,
+          <code>login_fail_count=0</code></td>
+      <td>鎖定已過期（&gt; <code>lock-duration-minutes=10</code>）自動解鎖</td>
+      <td><code>LocalAuthProvider:66-70</code></td>
+    </tr>
+    <tr>
+      <td>2c</td><td><code>users</code></td>
+      <td><span class="tag w">W</span></td>
+      <td><code>login_fail_count=0</code>, <code>last_login_at=now()</code></td>
+      <td>密碼正確路徑：重置失敗計數、更新最後登入時間</td>
+      <td><code>LocalAuthProvider:96-98</code></td>
+    </tr>
+    <tr>
+      <td>3</td><td><code>user_tenant_mapping</code></td>
+      <td><span class="tag r">R</span></td>
+      <td><code>user_id</code> <span class="tag fk">FK</span> <span class="tag c">C</span>,
+          <code>tenant_id</code> <span class="tag fk">FK</span>,
+          <code>role_id</code> <span class="tag fk">FK</span>,
+          <code>dept_id</code> <span class="tag fk">FK</span>,
+          <code>enabled</code> <span class="tag c">C</span></td>
+      <td>找該用戶可登入的場域清單（enabled=true）。SYSTEM context 繞 tenant filter</td>
+      <td><code>AuthServiceImpl:137-138</code></td>
+    </tr>
+    <tr>
+      <td>4</td><td><code>tenant</code></td>
+      <td><span class="tag r">R</span></td>
+      <td><code>tenant_id</code> <span class="tag pk">PK</span> <span class="tag c">C</span>,
+          <code>enabled</code> <span class="tag c">C</span></td>
+      <td>過濾掉已停用場域，得到 activeMappings</td>
+      <td><code>AuthServiceImpl:225-230</code></td>
+    </tr>
+    <tr>
+      <td>5</td><td><code>system_settings</code></td>
+      <td><span class="tag r">R</span></td>
+      <td><code>setting_key</code> <span class="tag c">C</span>(password.*),
+          <code>setting_value</code>, <code>tenant_id</code> <span class="tag c">C</span></td>
+      <td>讀密碼策略（過期天數、強制改密碼）— 由 <code>PasswordExpiryChecker</code> 觸發</td>
+      <td><code>AuthServiceImpl:147</code></td>
+    </tr>
+    <tr>
+      <td>6</td><td><code>role_permissions</code> + <code>permissions</code></td>
+      <td><span class="tag r">R</span></td>
+      <td><code>role_id</code> <span class="tag c">C</span>,
+          <code>tenant_id</code> <span class="tag c">C</span>(null=全域),
+          <code>permission.code</code></td>
+      <td>解析該角色在該 tenant 的權限碼清單，寫入 JWT claims</td>
+      <td><code>PermissionRepository.findCodesByRoleAndTenant</code></td>
+    </tr>
+    <tr>
+      <td>7</td><td><code>user_session</code></td>
+      <td><span class="tag w">W</span></td>
+      <td><code>session_id</code>(=JWT jti) <span class="tag pk">PK</span>,
+          <code>user_id</code>, <code>tenant_id</code>(可 null),
+          <code>ip_address</code>, <code>user_agent</code>(截 512),
+          <code>issued_at</code>, <code>last_seen_at</code>,
+          <code>expires_at</code>, <code>revoked=false</code></td>
+      <td>記錄登入裝置，提供「登入裝置清單／強制登出」功能</td>
+      <td><code>AuthServiceImpl#recordSession:570</code></td>
+    </tr>
+    <tr>
+      <td>8</td><td><code>user_event_log</code></td>
+      <td><span class="tag w">W</span></td>
+      <td><code>tenant_id</code>, <code>user_id</code>, <code>username</code>,
+          <code>email</code>, <code>event_type</code>(LOGIN_SUCCESS/LOGIN_FAIL),
+          <code>api_endpoint</code>, <code>ip_address</code>, <code>user_agent</code>,
+          <code>dept_id</code>, <code>error_code</code>, <code>message</code>,
+          <code>create_time</code></td>
+      <td>稽核紀錄。失敗時為每個所屬場域各寫一筆，讓 DEPT_ADMIN 都能看到</td>
+      <td><code>AuthServiceImpl#logLoginEvent:1014</code></td>
+    </tr>
+  </table>
+  </div>
+
+  <!-- ===== 欄位變化（state diff） ===== -->
+  <h2>3. <code>users</code> 表欄位變化（State Diff）</h2>
+  <div class="panel">
+  <table>
+    <tr>
+      <th>欄位</th>
+      <th>密碼錯誤（未鎖）</th>
+      <th>密碼錯誤（觸發鎖定）</th>
+      <th>鎖定後第一次成功（解鎖）</th>
+      <th>正常成功</th>
+    </tr>
+    <tr>
+      <td><code>login_fail_count</code></td>
+      <td><span class="from">n</span><span class="arrow">→</span><span class="to">n+1</span></td>
+      <td><span class="from">4</span><span class="arrow">→</span><span class="to">5</span></td>
+      <td><span class="from">5</span><span class="arrow">→</span><span class="to">0</span></td>
+      <td><span class="from">n</span><span class="arrow">→</span><span class="to">0</span></td>
+    </tr>
+    <tr>
+      <td><code>locked</code></td>
+      <td>false（不變）</td>
+      <td><span class="from">false</span><span class="arrow">→</span><span class="to">true</span></td>
+      <td><span class="from">true</span><span class="arrow">→</span><span class="to">false</span></td>
+      <td>false（不變）</td>
+    </tr>
+    <tr>
+      <td><code>locked_at</code></td>
+      <td>null（不變）</td>
+      <td><span class="from">null</span><span class="arrow">→</span><span class="to">now()</span></td>
+      <td><span class="from">T0</span><span class="arrow">→</span><span class="to">null</span></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><code>last_login_at</code></td>
+      <td>—</td><td>—</td>
+      <td><span class="to">now()</span></td>
+      <td><span class="to">now()</span></td>
+    </tr>
+  </table>
+  <div class="note">門檻：<code>app.security.lock.max-fail-count=5</code>、
+    <code>app.security.lock.lock-duration-minutes=10</code></div>
+  </div>
+
+  <!-- ===== 回應分支 ===== -->
+  <h2>4. 成功路徑下的四個分支</h2>
+  <div class="panel branch">
+    <div class="card">
+      <div class="title">A. 需強制改密碼</div>
+      <div class="note">PasswordExpiryStatus ≠ OK</div>
+      <ul>
+        <li>簽 <code>passwordChangeToken</code>（短效）</li>
+        <li>不寫 <code>user_session</code></li>
+        <li>不發 refresh_token cookie</li>
+        <li>回應 <code>passwordChangeRequired=true</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="title">B. SUPER_ADMIN</div>
+      <div class="note">users.is_super_admin = true</div>
+      <ul>
+        <li>access token scope = PLATFORM</li>
+        <li>tenant_id = null（不綁場域）</li>
+        <li>權限 = ROLE_SUPER_ADMIN ∩ tenant_id IS NULL</li>
+        <li>寫 <code>user_session</code>（tenant_id=null）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="title">C. 單一 tenant</div>
+      <div class="note">activeMappings.size() == 1</div>
+      <ul>
+        <li>access token scope = TENANT</li>
+        <li>roles / dept / dataScope / permissions 全綁定</li>
+        <li>寫 <code>user_session</code></li>
+        <li><code>needsSelection=false</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="title">D. 多個 tenant</div>
+      <div class="note">activeMappings.size() &gt; 1</div>
+      <ul>
+        <li>只發 <code>temporaryToken</code></li>
+        <li>不寫 <code>user_session</code>（待 select-tenant）</li>
+        <li>回 <code>tenantOptions[]</code> 給前端挑</li>
+        <li><code>needsSelection=true</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== Redis 副作用 ===== -->
+  <h2>5. 非 DB 的副作用</h2>
+  <div class="panel">
+  <table>
+    <tr><th>系統</th><th>Key / 物件</th><th>操作</th><th>用途</th></tr>
+    <tr><td>Redis</td><td><code>captcha:{captchaId}</code></td><td>GET + DEL</td>
+        <td>驗證圖形驗證碼（一次性）</td></tr>
+    <tr><td>Redis</td><td><code>rate:login:{ip}</code></td><td>INCR + EXPIRE</td>
+        <td>RateLimit 10/min</td></tr>
+    <tr><td>Cookie</td><td><code>refresh_token</code></td><td>Set-Cookie</td>
+        <td>HttpOnly, Secure, SameSite=Lax, maxAge=7d</td></tr>
+    <tr><td>SecurityLog</td><td>stdout (LOGIN_FAILED)</td><td>結構化日誌</td>
+        <td>SIEM 取用，含 reason=user_not_found/account_disabled/account_locked/bad_password</td></tr>
+  </table>
+  </div>
+</div>
+
+<script>
+  mermaid.initialize({startOnLoad:true, theme:'dark',
+    sequence:{ diagramMarginX:10, diagramMarginY:10, actorMargin:40,
+               messageFontSize:12, noteFontSize:11 }});
+</script>
+</body>
+</html>

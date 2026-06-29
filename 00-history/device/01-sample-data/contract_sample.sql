@@ -1,0 +1,6 @@
+INSERT INTO contracts
+(id, tenant_id, contract_code, contract_name, budget_year, procurement_number, contractor_name, contractor_contact, asset_category, quantity, start_date, end_date, acceptance_date, warranty_years, warranty_expiry, status, "attributes", created_by, created_at, updated_at)
+VALUES(1, 'T_D029426BA10C', 'C-114-001', '114年度臺北市路燈維護管理契約', 114, 'P-114-00123', '光明照明股份有限公司', '王經理 02-2771-0001', 'STREETLIGHT', 5000, '2025-01-01', '2025-12-31', NULL, 1, NULL, 'ACTIVE', '{}'::jsonb, 'system', '2026-05-06 09:00:26.327', '2026-05-06 09:00:26.327');
+INSERT INTO contracts
+(id, tenant_id, contract_code, contract_name, budget_year, procurement_number, contractor_name, contractor_contact, asset_category, quantity, start_date, end_date, acceptance_date, warranty_years, warranty_expiry, status, "attributes", created_by, created_at, updated_at)
+VALUES(2, 'T_D029426BA10C', 'C-114-002', '114年度智慧路燈控制器佈建契約', 114, 'P-114-00456', '遠傳電信股份有限公司', '陳專案 02-7723-5000', 'CONTROLLER', 2000, '2025-03-01', '2026-02-28', NULL, 2, NULL, 'ACTIVE', '{}'::jsonb, 'system', '2026-05-06 09:00:26.327', '2026-05-06 09:00:26.327');
