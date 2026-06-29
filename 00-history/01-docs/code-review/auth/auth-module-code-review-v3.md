@@ -61,7 +61,7 @@
 - 風險：整套 multi-auth-provider 功能在 production 形同擺設；租戶以為自己接了 AD 其實使用者仍在用 local 帳號登入
 - 建議：登入流程必須先決定 tenantId（例如以 email domain → tenant routing 表查表，或要求前端在 login payload 明示 tenant），再傳入 dispatcher
 
-#### [V3-H2] Dispatcher fallback-to-LOCAL 為 auth bypass 風險
+#### [V3-H2] Dispatcher fallback-to-LOCAL 為 auth bypass 風險  ✅ 已完成（2026-06-29）
 - 檔案：[AuthenticationDispatcher.java:63-74](backend/src/main/java/com/taipei/iot/auth/provider/AuthenticationDispatcher.java#L63)
 - 證據：任何 `BusinessException`（包含 `INVALID_CREDENTIAL`、`PROVIDER_UNAVAILABLE`）都會 fallback；`fallbackLocal` config 預設 `true`
 - 攻擊路徑：租戶 A 設定「禁用 LOCAL、改用 LDAP」，但 LOCAL 帳號殘留 → 攻擊者故意讓 LDAP timeout / fail → dispatcher 自動 fallback 走 LOCAL → 以 LOCAL 密碼登入成功

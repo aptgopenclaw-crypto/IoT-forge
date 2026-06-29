@@ -72,12 +72,11 @@ class AuthConfigEncryptorTest {
 	}
 
 	@Test
-	void encrypt_withoutKey_throwsException() {
+	void init_withoutKey_throwsException() {
 		AuthConfigEncryptor noKeyEncryptor = new AuthConfigEncryptor();
 		ReflectionTestUtils.setField(noKeyEncryptor, "secretKeyBase64", "");
-		noKeyEncryptor.init();
 
-		assertThrows(IllegalStateException.class, () -> noKeyEncryptor.encrypt("test"));
+		assertThrows(IllegalStateException.class, noKeyEncryptor::init);
 	}
 
 	@Test
@@ -88,8 +87,6 @@ class AuthConfigEncryptorTest {
 	@Test
 	void isKeyConfigured_withoutKey_returnsFalse() {
 		AuthConfigEncryptor noKeyEncryptor = new AuthConfigEncryptor();
-		ReflectionTestUtils.setField(noKeyEncryptor, "secretKeyBase64", "");
-		noKeyEncryptor.init();
 
 		assertFalse(noKeyEncryptor.isKeyConfigured());
 	}

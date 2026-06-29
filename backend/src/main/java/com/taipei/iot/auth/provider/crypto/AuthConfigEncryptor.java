@@ -37,9 +37,9 @@ public class AuthConfigEncryptor {
 	@PostConstruct
 	void init() {
 		if (secretKeyBase64 == null || secretKeyBase64.isBlank()) {
-			log.warn("AUTH_CONFIG_SECRET_KEY not configured. "
-					+ "Tenant auth config encryption/decryption will fail if invoked.");
-			return;
+			throw new IllegalStateException("AUTH_CONFIG_SECRET_KEY is not configured. "
+					+ "Tenant auth config (LDAP bindPassword, OIDC clientSecret) would be "
+					+ "stored as plaintext in the database. Set app.auth.config-secret-key.");
 		}
 		byte[] keyBytes = Base64.getDecoder().decode(secretKeyBase64);
 		if (keyBytes.length != 32) {
