@@ -19,6 +19,10 @@ public enum SecurityEvent {
 	 * [N-3] CSRF 攻擊嘗試 — cookie-bearing 端點（refresh / logout / idle-logout）收到
 	 * Origin/Referer 不符或遺漏的請求，已被 CsrfCookieFilter 阻擋。
 	 */
-	CSRF_ATTEMPT;
+	CSRF_ATTEMPT,
+	/**
+	 * [V3-H2] 外部認證 provider 降級回 LOCAL — 僅於基礎設施錯誤（如 LDAP 無法連線）時觸發。 憑證錯誤（密碼錯誤、帳號不存在等）絕不降級。
+	 */
+	AUTH_FALLBACK;
 
 }

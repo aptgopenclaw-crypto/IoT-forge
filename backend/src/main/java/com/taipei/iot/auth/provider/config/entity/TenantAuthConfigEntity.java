@@ -74,7 +74,7 @@ public class TenantAuthConfigEntity {
 
 	@Column(name = "fallback_local", nullable = false)
 	@Builder.Default
-	private Boolean fallbackLocal = true;
+	private Boolean fallbackLocal = false;
 
 	@CreatedDate
 	@Column(name = "created_at", nullable = false, updatable = false)

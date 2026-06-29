@@ -6,7 +6,9 @@ import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository
 import com.taipei.iot.auth.provider.crypto.AuthConfigEncryptor;
 import com.taipei.iot.auth.repository.UserRepository;
 import com.taipei.iot.common.enums.ErrorCode;
+import com.taipei.iot.common.enums.SecurityEvent;
 import com.taipei.iot.common.exception.BusinessException;
+import com.taipei.iot.common.util.SecurityLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -85,10 +87,16 @@ public class AuthenticationDispatcher {
 			return provider.authenticate(request, decryptedConfig);
 		}
 		catch (BusinessException e) {
-			// If external provider fails and fallback is enabled, try LOCAL
-			if (authType != AuthType.LOCAL && config != null && Boolean.TRUE.equals(config.getFallbackLocal())) {
-				log.warn("External auth ({}) failed for tenant {}, falling back to LOCAL", authType,
-						request.getTenantId());
+			// [V3-H2] Only infrastructure errors (network timeout, server unreachable)
+			// may trigger fallback to LOCAL. Credential errors (wrong password, unknown
+			// user, disabled/locked account) must NEVER fall back.
+			if (authType != AuthType.LOCAL && config != null && Boolean.TRUE.equals(config.getFallbackLocal())
+					&& isInfrastructureError(e)) {
+				SecurityLogger.warn(SecurityEvent.AUTH_FALLBACK, request.getIdentifier(), "type=" + authType,
+						"tenant=" + request.getTenantId(), "error=" + e.getErrorCode().getCode());
+				log.warn(
+						"External auth ({}) infrastructure failed for tenant {}, falling back to LOCAL. Error code: {}",
+						authType, request.getTenantId(), e.getErrorCode());
 				AuthenticationProvider localProvider = providerMap.get(AuthType.LOCAL);
 				if (localProvider != null) {
 					return localProvider.authenticate(request, null);
@@ -152,6 +160,21 @@ public class AuthenticationDispatcher {
 			return null;
 		}
 		return encryptor.decrypt(config.getConfigJson());
+	}
+
+	/**
+	 * [V3-H2] Determines whether a {@link BusinessException} represents an
+	 * infrastructure-level error (network timeout, server unreachable) as opposed to a
+	 * credential or business-logic error.
+	 *
+	 * <p>
+	 * Only infrastructure errors are eligible for fallback-to-LOCAL. Credential errors
+	 * ({@link ErrorCode#LDAP_AUTH_FAILED}, etc.) are never eligible — falling back on
+	 * those would let an attacker bypass external auth by submitting bad credentials.
+	 */
+	private static boolean isInfrastructureError(BusinessException e) {
+		ErrorCode code = e.getErrorCode();
+		return code == ErrorCode.LDAP_SERVICE_UNAVAILABLE;
 	}
 
 }

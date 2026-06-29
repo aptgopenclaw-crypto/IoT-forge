@@ -5,6 +5,7 @@ import com.taipei.iot.auth.provider.config.entity.TenantAuthConfigEntity;
 import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository;
 import com.taipei.iot.auth.provider.crypto.AuthConfigEncryptor;
 import com.taipei.iot.auth.repository.UserRepository;
+import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -166,7 +167,7 @@ class AuthenticationDispatcherTest {
 		when(configRepository.findByTenantId("TENANT_A")).thenReturn(Optional.of(config));
 		when(encryptor.decrypt("encrypted-config")).thenReturn("{\"url\":\"ldap://host\"}");
 		when(ldapProvider.authenticate(any(), eq("{\"url\":\"ldap://host\"}")))
-			.thenThrow(new BusinessException(com.taipei.iot.common.enums.ErrorCode.LOGIN_FAIL));
+			.thenThrow(new BusinessException(ErrorCode.LDAP_SERVICE_UNAVAILABLE));
 		when(localProvider.authenticate(any(), isNull()))
 			.thenReturn(AuthenticationResult.builder().localUserId("user-1").email("test@example.com").build());
 
@@ -176,6 +177,39 @@ class AuthenticationDispatcherTest {
 		assertEquals("user-1", result.getLocalUserId());
 		verify(ldapProvider).authenticate(any(), any());
 		verify(localProvider).authenticate(any(), isNull());
+	}
+
+	@Test
+	void dispatch_externalProviderFails_credentialError_doesNotFallback() {
+		// Credential errors (LOGIN_FAIL, LDAP_AUTH_FAILED, etc.) must NEVER trigger
+		// fallback to LOCAL, even when fallbackLocal=true.
+		AuthenticationProvider ldapProvider = mock(AuthenticationProvider.class);
+		when(ldapProvider.getType()).thenReturn(AuthType.LDAP);
+		dispatcher = new AuthenticationDispatcher(List.of(localProvider, ldapProvider), configRepository, encryptor,
+				userRepository);
+
+		AuthenticationRequest request = AuthenticationRequest.builder()
+			.identifier("test@example.com")
+			.credential("password")
+			.tenantId("TENANT_A")
+			.build();
+
+		TenantAuthConfigEntity config = TenantAuthConfigEntity.builder()
+			.tenantId("TENANT_A")
+			.authType(AuthType.LDAP)
+			.enabled(true)
+			.fallbackLocal(true)
+			.configJson("encrypted-config")
+			.build();
+		when(configRepository.findByTenantId("TENANT_A")).thenReturn(Optional.of(config));
+		when(encryptor.decrypt("encrypted-config")).thenReturn("{\"url\":\"ldap://host\"}");
+		when(ldapProvider.authenticate(any(), eq("{\"url\":\"ldap://host\"}")))
+			.thenThrow(new BusinessException(ErrorCode.LOGIN_FAIL));
+
+		assertThrows(BusinessException.class, () -> dispatcher.dispatch(request));
+
+		verify(ldapProvider).authenticate(any(), any());
+		verify(localProvider, never()).authenticate(any(), any());
 	}
 
 	@Test
