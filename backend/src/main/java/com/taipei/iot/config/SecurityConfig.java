@@ -1,5 +1,6 @@
 package com.taipei.iot.config;
 
+import com.taipei.iot.auth.security.CsrfCookieFilter;
 import com.taipei.iot.auth.security.JwtAuthenticationFilter;
 import com.taipei.iot.auth.security.ScopeEnforcementFilter;
 import com.taipei.iot.common.enums.ErrorCode;
@@ -33,6 +34,8 @@ import org.springframework.security.web.header.writers.XXssProtectionHeaderWrite
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+	private final CsrfCookieFilter csrfCookieFilter;
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -189,6 +192,10 @@ public class SecurityConfig {
 				.authenticated()
 				.anyRequest()
 				.authenticated())
+			// [N-3] CSRF protection — runs before JWT auth so it can reject
+			// cookie-bearing POSTs (refresh / logout / idle-logout) lacking a valid
+			// Origin or Referer header. Does not need authentication for the check.
+			.addFilterBefore(csrfCookieFilter, UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			// [ADR-007] Phase 1.1.2 — observe scope claim vs path prefix in warning mode.
 			// Runs after JwtAuthenticationFilter so Authentication details are populated.

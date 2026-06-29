@@ -356,7 +356,9 @@ class AuthControllerTest {
 		TokenResult result = TokenResult.builder().accessToken("new-access").refreshToken("new-refresh").build();
 		when(authService.refreshToken(eq("old-refresh-token"), any())).thenReturn(result);
 
-		mockMvc.perform(post("/v1/noauth/token/refresh").cookie(new Cookie("refresh_token", "old-refresh-token")))
+		mockMvc
+			.perform(post("/v1/noauth/token/refresh").cookie(new Cookie("refresh_token", "old-refresh-token"))
+				.header("Origin", "http://localhost"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.body.accessToken").value("new-access"));
 	}
@@ -377,7 +379,8 @@ class AuthControllerTest {
 
 		mockMvc
 			.perform(post("/v1/auth/logout").header("Authorization", "Bearer " + token)
-				.cookie(new Cookie("refresh_token", "refresh")))
+				.cookie(new Cookie("refresh_token", "refresh"))
+				.header("Origin", "http://localhost"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.errorCode").value("00000"));
 	}

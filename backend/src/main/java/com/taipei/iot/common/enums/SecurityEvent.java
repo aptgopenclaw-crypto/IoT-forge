@@ -14,6 +14,11 @@ public enum SecurityEvent {
 	 * [Platform/Tenant Separation ADR-007] JWT scope claim 與 request path prefix 不符。
 	 * Phase 1.1.2 為 warning-only（log 但不擋）；Phase 3 切換為 enforce mode。
 	 */
-	SCOPE_MISMATCH;
+	SCOPE_MISMATCH,
+	/**
+	 * [N-3] CSRF 攻擊嘗試 — cookie-bearing 端點（refresh / logout / idle-logout）收到
+	 * Origin/Referer 不符或遺漏的請求，已被 CsrfCookieFilter 阻擋。
+	 */
+	CSRF_ATTEMPT;
 
 }

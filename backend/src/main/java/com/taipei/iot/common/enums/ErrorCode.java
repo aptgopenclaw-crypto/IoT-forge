@@ -137,6 +137,9 @@ public enum ErrorCode {
 	// 10030-10039: 速率限制
 	RATE_LIMIT_EXCEEDED("10030", 429, "請求過於頻繁，請稍後再試"),
 
+	// 10035: CSRF 驗證失敗
+	CSRF_VALIDATION_FAILED("10035", 403, "CSRF 驗證失敗"),
+
 	// 99xxx: 系統
 	UNKNOWN_ERROR("99999", 500, "未知錯誤");
 
