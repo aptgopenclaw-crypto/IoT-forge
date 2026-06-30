@@ -1,6 +1,6 @@
 package com.taipei.iot.notification.websocket;
 
-import com.taipei.iot.config.CorsProperties;
+import com.taipei.iot.common.config.CorsProperties;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

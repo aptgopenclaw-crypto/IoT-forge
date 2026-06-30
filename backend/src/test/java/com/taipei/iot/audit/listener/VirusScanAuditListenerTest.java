@@ -1,8 +1,8 @@
 package com.taipei.iot.audit.listener;
 
 import com.taipei.iot.audit.async.AuditAsyncWriter;
-import com.taipei.iot.audit.enums.AuditCategory;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.enums.AuditCategory;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.event.VirusScanAuditEvent;
 import com.taipei.iot.common.util.SecurityContextUtils;
 import com.taipei.iot.tenant.TenantContext;

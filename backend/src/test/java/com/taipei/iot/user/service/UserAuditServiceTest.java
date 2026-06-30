@@ -1,6 +1,6 @@
 package com.taipei.iot.user.service;
 
-import com.taipei.iot.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
 import com.taipei.iot.user.controller.UserAdminController;
 import com.taipei.iot.user.entity.UserInfoLogEntity;
 import com.taipei.iot.user.repository.UserInfoLogRepository;

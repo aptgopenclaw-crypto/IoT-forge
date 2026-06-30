@@ -1,6 +1,6 @@
 package com.taipei.iot.workflow.service;
 
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.workflow.exception.WorkflowNotFoundException;
 import com.taipei.iot.workflow.model.StepDefinition;
 import com.taipei.iot.workflow.model.WorkflowContext;

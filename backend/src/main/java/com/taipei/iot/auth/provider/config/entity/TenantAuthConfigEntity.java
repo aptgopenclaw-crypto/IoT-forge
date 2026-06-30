@@ -1,6 +1,6 @@
 package com.taipei.iot.auth.provider.config.entity;
 
-import com.taipei.iot.auth.provider.AuthType;
+import com.taipei.iot.common.enums.AuthType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

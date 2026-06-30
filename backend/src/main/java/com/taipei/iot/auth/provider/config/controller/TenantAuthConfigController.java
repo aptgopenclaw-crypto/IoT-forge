@@ -5,7 +5,7 @@ import com.taipei.iot.auth.provider.config.dto.TenantAuthConfigResponse;
 import com.taipei.iot.auth.provider.config.service.TenantAuthConfigService;
 import com.taipei.iot.common.annotation.DeprecatedApi;
 import com.taipei.iot.common.response.BaseResponse;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

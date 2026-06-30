@@ -1,6 +1,6 @@
 package com.taipei.iot.announcement.repository;
 
-import com.taipei.iot.tenant.TenantScopedRepository;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

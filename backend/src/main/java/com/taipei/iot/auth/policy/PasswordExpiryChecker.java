@@ -1,6 +1,7 @@
 package com.taipei.iot.auth.policy;
 
-import com.taipei.iot.auth.entity.UserEntity;
+import com.taipei.iot.common.policy.PasswordPolicy;
+import com.taipei.iot.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

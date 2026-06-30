@@ -6,7 +6,7 @@ import com.taipei.iot.dept.annotation.DataPermission;
 import com.taipei.iot.dept.context.DataScopeContext;
 import com.taipei.iot.dept.context.DataScopeFilter;
 import com.taipei.iot.dept.entity.DeptInfoEntity;
-import com.taipei.iot.dept.enums.DataScopeEnum;
+import com.taipei.iot.common.enums.DataScopeEnum;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -7,7 +7,7 @@ import com.taipei.iot.assettransfer.dto.WorkflowStepLogDto;
 import com.taipei.iot.assettransfer.entity.AssetTransferApplicationEntity;
 import com.taipei.iot.assettransfer.enums.AssetTransferStatus;
 import com.taipei.iot.assettransfer.repository.AssetTransferApplicationRepository;
-import com.taipei.iot.auth.repository.UserRepository;
+import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

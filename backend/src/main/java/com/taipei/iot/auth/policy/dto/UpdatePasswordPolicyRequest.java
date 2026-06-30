@@ -10,7 +10,7 @@ import lombok.Data;
  *
  * <p>
  * Value is transmitted as a raw string and validated against the key's
- * {@link com.taipei.iot.auth.policy.PasswordPolicyKey} type by the service.
+ * {@link com.taipei.iot.common.policy.PasswordPolicyKey} type by the service.
  */
 @Data
 public class UpdatePasswordPolicyRequest {

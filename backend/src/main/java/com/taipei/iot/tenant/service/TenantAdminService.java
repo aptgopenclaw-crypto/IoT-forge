@@ -1,19 +1,19 @@
 package com.taipei.iot.tenant.service;
 
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.entity.UserTenantMappingEntity;
-import com.taipei.iot.auth.provider.AuthType;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.entity.UserTenantMappingEntity;
+import com.taipei.iot.common.enums.AuthType;
 import com.taipei.iot.auth.provider.config.entity.TenantAuthConfigEntity;
 import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository;
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.auth.repository.UserTenantMappingRepository;
+import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.setting.entity.SystemSettingEntity;
 import com.taipei.iot.setting.enums.SettingKey;
 import com.taipei.iot.setting.repository.SystemSettingRepository;
 import com.taipei.iot.tenant.TenantEnabledCache;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.tenant.TenantEntity;
 import com.taipei.iot.tenant.TenantRepository;
 import com.taipei.iot.tenant.dto.CreateTenantRequest;

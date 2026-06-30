@@ -1,6 +1,6 @@
 package com.taipei.iot.common.util;
 
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +60,7 @@ import lombok.extern.slf4j.Slf4j;
  * <li>ArchUnit 測試會掃描違規使用（見 {@code NativeQueryArchTest}）</li>
  * </ul>
  *
- * @see com.taipei.iot.tenant.TenantContext
+ * @see com.taipei.iot.common.context.TenantContext
  * @see com.taipei.iot.tenant.TenantFilterAspect
  */
 @Slf4j

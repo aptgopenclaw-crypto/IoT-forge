@@ -1,5 +1,7 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.common.tenant.TenantAware;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.metamodel.EntityType;
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,8 @@
 package com.taipei.iot.audit.aspect;
 
-import com.taipei.iot.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
 import com.taipei.iot.audit.async.AuditAsyncWriter;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.tenant.TenantContext;

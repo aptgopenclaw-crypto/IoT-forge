@@ -1,6 +1,6 @@
 package com.taipei.iot.tenant.dto;
 
-import com.taipei.iot.auth.provider.AuthType;
+import com.taipei.iot.common.enums.AuthType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -3,7 +3,7 @@ package com.taipei.iot.dispatch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
-import com.taipei.iot.config.CorsProperties;
+import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.config.SecurityConfig;
 import com.taipei.iot.dispatch.dto.WorkOrderRequest;
 import com.taipei.iot.dispatch.dto.WorkOrderResponse;

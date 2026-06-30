@@ -3,10 +3,9 @@ package com.taipei.iot.audit.job;
 import com.taipei.iot.audit.repository.UserEventLogRepository;
 import com.taipei.iot.setting.enums.SettingKey;
 import com.taipei.iot.setting.repository.SystemSettingRepository;
-import com.taipei.iot.tenant.RunInSystemTenantContext;
-import com.taipei.iot.tenant.TenantContext;
-import com.taipei.iot.tenant.TenantEntity;
-import com.taipei.iot.tenant.TenantRepository;
+import com.taipei.iot.common.tenant.RunInSystemTenantContext;
+import com.taipei.iot.common.tenant.TenantIdProvider;
+import com.taipei.iot.common.context.TenantContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,7 +22,7 @@ public class AuditPurgeJob {
 
 	private final UserEventLogRepository userEventLogRepository;
 
-	private final TenantRepository tenantRepository;
+	private final TenantIdProvider tenantIdProvider;
 
 	private final SystemSettingRepository systemSettingRepository;
 
@@ -36,16 +35,16 @@ public class AuditPurgeJob {
 		// [Tenant v2 T-13] @RunInSystemTenantContext 包整段；本 method 內各 tenant 迭代時
 		// 仍會用 setCurrentTenantId/setSystemContext 切換以讀取 per-tenant 設定，但離開
 		// 本 method 時 aspect 會把 context 還原至呼叫端原本的狀態（排程觸發時為 null）。
-		List<TenantEntity> tenants = tenantRepository.findByEnabledTrue();
+		List<String> tenantIds = tenantIdProvider.findEnabledTenantIds();
 		int totalDeleted = 0;
 
-		for (TenantEntity tenant : tenants) {
-			int retentionDays = getRetentionDays(tenant.getTenantId());
+		for (String tenantId : tenantIds) {
+			int retentionDays = getRetentionDays(tenantId);
 			LocalDateTime cutoff = LocalDateTime.now().minusDays(retentionDays);
-			int deleted = userEventLogRepository.deleteByTenantIdAndCreateTimeBefore(tenant.getTenantId(), cutoff);
+			int deleted = userEventLogRepository.deleteByTenantIdAndCreateTimeBefore(tenantId, cutoff);
 			if (deleted > 0) {
-				log.info("AuditPurgeJob: tenant={} retentionDays={} deleted={} cutoff={}", tenant.getTenantId(),
-						retentionDays, deleted, cutoff);
+				log.info("AuditPurgeJob: tenant={} retentionDays={} deleted={} cutoff={}", tenantId, retentionDays,
+						deleted, cutoff);
 			}
 			totalDeleted += deleted;
 		}

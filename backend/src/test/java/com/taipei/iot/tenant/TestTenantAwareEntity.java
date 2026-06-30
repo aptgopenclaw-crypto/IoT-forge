@@ -1,5 +1,7 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.common.tenant.TenantAware;
+import com.taipei.iot.common.tenant.TenantEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;

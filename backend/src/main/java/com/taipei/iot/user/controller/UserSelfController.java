@@ -1,7 +1,7 @@
 package com.taipei.iot.user.controller;
 
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.security.JwtUtil;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.common.auth.port.TokenJtiReader;
 import com.taipei.iot.common.annotation.RateLimit;
 import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.user.dto.request.ChangePasswordRequest;
@@ -29,7 +29,7 @@ public class UserSelfController {
 
 	private final UserSelfService userSelfService;
 
-	private final JwtUtil jwtUtil;
+	private final TokenJtiReader tokenJtiReader;
 
 	@PutMapping("/my")
 	@Operation(summary = "更新我的個人資料", description = "由登入者更新自己的基本資料")
@@ -56,7 +56,7 @@ public class UserSelfController {
 		if (refreshToken == null || refreshToken.isBlank())
 			return null;
 		try {
-			return jwtUtil.parseToken(refreshToken).getId();
+			return tokenJtiReader.extractJti(refreshToken);
 		}
 		catch (Exception e) {
 			log.debug("Failed to extract JTI from refresh token: {}", e.getMessage());

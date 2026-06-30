@@ -1,7 +1,7 @@
 package com.taipei.iot.audit.repository;
 
 import com.taipei.iot.audit.entity.UserEventLogEntity;
-import com.taipei.iot.tenant.TenantScopedRepository;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;

@@ -4,12 +4,6 @@ import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.enums.SecurityEvent;
 import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.common.util.SecurityLogger;
-import com.taipei.iot.workflow.exception.WorkflowException;
-import com.taipei.iot.workflow.exception.WorkflowInstanceNotFoundException;
-import com.taipei.iot.workflow.exception.WorkflowInvalidTransitionException;
-import com.taipei.iot.workflow.exception.WorkflowNotFoundException;
-import com.taipei.iot.workflow.exception.WorkflowPermissionException;
-import com.taipei.iot.workflow.exception.WorkflowStepAlreadyCompletedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
@@ -31,29 +25,6 @@ import java.util.stream.Stream;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-	@ExceptionHandler(WorkflowInstanceNotFoundException.class)
-	public ResponseEntity<BaseResponse<?>> handleWorkflowNotFound(WorkflowInstanceNotFoundException ex) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-			.body(BaseResponse.fail(ErrorCode.UNKNOWN_ERROR, ex.getMessage()));
-	}
-
-	@ExceptionHandler(WorkflowNotFoundException.class)
-	public ResponseEntity<BaseResponse<?>> handleWorkflowDefNotFound(WorkflowNotFoundException ex) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-			.body(BaseResponse.fail(ErrorCode.UNKNOWN_ERROR, ex.getMessage()));
-	}
-
-	@ExceptionHandler(WorkflowPermissionException.class)
-	public ResponseEntity<BaseResponse<?>> handleWorkflowPermission(WorkflowPermissionException ex) {
-		return ResponseEntity.status(HttpStatus.FORBIDDEN)
-			.body(BaseResponse.fail(ErrorCode.PERMISSION_DENIED, ex.getMessage()));
-	}
-
-	@ExceptionHandler({ WorkflowInvalidTransitionException.class, WorkflowStepAlreadyCompletedException.class })
-	public ResponseEntity<BaseResponse<?>> handleWorkflowBadRequest(WorkflowException ex) {
-		return ResponseEntity.badRequest().body(BaseResponse.fail(ErrorCode.VALIDATION_ERROR, ex.getMessage()));
-	}
 
 	@ExceptionHandler(BusinessException.class)
 	public ResponseEntity<BaseResponse<?>> handleBusiness(BusinessException ex) {

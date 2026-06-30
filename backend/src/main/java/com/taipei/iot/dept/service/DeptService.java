@@ -1,8 +1,8 @@
 package com.taipei.iot.dept.service;
 
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.auth.repository.UserTenantMappingRepository;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.util.SecurityContextUtils;
@@ -12,7 +12,7 @@ import com.taipei.iot.dept.dto.DeptOptionVO;
 import com.taipei.iot.dept.dto.UpdateDeptRequest;
 import com.taipei.iot.dept.entity.DeptInfoEntity;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;

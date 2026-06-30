@@ -1,5 +1,7 @@
 package com.taipei.iot.auth.provider;
 
+import com.taipei.iot.common.enums.AuthType;
+
 /**
  * Strategy interface for pluggable authentication mechanisms. Each concrete provider
  * handles one {@link AuthType}.

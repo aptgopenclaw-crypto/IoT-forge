@@ -5,7 +5,7 @@ import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.enums.SecurityEvent;
 import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.common.util.SecurityLogger;
-import com.taipei.iot.config.CorsProperties;
+import com.taipei.iot.common.config.CorsProperties;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

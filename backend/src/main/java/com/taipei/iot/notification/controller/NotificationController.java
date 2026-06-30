@@ -1,7 +1,7 @@
 package com.taipei.iot.notification.controller;
 
-import com.taipei.iot.audit.annotation.AuditEvent;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.annotation.PaginationParams;
 import com.taipei.iot.common.dto.PageQuery;
 import com.taipei.iot.common.response.BaseResponse;

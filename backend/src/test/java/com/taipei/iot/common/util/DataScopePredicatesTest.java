@@ -1,6 +1,6 @@
 package com.taipei.iot.common.util;
 
-import com.taipei.iot.dept.enums.DataScopeEnum;
+import com.taipei.iot.common.enums.DataScopeEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

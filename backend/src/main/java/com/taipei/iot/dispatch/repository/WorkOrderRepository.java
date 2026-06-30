@@ -3,7 +3,7 @@ package com.taipei.iot.dispatch.repository;
 import com.taipei.iot.dispatch.entity.WorkOrder;
 import com.taipei.iot.dispatch.enums.WorkOrderSourceType;
 import com.taipei.iot.dispatch.enums.WorkOrderStatus;
-import com.taipei.iot.tenant.TenantScopedRepository;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

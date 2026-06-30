@@ -1,7 +1,7 @@
 package com.taipei.iot.notification.channel;
 
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.repository.UserRepository;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.notification.dto.NotificationPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

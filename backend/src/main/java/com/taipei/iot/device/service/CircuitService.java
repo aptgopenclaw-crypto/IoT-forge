@@ -7,7 +7,7 @@ import com.taipei.iot.device.dto.CircuitResponse;
 import com.taipei.iot.device.entity.Circuit;
 import com.taipei.iot.device.repository.CircuitRepository;
 import com.taipei.iot.device.repository.DeviceRepository;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

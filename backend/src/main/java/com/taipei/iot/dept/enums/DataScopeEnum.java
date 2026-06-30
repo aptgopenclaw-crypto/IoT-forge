@@ -2,6 +2,11 @@ package com.taipei.iot.dept.enums;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @deprecated 已遷移至 {@link com.taipei.iot.common.enums.DataScopeEnum}， 此類別保留僅供 Transient
+ * 期的向後相容，日後將移除。 請改用 {@code com.taipei.iot.common.enums.DataScopeEnum}。
+ */
+@Deprecated
 @Slf4j
 public enum DataScopeEnum {
 

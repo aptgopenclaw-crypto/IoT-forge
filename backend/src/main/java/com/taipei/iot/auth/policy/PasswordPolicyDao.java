@@ -17,8 +17,8 @@ import java.util.Map;
  *
  * <p>
  * Deliberately does <strong>not</strong> extend
- * {@link com.taipei.iot.tenant.TenantScopedRepository}, and uses native SQL, so the
- * {@code TenantFilterAspect} and Hibernate's {@code @Filter(name="tenantFilter")} are
+ * {@link com.taipei.iot.common.tenant.TenantScopedRepository}, and uses native SQL, so
+ * the {@code TenantFilterAspect} and Hibernate's {@code @Filter(name="tenantFilter")} are
  * both bypassed. Every method takes an explicit {@code tenantId} (including the reserved
  * platform sentinel {@link PasswordPolicyResolver#PLATFORM_SENTINEL}).
  */

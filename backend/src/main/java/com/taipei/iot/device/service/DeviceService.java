@@ -15,7 +15,7 @@ import com.taipei.iot.device.repository.ContractRepository;
 import com.taipei.iot.dispatch.enums.WorkOrderStatus;
 import com.taipei.iot.dispatch.repository.WorkOrderRepository;
 import com.taipei.iot.schema.service.DeviceTemplateService;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

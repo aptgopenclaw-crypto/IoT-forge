@@ -1,6 +1,7 @@
 package com.taipei.iot.auth.policy;
 
-import com.taipei.iot.auth.entity.UserEntity;
+import com.taipei.iot.common.policy.PasswordPolicy;
+import com.taipei.iot.user.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

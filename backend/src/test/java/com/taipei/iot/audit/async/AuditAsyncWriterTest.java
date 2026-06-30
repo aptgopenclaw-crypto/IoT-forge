@@ -2,8 +2,8 @@ package com.taipei.iot.audit.async;
 
 import com.taipei.iot.audit.entity.UserEventLogEntity;
 import com.taipei.iot.audit.repository.UserEventLogRepository;
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.repository.UserRepository;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

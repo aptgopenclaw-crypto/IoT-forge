@@ -1,7 +1,7 @@
 package com.taipei.iot.user.service;
 
-import com.taipei.iot.auth.policy.PasswordPolicy;
-import com.taipei.iot.auth.policy.PasswordPolicyResolver;
+import com.taipei.iot.common.policy.PasswordPolicy;
+import com.taipei.iot.common.auth.port.PasswordPolicyProvider;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.user.entity.PasswordHistoryEntity;
@@ -34,7 +34,7 @@ class PasswordValidatorTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
-	private PasswordPolicyResolver policyResolver;
+	private PasswordPolicyProvider policyResolver;
 
 	@InjectMocks
 	private PasswordValidator validator;

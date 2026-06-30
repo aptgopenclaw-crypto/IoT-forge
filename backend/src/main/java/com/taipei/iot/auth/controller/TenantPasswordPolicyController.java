@@ -1,12 +1,12 @@
 package com.taipei.iot.auth.controller;
 
-import com.taipei.iot.audit.annotation.AuditEvent;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.auth.policy.PasswordPolicyService;
 import com.taipei.iot.auth.policy.dto.PasswordPolicyDto;
 import com.taipei.iot.auth.policy.dto.UpdatePasswordPolicyRequest;
 import com.taipei.iot.common.response.BaseResponse;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

@@ -3,7 +3,7 @@ package com.taipei.iot.dept.service;
 import com.taipei.iot.common.dto.UserInfo;
 import com.taipei.iot.common.util.SecurityContextUtils;
 import com.taipei.iot.dept.entity.DeptInfoEntity;
-import com.taipei.iot.dept.enums.DataScopeEnum;
+import com.taipei.iot.common.enums.DataScopeEnum;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

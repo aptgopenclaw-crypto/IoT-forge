@@ -1,10 +1,10 @@
 package com.taipei.iot.user.service;
 
-import com.taipei.iot.auth.entity.ChangePasswordLogEntity;
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.repository.ChangePasswordLogRepository;
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.auth.service.UserSessionService;
+import com.taipei.iot.user.entity.ChangePasswordLogEntity;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.repository.ChangePasswordLogRepository;
+import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.common.auth.port.SessionRevoker;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.user.dto.request.ChangePasswordRequest;
@@ -32,7 +32,7 @@ public class UserSelfService {
 
 	private final UserAuditService userAuditService;
 
-	private final UserSessionService userSessionService;
+	private final SessionRevoker sessionRevoker;
 
 	@Transactional
 	public UserEntity updateOwnProfile(String currentUserId, UpdateOwnProfileRequest req) {
@@ -88,7 +88,7 @@ public class UserSelfService {
 		userAuditService.logAction("UPDATE", currentUserId, currentUserId, "自助修改密碼");
 
 		// [User N-4] 密碼變更後撤銷其他裝置的 session，防止攻擊者持有的 refresh token 繼續滾動
-		userSessionService.revokeAllExceptCurrent(currentUserId, currentSessionJti);
+		sessionRevoker.revokeAllExceptCurrent(currentUserId, currentSessionJti);
 	}
 
 }

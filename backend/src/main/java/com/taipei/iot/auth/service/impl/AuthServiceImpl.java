@@ -10,18 +10,17 @@ import com.taipei.iot.auth.dto.response.LoginResult;
 import com.taipei.iot.auth.dto.response.TenantOption;
 import com.taipei.iot.auth.dto.response.TokenResult;
 import com.taipei.iot.auth.dto.response.UserInfoDto;
-import com.taipei.iot.audit.entity.UserEventLogEntity;
-import com.taipei.iot.audit.enums.AuditEventType;
-import com.taipei.iot.audit.repository.UserEventLogRepository;
-import com.taipei.iot.auth.entity.ChangePasswordLogEntity;
-import com.taipei.iot.auth.entity.UserEntity;
+import com.taipei.iot.common.audit.enums.AuditEventType;
+import com.taipei.iot.common.event.LoginAuditEvent;
+import com.taipei.iot.user.entity.ChangePasswordLogEntity;
+import com.taipei.iot.user.entity.UserEntity;
 import com.taipei.iot.auth.entity.UserResetPasswordTokenEntity;
 import com.taipei.iot.auth.entity.UserSessionEntity;
-import com.taipei.iot.auth.entity.UserTenantMappingEntity;
-import com.taipei.iot.auth.repository.ChangePasswordLogRepository;
-import com.taipei.iot.auth.repository.UserRepository;
+import com.taipei.iot.user.entity.UserTenantMappingEntity;
+import com.taipei.iot.user.repository.ChangePasswordLogRepository;
+import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.auth.repository.UserResetPasswordTokenRepository;
-import com.taipei.iot.auth.repository.UserTenantMappingRepository;
+import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.auth.security.TokenScope;
 import com.taipei.iot.auth.policy.PasswordExpiryChecker;
@@ -37,7 +36,7 @@ import com.taipei.iot.common.util.SecurityLogger;
 import com.taipei.iot.user.entity.PasswordHistoryEntity;
 import com.taipei.iot.user.repository.PasswordHistoryRepository;
 import com.taipei.iot.user.service.PasswordValidator;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.tenant.TenantEntity;
 import com.taipei.iot.tenant.TenantRepository;
 import io.jsonwebtoken.Claims;
@@ -82,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
 
 	private final UserTenantMappingRepository userTenantMappingRepository;
 
-	private final UserEventLogRepository userEventLogRepository;
+	private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
 	private final ChangePasswordLogRepository changePasswordLogRepository;
 
@@ -1007,26 +1006,11 @@ public class AuthServiceImpl implements AuthService {
 
 	private void logLoginEvent(String userId, String tenantId, String email, String displayName, Long deptId,
 			AuditEventType eventType, String detail, HttpServletRequest request) {
-		UserEventLogEntity entity = new UserEventLogEntity();
-		entity.setTenantId(tenantId);
-		entity.setUserId(userId);
-		entity.setUsername(email);
-		entity.setUserLabel(displayName);
-		entity.setEmail(email);
-		entity.setEventType(eventType.getValue());
-		entity.setEventDesc(eventType.getCategory().getValue());
-		entity.setApiEndpoint(request != null ? request.getRequestURI() : null);
-		entity.setErrorCode(eventType.errorCode());
-		entity.setMessage(detail);
-		entity.setIpAddress(request != null ? request.getRemoteAddr() : null);
-		entity.setUserAgent(request != null ? request.getHeader("User-Agent") : null);
-		entity.setExecutionTime(0L);
-		entity.setDeptId(deptId);
-		entity.setCreateTime(LocalDateTime.now());
-
-		// 使用 SYSTEM context 繞過 tenant filter 存檔（登入時可能尚無 tenant context）
-		// [Tenant v2 T-13] 改用 TenantContext.runInSystemContext 集中還原邏輯。
-		TenantContext.runInSystemContext(() -> userEventLogRepository.save(entity));
+		// 透過 Spring 事件機制解耦 auth → audit 直接依賴
+		// LoginAuditListener（audit 模組）非同步訂閱並寫入 user_event_log
+		eventPublisher.publishEvent(new LoginAuditEvent(userId, tenantId, email, displayName, deptId, eventType, detail,
+				request != null ? request.getRequestURI() : null, request != null ? request.getRemoteAddr() : null,
+				request != null ? request.getHeader("User-Agent") : null));
 	}
 
 	/**

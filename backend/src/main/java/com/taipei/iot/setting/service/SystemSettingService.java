@@ -6,7 +6,7 @@ import com.taipei.iot.setting.dto.SystemSettingDto;
 import com.taipei.iot.setting.entity.SystemSettingEntity;
 import com.taipei.iot.setting.enums.SettingKey;
 import com.taipei.iot.setting.repository.SystemSettingRepository;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;

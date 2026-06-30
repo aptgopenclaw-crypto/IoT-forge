@@ -1,13 +1,13 @@
 package com.taipei.iot.audit.aspect;
 
-import com.taipei.iot.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
 import com.taipei.iot.audit.async.AuditAsyncWriter;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.audit.util.PayloadSanitizer;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.dto.UserInfo;
 import com.taipei.iot.common.util.SecurityContextUtils;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;

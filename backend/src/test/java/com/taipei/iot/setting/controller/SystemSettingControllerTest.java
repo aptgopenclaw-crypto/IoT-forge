@@ -4,7 +4,7 @@ import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
-import com.taipei.iot.config.CorsProperties;
+import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.config.SecurityConfig;
 import com.taipei.iot.setting.dto.SystemSettingDto;
 import com.taipei.iot.setting.service.SystemSettingService;

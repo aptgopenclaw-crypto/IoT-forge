@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.repository.UserRepository;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.device.repository.DeviceRepository;

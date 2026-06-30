@@ -1,11 +1,11 @@
 package com.taipei.iot.user.service;
 
-import com.taipei.iot.auth.entity.RoleEntity;
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.entity.UserTenantMappingEntity;
-import com.taipei.iot.auth.repository.RoleRepository;
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.auth.repository.UserTenantMappingRepository;
+import com.taipei.iot.rbac.entity.RoleEntity;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.entity.UserTenantMappingEntity;
+import com.taipei.iot.rbac.repository.RoleRepository;
+import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
@@ -110,7 +110,7 @@ class UserAdminServiceTest {
 		// [Phase 3] Default policy: force-change-on-first-login=true (platform default)
 		// so existing createUser tests see the new column populated but their
 		// assertions on other fields remain unchanged.
-		when(passwordPolicyResolver.resolve(any())).thenReturn(com.taipei.iot.auth.policy.PasswordPolicy.builder()
+		when(passwordPolicyResolver.resolve(any())).thenReturn(com.taipei.iot.common.policy.PasswordPolicy.builder()
 			.minLength(8)
 			.requireUppercase(true)
 			.requireLowercase(true)

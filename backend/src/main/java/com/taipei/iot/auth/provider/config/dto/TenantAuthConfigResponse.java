@@ -1,6 +1,6 @@
 package com.taipei.iot.auth.provider.config.dto;
 
-import com.taipei.iot.auth.provider.AuthType;
+import com.taipei.iot.common.enums.AuthType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

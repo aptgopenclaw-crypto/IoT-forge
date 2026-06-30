@@ -1,7 +1,7 @@
 package com.taipei.iot.setting.repository;
 
 import com.taipei.iot.setting.entity.SystemSettingEntity;
-import com.taipei.iot.tenant.TenantScopedRepository;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

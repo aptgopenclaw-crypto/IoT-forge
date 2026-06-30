@@ -1,6 +1,6 @@
 package com.taipei.iot.notification.websocket;
 
-import com.taipei.iot.config.CorsProperties;
+import com.taipei.iot.common.config.CorsProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 

@@ -2,10 +2,10 @@ package com.taipei.iot.audit.controller;
 
 import com.taipei.iot.audit.dto.AuditQueryRequest;
 import com.taipei.iot.audit.dto.UserEventLogDto;
-import com.taipei.iot.audit.enums.AuditCategory;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.enums.AuditCategory;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.audit.service.AuditService;
-import com.taipei.iot.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
 import com.taipei.iot.common.annotation.RateLimit;
 import com.taipei.iot.common.dto.PageResponse;
 import com.taipei.iot.common.response.BaseResponse;

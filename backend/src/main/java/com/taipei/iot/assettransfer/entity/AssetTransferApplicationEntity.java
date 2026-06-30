@@ -1,7 +1,7 @@
 package com.taipei.iot.assettransfer.entity;
 
-import com.taipei.iot.tenant.TenantAware;
-import com.taipei.iot.tenant.TenantEntityListener;
+import com.taipei.iot.common.tenant.TenantAware;
+import com.taipei.iot.common.tenant.TenantEntityListener;
 import com.taipei.iot.assettransfer.enums.AssetTransferStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

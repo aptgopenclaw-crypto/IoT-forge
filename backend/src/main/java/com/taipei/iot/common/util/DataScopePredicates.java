@@ -1,6 +1,6 @@
 package com.taipei.iot.common.util;
 
-import com.taipei.iot.dept.enums.DataScopeEnum;
+import com.taipei.iot.common.enums.DataScopeEnum;
 
 /**
  * {@link DataScopeEnum} 共用 predicate，集中「ALL / 受限 / 僅 owner」幾種常見判斷， 避免各 service 散落

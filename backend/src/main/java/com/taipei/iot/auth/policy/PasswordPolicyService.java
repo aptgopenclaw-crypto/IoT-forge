@@ -3,6 +3,7 @@ package com.taipei.iot.auth.policy;
 import com.taipei.iot.auth.policy.dto.PasswordPolicyDto;
 import com.taipei.iot.auth.policy.dto.UpdatePasswordPolicyRequest;
 import com.taipei.iot.common.enums.ErrorCode;
+import com.taipei.iot.common.policy.PasswordPolicy;
 import com.taipei.iot.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

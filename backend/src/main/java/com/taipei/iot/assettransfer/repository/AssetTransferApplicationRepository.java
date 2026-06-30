@@ -1,7 +1,7 @@
 package com.taipei.iot.assettransfer.repository;
 
 import com.taipei.iot.assettransfer.entity.AssetTransferApplicationEntity;
-import com.taipei.iot.tenant.TenantScopedRepository;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;

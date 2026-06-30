@@ -1,17 +1,17 @@
 package com.taipei.iot.user.service;
 
-import com.taipei.iot.auth.entity.RoleEntity;
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.entity.UserTenantMappingEntity;
-import com.taipei.iot.auth.repository.RoleRepository;
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.auth.repository.UserTenantMappingRepository;
+import com.taipei.iot.rbac.entity.RoleEntity;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.entity.UserTenantMappingEntity;
+import com.taipei.iot.rbac.repository.RoleRepository;
+import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
 import com.taipei.iot.dept.service.DataScopeHelper;
 import com.taipei.iot.rbac.service.RoleService;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.tenant.TenantRepository;
 import com.taipei.iot.user.dto.request.AddTenantRoleRequest;
 import com.taipei.iot.user.dto.request.CreateUserRequest;
@@ -65,7 +65,7 @@ public class UserAdminService {
 
 	private final TenantRepository tenantRepository;
 
-	private final com.taipei.iot.auth.policy.PasswordPolicyResolver passwordPolicyResolver;
+	private final com.taipei.iot.common.auth.port.PasswordPolicyProvider passwordPolicyResolver;
 
 	@Transactional(readOnly = true)
 	public UserListItemDto getUser(String userId) {
@@ -163,14 +163,14 @@ public class UserAdminService {
 			throw new BusinessException(ErrorCode.USER_ALREADY_EXISTS);
 		}
 
-		com.taipei.iot.auth.provider.AuthType authType = req.getAuthType() != null ? req.getAuthType()
-				: com.taipei.iot.auth.provider.AuthType.LOCAL;
+		com.taipei.iot.common.enums.AuthType authType = req.getAuthType() != null ? req.getAuthType()
+				: com.taipei.iot.common.enums.AuthType.LOCAL;
 
 		String userId = UUID.randomUUID().toString();
 		String passwordHash;
 		boolean forceChange = false;
 
-		if (authType == com.taipei.iot.auth.provider.AuthType.LOCAL) {
+		if (authType == com.taipei.iot.common.enums.AuthType.LOCAL) {
 			if (req.getInitialPassword() == null || req.getInitialPassword().isBlank()) {
 				throw new BusinessException(ErrorCode.VALIDATION_ERROR, "LOCAL 帳號必須提供初始密碼");
 			}
@@ -178,7 +178,7 @@ public class UserAdminService {
 					req.getInitialPassword(), new PasswordValidator.UserContext(req.getEmail(), req.getEmail()));
 			passwordHash = passwordEncoder.encode(req.getInitialPassword());
 			// [Phase 3] Honour password.force_change_on_first_login policy
-			com.taipei.iot.auth.policy.PasswordPolicy policy = passwordPolicyResolver
+			com.taipei.iot.common.policy.PasswordPolicy policy = passwordPolicyResolver
 				.resolve(com.taipei.iot.tenant.TenantContext.getCurrentTenantId());
 			forceChange = policy.isForceChangeOnFirstLogin();
 		}
@@ -219,7 +219,7 @@ public class UserAdminService {
 			.build();
 		UserTenantMappingEntity savedMapping = userTenantMappingRepository.save(mapping);
 
-		if (authType == com.taipei.iot.auth.provider.AuthType.LOCAL) {
+		if (authType == com.taipei.iot.common.enums.AuthType.LOCAL) {
 			passwordHistoryRepository
 				.save(PasswordHistoryEntity.builder().userId(userId).passwordHash(passwordHash).build());
 		}

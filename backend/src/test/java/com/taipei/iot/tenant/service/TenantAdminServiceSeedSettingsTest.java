@@ -1,7 +1,7 @@
 package com.taipei.iot.tenant.service;
 
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.auth.repository.UserTenantMappingRepository;
+import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository;
 import com.taipei.iot.setting.entity.SystemSettingEntity;
 import com.taipei.iot.setting.enums.SettingKey;

@@ -2,9 +2,9 @@ package com.taipei.iot.audit.async;
 
 import com.taipei.iot.audit.entity.UserEventLogEntity;
 import com.taipei.iot.audit.repository.UserEventLogRepository;
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.tenant.RunInSystemTenantContext;
+import com.taipei.iot.common.audit.port.UserDisplayInfo;
+import com.taipei.iot.common.audit.port.UserDisplayInfoProvider;
+import com.taipei.iot.common.tenant.RunInSystemTenantContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -19,7 +19,7 @@ public class AuditAsyncWriter {
 
 	private final UserEventLogRepository userEventLogRepository;
 
-	private final UserRepository userRepository;
+	private final UserDisplayInfoProvider userDisplayInfoProvider;
 
 	@Async("auditExecutor")
 	@RunInSystemTenantContext
@@ -29,14 +29,14 @@ public class AuditAsyncWriter {
 		// [Tenant v2 T-13] @RunInSystemTenantContext 已把整段包進 SYSTEM context；
 		// @Async 在新執行緒執行（ThreadLocal 不繼承），aspect 也能正確初始化並 cleanup。
 		try {
-			// 查詢使用者 displayName 與 email（best-effort）
+			// 查詢使用者 displayName 與 email（best-effort，透過 Port 解除 audit→auth 直接依賴）
 			String userLabel = null;
 			String email = null;
 			if (userId != null) {
-				UserEntity user = userRepository.findById(userId).orElse(null);
-				if (user != null) {
-					userLabel = user.getDisplayName();
-					email = user.getEmail();
+				UserDisplayInfo info = userDisplayInfoProvider.findByUserId(userId).orElse(null);
+				if (info != null) {
+					userLabel = info.displayName();
+					email = info.email();
 				}
 			}
 

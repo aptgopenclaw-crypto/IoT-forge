@@ -6,7 +6,7 @@ import com.taipei.iot.common.dto.PageResponse;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
-import com.taipei.iot.config.CorsProperties;
+import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.config.SecurityConfig;
 import com.taipei.iot.platform.announcement.dto.PlatformAnnouncementRequest;
 import com.taipei.iot.platform.announcement.dto.PlatformAnnouncementResponse;

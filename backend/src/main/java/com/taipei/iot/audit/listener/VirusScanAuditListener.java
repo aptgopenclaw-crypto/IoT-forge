@@ -1,11 +1,11 @@
 package com.taipei.iot.audit.listener;
 
 import com.taipei.iot.audit.async.AuditAsyncWriter;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.dto.UserInfo;
 import com.taipei.iot.common.event.VirusScanAuditEvent;
 import com.taipei.iot.common.util.SecurityContextUtils;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

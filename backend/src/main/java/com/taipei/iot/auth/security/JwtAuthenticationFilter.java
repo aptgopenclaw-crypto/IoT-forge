@@ -3,7 +3,7 @@ package com.taipei.iot.auth.security;
 import com.taipei.iot.common.enums.SecurityEvent;
 import com.taipei.iot.common.util.JwtClaimKeys;
 import com.taipei.iot.common.util.SecurityLogger;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.tenant.TenantEnabledCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

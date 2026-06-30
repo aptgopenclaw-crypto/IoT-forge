@@ -1,10 +1,10 @@
 package com.taipei.iot.auth.provider.local;
 
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.provider.AuthType;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.common.enums.AuthType;
 import com.taipei.iot.auth.provider.AuthenticationRequest;
 import com.taipei.iot.auth.provider.AuthenticationResult;
-import com.taipei.iot.auth.repository.UserRepository;
+import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;

@@ -9,7 +9,7 @@ package com.taipei.iot.common.tenant;
  * 本專案 tenant 隔離有兩種模式：
  * <ol>
  * <li><b>純租戶範圍</b>（{@code tenant_id = :tenantId}）：由
- * {@link com.taipei.iot.tenant.TenantScopedRepository} marker 介面 +
+ * {@link com.taipei.iot.common.tenant.TenantScopedRepository} marker 介面 +
  * {@link com.taipei.iot.tenant.TenantFilterAspect} 透過 Hibernate {@code @Filter}
  * 自動套用，是主要機制。</li>
  * <li><b>全域 + 租戶混合</b>（{@code tenant_id IS NULL OR tenant_id = :tenantId}）： 例如
@@ -36,7 +36,7 @@ package com.taipei.iot.common.tenant;
  * <p>
  * 命名參數固定為 {@code :tenantId}，呼叫端需以 {@code @Param("tenantId")} 對應。
  *
- * @see com.taipei.iot.tenant.TenantScopedRepository
+ * @see com.taipei.iot.common.tenant.TenantScopedRepository
  * @see TenantScopeSpecifications
  */
 public final class TenantScopeJpql {

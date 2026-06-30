@@ -1,5 +1,6 @@
 package com.taipei.iot.config;
 
+import com.taipei.iot.common.config.CorsProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 

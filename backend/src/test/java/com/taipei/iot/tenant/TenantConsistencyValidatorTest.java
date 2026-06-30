@@ -1,5 +1,7 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.common.tenant.TenantAware;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.repository.JpaRepository;
 

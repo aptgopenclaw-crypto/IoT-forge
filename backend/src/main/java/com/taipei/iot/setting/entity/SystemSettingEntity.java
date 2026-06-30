@@ -1,7 +1,7 @@
 package com.taipei.iot.setting.entity;
 
-import com.taipei.iot.tenant.TenantAware;
-import com.taipei.iot.tenant.TenantEntityListener;
+import com.taipei.iot.common.tenant.TenantAware;
+import com.taipei.iot.common.tenant.TenantEntityListener;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Filter;

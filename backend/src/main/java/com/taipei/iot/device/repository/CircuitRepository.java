@@ -1,7 +1,7 @@
 package com.taipei.iot.device.repository;
 
 import com.taipei.iot.device.entity.Circuit;
-import com.taipei.iot.tenant.TenantScopedRepository;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,7 +1,7 @@
 package com.taipei.iot.auth.mapper;
 
 import com.taipei.iot.auth.dto.response.UserInfoDto;
-import com.taipei.iot.auth.entity.UserEntity;
+import com.taipei.iot.user.entity.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

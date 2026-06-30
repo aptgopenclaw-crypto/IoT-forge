@@ -1,10 +1,10 @@
 package com.taipei.iot.user.service;
 
-import com.taipei.iot.auth.entity.ChangePasswordLogEntity;
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.repository.ChangePasswordLogRepository;
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.auth.service.UserSessionService;
+import com.taipei.iot.user.entity.ChangePasswordLogEntity;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.repository.ChangePasswordLogRepository;
+import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.common.auth.port.SessionRevoker;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.user.dto.request.ChangePasswordRequest;
@@ -50,7 +50,7 @@ class UserSelfServiceTest {
 	private UserAuditService userAuditService;
 
 	@Mock
-	private UserSessionService userSessionService;
+	private SessionRevoker sessionRevoker;
 
 	private UserEntity testUser;
 
@@ -110,7 +110,7 @@ class UserSelfServiceTest {
 		verify(changePasswordLogRepository).save(any(ChangePasswordLogEntity.class));
 		verify(userAuditService).logAction(eq("UPDATE"), eq("user-001"), eq("user-001"), anyString());
 		// N-4: 驗證密碼變更後撤銷其他 session
-		verify(userSessionService).revokeAllExceptCurrent("user-001", "session-jti-current");
+		verify(sessionRevoker).revokeAllExceptCurrent("user-001", "session-jti-current");
 	}
 
 	@Test
@@ -180,7 +180,7 @@ class UserSelfServiceTest {
 		userSelfService.changePassword("user-001", req, null);
 
 		// JTI 為 null 時，revokeAllExceptCurrent 應仍被呼叫（內部會撤銷所有 session）
-		verify(userSessionService).revokeAllExceptCurrent("user-001", null);
+		verify(sessionRevoker).revokeAllExceptCurrent("user-001", null);
 	}
 
 }

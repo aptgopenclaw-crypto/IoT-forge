@@ -67,7 +67,7 @@
 - 攻擊路徑：租戶 A 設定「禁用 LOCAL、改用 LDAP」，但 LOCAL 帳號殘留 → 攻擊者故意讓 LDAP timeout / fail → dispatcher 自動 fallback 走 LOCAL → 以 LOCAL 密碼登入成功
 - 建議：(a) 預設改 `false`；(b) 僅在 infrastructure exception（network、timeout）才 fallback，憑證錯誤絕不 fallback；(c) 每次 fallback 都寫 `SecurityLogger.warn("AUTH_FALLBACK", ...)` 並產 metric
 
-#### [V3-H3] AuthConfigEncryptor key 未配置時只 log.warn
+#### [V3-H3] AuthConfigEncryptor key 未配置時只 log.warn ✅ 已完成（2026-06-29）
 - 檔案：[AuthConfigEncryptor.java:36-40](backend/src/main/java/com/taipei/iot/auth/provider/crypto/AuthConfigEncryptor.java#L36)
 - 風險：production 漏設 `app.auth.config.encryption-key` → 整個 LDAP bindPassword / OIDC clientSecret 以明文存進 DB
 - 建議：`@PostConstruct` 在 prod profile 強制 `Assert.hasText(key)`；缺 key 直接 fail-fast

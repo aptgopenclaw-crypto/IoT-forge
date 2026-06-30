@@ -1,6 +1,6 @@
 package com.taipei.iot.workflow.repository;
 
-import com.taipei.iot.tenant.TenantScopedRepository;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import com.taipei.iot.workflow.entity.WorkflowInstanceEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;

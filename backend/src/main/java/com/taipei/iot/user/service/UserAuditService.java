@@ -1,6 +1,6 @@
 package com.taipei.iot.user.service;
 
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.user.entity.UserInfoLogEntity;
 import com.taipei.iot.user.repository.UserInfoLogRepository;
 import lombok.RequiredArgsConstructor;

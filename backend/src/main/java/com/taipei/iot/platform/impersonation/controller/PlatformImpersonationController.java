@@ -1,7 +1,7 @@
 package com.taipei.iot.platform.impersonation.controller;
 
-import com.taipei.iot.audit.annotation.AuditEvent;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.common.util.SecurityContextUtils;
 import com.taipei.iot.platform.impersonation.dto.CreateImpersonationRequest;

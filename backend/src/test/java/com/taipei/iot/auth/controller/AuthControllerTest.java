@@ -20,7 +20,7 @@ import com.taipei.iot.auth.service.UserSessionService;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
-import com.taipei.iot.config.CorsProperties;
+import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.config.SecurityConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;

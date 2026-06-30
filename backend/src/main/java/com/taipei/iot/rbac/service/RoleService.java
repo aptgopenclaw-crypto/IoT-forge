@@ -1,12 +1,12 @@
 package com.taipei.iot.rbac.service;
 
-import com.taipei.iot.auth.entity.RoleEntity;
-import com.taipei.iot.auth.repository.RoleRepository;
+import com.taipei.iot.rbac.entity.RoleEntity;
+import com.taipei.iot.rbac.repository.RoleRepository;
 import com.taipei.iot.common.dto.UserInfo;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.util.SecurityContextUtils;
-import com.taipei.iot.dept.enums.DataScopeEnum;
+import com.taipei.iot.common.enums.DataScopeEnum;
 import com.taipei.iot.rbac.dto.request.AssignRolePermissionsRequest;
 import com.taipei.iot.rbac.dto.request.CreateRoleRequest;
 import com.taipei.iot.rbac.dto.request.UpdateRoleRequest;
@@ -16,7 +16,7 @@ import com.taipei.iot.rbac.dto.response.RolePermissionListDto;
 import com.taipei.iot.rbac.entity.RolePermissionEntity;
 import com.taipei.iot.rbac.repository.PermissionRepository;
 import com.taipei.iot.rbac.repository.RolePermissionRepository;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

@@ -2,7 +2,7 @@ package com.taipei.iot.auth.provider.config.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.taipei.iot.auth.provider.AuthType;
+import com.taipei.iot.common.enums.AuthType;
 import com.taipei.iot.auth.provider.AuthenticationDispatcher;
 import com.taipei.iot.auth.provider.config.dto.TenantAuthConfigRequest;
 import com.taipei.iot.auth.provider.config.dto.TenantAuthConfigResponse;

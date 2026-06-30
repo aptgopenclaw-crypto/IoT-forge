@@ -1,7 +1,7 @@
 package com.taipei.iot.dept.controller;
 
-import com.taipei.iot.audit.annotation.AuditEvent;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.dept.dto.CreateDeptRequest;
 import com.taipei.iot.dept.dto.DeptDto;

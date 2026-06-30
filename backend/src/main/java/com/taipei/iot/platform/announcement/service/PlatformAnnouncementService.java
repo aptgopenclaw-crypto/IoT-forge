@@ -1,8 +1,8 @@
 package com.taipei.iot.platform.announcement.service;
 
 import com.taipei.iot.announcement.service.HtmlSanitizerService;
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.repository.UserRepository;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.common.dto.PageResponse;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;

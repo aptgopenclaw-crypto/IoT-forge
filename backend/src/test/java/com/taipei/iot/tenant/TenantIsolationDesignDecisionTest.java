@@ -1,5 +1,7 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.common.tenant.TenantAware;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import com.taipei.iot.auth.entity.UserSessionEntity;
 import com.taipei.iot.auth.provider.config.entity.TenantAuthConfigEntity;
 import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository;

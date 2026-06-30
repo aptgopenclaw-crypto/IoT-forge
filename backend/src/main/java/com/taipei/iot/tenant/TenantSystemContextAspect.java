@@ -1,5 +1,6 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.common.tenant.RunInSystemTenantContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Order(0)
 public class TenantSystemContextAspect {
 
-	@Around("@annotation(com.taipei.iot.tenant.RunInSystemTenantContext)")
+	@Around("@annotation(com.taipei.iot.common.tenant.RunInSystemTenantContext)")
 	public Object aroundSystemContext(ProceedingJoinPoint pjp) throws Throwable {
 		try {
 			return TenantContext.runInSystemContext(() -> {

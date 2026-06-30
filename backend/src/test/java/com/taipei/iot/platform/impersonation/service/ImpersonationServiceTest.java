@@ -1,9 +1,9 @@
 package com.taipei.iot.platform.impersonation.service;
 
-import com.taipei.iot.auth.entity.UserEntity;
-import com.taipei.iot.auth.entity.UserTenantMappingEntity;
-import com.taipei.iot.auth.repository.UserRepository;
-import com.taipei.iot.auth.repository.UserTenantMappingRepository;
+import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.user.entity.UserTenantMappingEntity;
+import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;

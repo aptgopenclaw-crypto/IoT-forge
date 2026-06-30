@@ -1,7 +1,7 @@
 package com.taipei.iot.rbac.service;
 
-import com.taipei.iot.auth.entity.RoleEntity;
-import com.taipei.iot.auth.repository.RoleRepository;
+import com.taipei.iot.rbac.entity.RoleEntity;
+import com.taipei.iot.rbac.repository.RoleRepository;
 import com.taipei.iot.rbac.dto.response.RoleDto;
 import com.taipei.iot.rbac.repository.PermissionRepository;
 import com.taipei.iot.rbac.repository.RolePermissionRepository;

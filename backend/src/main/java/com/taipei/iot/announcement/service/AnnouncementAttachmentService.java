@@ -12,7 +12,7 @@ import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.service.FileStorageService;
 import com.taipei.iot.common.service.FileValidationService;
 import com.taipei.iot.common.util.SecurityContextUtils;
-import com.taipei.iot.dept.enums.DataScopeEnum;
+import com.taipei.iot.common.enums.DataScopeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

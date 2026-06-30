@@ -1,14 +1,14 @@
 package com.taipei.iot.rbac.controller;
 
-import com.taipei.iot.audit.annotation.AuditEvent;
-import com.taipei.iot.audit.enums.AuditEventType;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.rbac.dto.request.CreateMenuRequest;
 import com.taipei.iot.rbac.dto.request.UpdateMenuRequest;
 import com.taipei.iot.rbac.dto.response.MenuDto;
 import com.taipei.iot.rbac.dto.response.UserMenuDto;
 import com.taipei.iot.rbac.service.MenuService;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

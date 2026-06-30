@@ -1,7 +1,7 @@
 package com.taipei.iot.dept.repository;
 
 import com.taipei.iot.dept.entity.DeptInfoEntity;
-import com.taipei.iot.tenant.TenantScopedRepository;
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
