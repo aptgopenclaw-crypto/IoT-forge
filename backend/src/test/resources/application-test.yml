@@ -4,7 +4,7 @@ spring:
     username: postgres
     password: Kali1234!
     hikari:
-      schema: taipei_iot_test
+      schema: taipei_streetlight_test
       maximum-pool-size: 5
 
   jpa:
@@ -26,6 +26,12 @@ spring:
       host: localhost
       port: 6379
       password: Kali1234!
+
+  # 提供 mail host 讓 MailSenderAutoConfiguration 建立 JavaMailSender bean，
+  # 滿足 PasswordResetMailService 的硬依賴（測試不會實際連線/寄信）。
+  mail:
+    host: localhost
+    port: 25
 
 tenant:
   mode: single
