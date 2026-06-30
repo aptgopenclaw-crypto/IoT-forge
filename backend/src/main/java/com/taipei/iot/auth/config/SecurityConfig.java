@@ -1,4 +1,4 @@
-package com.taipei.iot.config;
+package com.taipei.iot.auth.config;
 
 import com.taipei.iot.auth.security.CsrfCookieFilter;
 import com.taipei.iot.auth.security.JwtAuthenticationFilter;

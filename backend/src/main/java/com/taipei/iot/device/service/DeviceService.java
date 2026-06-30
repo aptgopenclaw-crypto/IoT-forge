@@ -12,8 +12,7 @@ import com.taipei.iot.device.entity.Contract;
 import com.taipei.iot.device.enums.DeviceStatus;
 import com.taipei.iot.device.repository.DeviceRepository;
 import com.taipei.iot.device.repository.ContractRepository;
-import com.taipei.iot.dispatch.enums.WorkOrderStatus;
-import com.taipei.iot.dispatch.repository.WorkOrderRepository;
+import com.taipei.iot.common.dispatch.port.OpenWorkOrderCounter;
 import com.taipei.iot.schema.service.DeviceTemplateService;
 import com.taipei.iot.common.context.TenantContext;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +36,7 @@ public class DeviceService {
 
 	private final ContractRepository contractRepository;
 
-	private final WorkOrderRepository workOrderRepository;
+	private final OpenWorkOrderCounter openWorkOrderCounter;
 
 	private final DeviceTemplateService deviceTemplateService;
 
@@ -63,8 +62,7 @@ public class DeviceService {
 		long active = all.stream().filter(d -> d.getStatus() == DeviceStatus.ACTIVE).count();
 		long online = all.stream().filter(d -> d.getLastHeartbeatAt() != null).count();
 
-		long openWorkOrders = workOrderRepository
-			.countOpenWorkOrders(List.of(WorkOrderStatus.COMPLETED, WorkOrderStatus.CLOSED));
+		long openWorkOrders = openWorkOrderCounter.countOpenWorkOrders();
 
 		return DeviceStatsResponse.builder()
 			.totalDevices(all.size())

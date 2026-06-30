@@ -1,5 +1,6 @@
 package com.taipei.iot.config;
 
+import com.taipei.iot.auth.config.SecurityConfig;
 import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.common.interceptor.RateLimitInterceptor;

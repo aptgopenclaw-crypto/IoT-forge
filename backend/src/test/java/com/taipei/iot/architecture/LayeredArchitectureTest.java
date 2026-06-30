@@ -4,7 +4,6 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
-import com.tngtech.archunit.library.freeze.FreezingArchRule;
 
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
@@ -28,11 +27,11 @@ import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.sli
  * <b>Rules enforced:</b>
  * <ol>
  * <li>{@link #layers_are_respected} — upper layers may NOT be accessed by lower layers
- * (frozen: known remaining auth↔tenant cycle tracked)</li>
+ * (strict: all upward violations resolved)</li>
  * <li>{@link #common_has_no_business_dependencies} — L0 ({@code common}) must not import
  * any business-layer module</li>
- * <li>{@link #no_cyclic_dependencies} — no module-level package cycles (frozen: known
- * remaining auth↔tenant cycle tracked)</li>
+ * <li>{@link #no_cyclic_dependencies} — no module-level package cycles (strict: all
+ * cycles resolved)</li>
  * </ol>
  */
 @AnalyzeClasses(packages = "com.taipei.iot", importOptions = ImportOption.DoNotIncludeTests.class)
@@ -40,13 +39,12 @@ class LayeredArchitectureTest {
 
 	// ─────────────────────────────────────────────────────────────────
 	// Rule 1: Layered access — upper layers may only be reached from above
-	// NOTE: Frozen because auth↔tenant (⏳ in report §4) still has known remaining
-	// violations. As you fix them, remove freeze and make this strict.
+	// STRICT: all upward violations resolved (audit→dept/user via ports; config→auth by
+	// moving SecurityConfig into the auth module). Any new upward dependency now fails.
 	// ─────────────────────────────────────────────────────────────────
 
 	@ArchTest
-	static final ArchRule layers_are_respected = FreezingArchRule.freeze(layeredArchitecture()
-		.consideringOnlyDependenciesInLayers()
+	static final ArchRule layers_are_respected = layeredArchitecture().consideringOnlyDependenciesInLayers()
 
 		// Layer definitions
 		.layer("L0_common")
@@ -69,7 +67,7 @@ class LayeredArchitectureTest {
 		.whereLayer("L2_identity")
 		.mayOnlyBeAccessedByLayers("L3_domain", "L4_facade")
 		.whereLayer("L3_domain")
-		.mayOnlyBeAccessedByLayers("L4_facade"));
+		.mayOnlyBeAccessedByLayers("L4_facade");
 
 	// ─────────────────────────────────────────────────────────────────
 	// Rule 2: common is the pure foundation — must not depend on business modules
@@ -92,12 +90,12 @@ class LayeredArchitectureTest {
 
 	// ─────────────────────────────────────────────────────────────────
 	// Rule 3: No package cycles between top-level business modules
-	// NOTE: Frozen because auth↔tenant (⏳ in report §4) still has a known cycle.
-	// Once resolved, remove freeze and make this strict.
+	// STRICT: all 問題二 (platform cluster), 問題四 (device↔schema, device↔dispatch) and
+	// the dept↔user cycle are resolved. The freeze is removed — any new module cycle now
+	// fails the build.
 	// ─────────────────────────────────────────────────────────────────
 
 	@ArchTest
-	static final ArchRule no_cyclic_dependencies = FreezingArchRule
-		.freeze(slices().matching("com.taipei.iot.(*)..").should().beFreeOfCycles());
+	static final ArchRule no_cyclic_dependencies = slices().matching("com.taipei.iot.(*)..").should().beFreeOfCycles();
 
 }

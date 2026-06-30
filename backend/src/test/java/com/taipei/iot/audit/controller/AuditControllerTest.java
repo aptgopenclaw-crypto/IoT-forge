@@ -4,7 +4,7 @@ import com.taipei.iot.audit.dto.AuditQueryRequest;
 import com.taipei.iot.audit.dto.UserEventLogDto;
 import com.taipei.iot.audit.service.AuditService;
 import com.taipei.iot.common.config.CorsProperties;
-import com.taipei.iot.config.SecurityConfig;
+import com.taipei.iot.auth.config.SecurityConfig;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
 import com.taipei.iot.auth.security.JwtUtil;
 import io.jsonwebtoken.Claims;

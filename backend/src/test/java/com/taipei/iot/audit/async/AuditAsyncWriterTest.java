@@ -2,8 +2,8 @@ package com.taipei.iot.audit.async;
 
 import com.taipei.iot.audit.entity.UserEventLogEntity;
 import com.taipei.iot.audit.repository.UserEventLogRepository;
-import com.taipei.iot.user.entity.UserEntity;
-import com.taipei.iot.user.repository.UserRepository;
+import com.taipei.iot.common.audit.port.UserDisplayInfo;
+import com.taipei.iot.common.audit.port.UserDisplayInfoProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -24,20 +24,15 @@ class AuditAsyncWriterTest {
 	private UserEventLogRepository userEventLogRepository;
 
 	@Mock
-	private UserRepository userRepository;
+	private UserDisplayInfoProvider userDisplayInfoProvider;
 
 	@InjectMocks
 	private AuditAsyncWriter auditAsyncWriter;
 
 	@Test
 	void saveAsync_shouldPersistEntity() {
-		UserEntity user = UserEntity.builder()
-			.userId("u-admin-001")
-			.displayName("Admin User")
-			.email("admin@example.com")
-			.passwordHash("hash")
-			.build();
-		when(userRepository.findById("u-admin-001")).thenReturn(Optional.of(user));
+		UserDisplayInfo userInfo = new UserDisplayInfo("Admin User", "admin@example.com");
+		when(userDisplayInfoProvider.findByUserId("u-admin-001")).thenReturn(Optional.of(userInfo));
 		when(userEventLogRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
 		auditAsyncWriter.saveAsync("tenant-100", "u-admin-001", "admin@test.com", "LOGIN", "USER_AUTH",

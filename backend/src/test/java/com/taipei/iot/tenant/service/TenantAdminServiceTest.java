@@ -1,28 +1,23 @@
 package com.taipei.iot.tenant.service;
 
-import com.taipei.iot.user.entity.UserEntity;
-import com.taipei.iot.user.entity.UserTenantMappingEntity;
-import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository;
-import com.taipei.iot.user.repository.UserRepository;
-import com.taipei.iot.user.repository.UserTenantMappingRepository;
+import com.taipei.iot.common.auth.port.TenantAuthConfigProvisioner;
+import com.taipei.iot.common.enums.AuthType;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
+import com.taipei.iot.common.user.port.TenantAdminProvisioner;
 import com.taipei.iot.setting.repository.SystemSettingRepository;
 import com.taipei.iot.tenant.TenantEnabledCache;
 import com.taipei.iot.tenant.TenantEntity;
 import com.taipei.iot.tenant.TenantRepository;
 import com.taipei.iot.tenant.dto.CreateTenantRequest;
 import com.taipei.iot.tenant.dto.UpdateTenantRequest;
-import com.taipei.iot.user.service.PasswordValidator;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -39,8 +34,9 @@ import static org.mockito.Mockito.when;
  * 單元測試 {@link TenantAdminService}。
  *
  * <p>
- * 重點：T-4 修復後 createTenant 必須在編碼密碼前呼叫 {@link PasswordValidator#validate}，
- * 確保初始管理員密碼不能繞過密碼政策。
+ * createTenant 將初始管理員與 auth config 佈建委派給 {@link TenantAdminProvisioner}、
+ * {@link TenantAuthConfigProvisioner}（依賴反轉，避免 tenant→user / tenant→auth 反向依賴）。 本測試只驗證
+ * tenant 層職責與委派；佈建細節由 adapter 自身測試覆蓋。
  * </p>
  */
 @ExtendWith(MockitoExtension.class)
@@ -50,25 +46,16 @@ class TenantAdminServiceTest {
 	private TenantRepository tenantRepository;
 
 	@Mock
-	private UserRepository userRepository;
-
-	@Mock
-	private UserTenantMappingRepository userTenantMappingRepository;
-
-	@Mock
-	private PasswordEncoder passwordEncoder;
-
-	@Mock
 	private TenantEnabledCache tenantEnabledCache;
-
-	@Mock
-	private PasswordValidator passwordValidator;
 
 	@Mock
 	private SystemSettingRepository systemSettingRepository;
 
 	@Mock
-	private TenantAuthConfigRepository tenantAuthConfigRepository;
+	private TenantAdminProvisioner tenantAdminProvisioner;
+
+	@Mock
+	private TenantAuthConfigProvisioner tenantAuthConfigProvisioner;
 
 	@InjectMocks
 	private TenantAdminService service;
@@ -90,64 +77,42 @@ class TenantAdminServiceTest {
 		return baseRequest;
 	}
 
-	// ───────── T-4: password policy enforcement ─────────
+	// ───────── 委派佈建 ─────────
 
-	@Nested
-	class PasswordPolicyEnforcement {
+	@Test
+	void createTenant_seedsAuthConfig_andDelegatesAdminProvisioning() {
+		when(tenantRepository.findByTenantCode("ACME")).thenReturn(Optional.empty());
 
-		@Test
-		void createTenant_withAdmin_invokesPasswordValidator_beforeEncoding() {
-			when(tenantRepository.findByTenantCode("ACME")).thenReturn(Optional.empty());
-			when(userRepository.existsByEmail("admin@acme.test")).thenReturn(false);
-			when(passwordEncoder.encode(any())).thenReturn("hashed");
+		service.createTenant(withAdmin("admin@acme.test", "StrongP@ssw0rd"));
 
-			service.createTenant(withAdmin("admin@acme.test", "StrongP@ssw0rd"));
+		// auth config 以預設 LOCAL 佈建
+		ArgumentCaptor<String> authTenantId = ArgumentCaptor.forClass(String.class);
+		verify(tenantAuthConfigProvisioner).seedDefaultAuthConfig(authTenantId.capture(), eq(AuthType.LOCAL));
+		assertThat(authTenantId.getValue()).startsWith("T_");
 
-			ArgumentCaptor<String> tenantIdCaptor = ArgumentCaptor.forClass(String.class);
-			ArgumentCaptor<PasswordValidator.UserContext> ctxCaptor = ArgumentCaptor
-				.forClass(PasswordValidator.UserContext.class);
-			verify(passwordValidator).validate(tenantIdCaptor.capture(), eq("StrongP@ssw0rd"), ctxCaptor.capture());
+		// 管理員佈建委派，spec 帶入剛建立的 tenantId 與 request 內容
+		ArgumentCaptor<TenantAdminProvisioner.TenantAdminSpec> specCaptor = ArgumentCaptor
+			.forClass(TenantAdminProvisioner.TenantAdminSpec.class);
+		verify(tenantAdminProvisioner).provisionTenantAdmin(specCaptor.capture());
+		TenantAdminProvisioner.TenantAdminSpec spec = specCaptor.getValue();
+		assertThat(spec.tenantId()).startsWith("T_");
+		assertThat(spec.email()).isEqualTo("admin@acme.test");
+		assertThat(spec.rawPassword()).isEqualTo("StrongP@ssw0rd");
+		assertThat(spec.displayName()).isEqualTo("Admin");
+	}
 
-			// 應傳入剛建立的 tenantId（非 null、非 platform-fallback null）
-			assertThat(tenantIdCaptor.getValue()).startsWith("T_");
-			// UserContext 應含 email（username 尚未產生因此為 null）
-			assertThat(ctxCaptor.getValue().username()).isNull();
-			assertThat(ctxCaptor.getValue().email()).isEqualTo("admin@acme.test");
+	@Test
+	void createTenant_withoutAdmin_stillDelegates_withBlankSpec() {
+		when(tenantRepository.findByTenantCode("ACME")).thenReturn(Optional.empty());
 
-			// 確認流程：validate → encode → save
-			verify(passwordEncoder).encode("StrongP@ssw0rd");
-			verify(userRepository).save(any(UserEntity.class));
-		}
+		service.createTenant(baseRequest); // admin* fields all null
 
-		@Test
-		void createTenant_weakPassword_validatorThrows_userNotCreated() {
-			when(tenantRepository.findByTenantCode("ACME")).thenReturn(Optional.empty());
-			when(userRepository.existsByEmail("admin@acme.test")).thenReturn(false);
-			// 密碼政策拒絕
-			org.mockito.Mockito.doThrow(new BusinessException(ErrorCode.RESET_PASSWORD_ERROR, "密碼長度至少 12 字元"))
-				.when(passwordValidator)
-				.validate(any(), eq("password"), any());
-
-			assertThatThrownBy(() -> service.createTenant(withAdmin("admin@acme.test", "password")))
-				.isInstanceOf(BusinessException.class)
-				.hasMessageContaining("密碼長度至少 12 字元");
-
-			// 應在 encode / save user 之前就拋出，避免弱密碼被持久化
-			verify(passwordEncoder, never()).encode(any());
-			verify(userRepository, never()).save(any(UserEntity.class));
-			verify(userTenantMappingRepository, never()).save(any());
-		}
-
-		@Test
-		void createTenant_withoutAdmin_doesNotInvokeValidator() {
-			when(tenantRepository.findByTenantCode("ACME")).thenReturn(Optional.empty());
-
-			service.createTenant(baseRequest); // admin* fields all null
-
-			verify(passwordValidator, never()).validate(any(), any(), any());
-			verify(userRepository, never()).save(any(UserEntity.class));
-		}
-
+		// 仍委派（由 adapter 判斷 blank 後略過建立帳號）
+		ArgumentCaptor<TenantAdminProvisioner.TenantAdminSpec> specCaptor = ArgumentCaptor
+			.forClass(TenantAdminProvisioner.TenantAdminSpec.class);
+		verify(tenantAdminProvisioner).provisionTenantAdmin(specCaptor.capture());
+		assertThat(specCaptor.getValue().email()).isNull();
+		assertThat(specCaptor.getValue().rawPassword()).isNull();
 	}
 
 	// ───────── 基本流程 ─────────
@@ -161,34 +126,7 @@ class TenantAdminServiceTest {
 			.isEqualTo(ErrorCode.TENANT_CODE_DUPLICATE);
 
 		verify(tenantRepository, never()).save(any());
-	}
-
-	@Test
-	void createTenant_duplicateEmail_throws_andValidatorNotInvoked() {
-		when(tenantRepository.findByTenantCode("ACME")).thenReturn(Optional.empty());
-		when(userRepository.existsByEmail("admin@acme.test")).thenReturn(true);
-
-		assertThatThrownBy(() -> service.createTenant(withAdmin("admin@acme.test", "StrongP@ssw0rd")))
-			.isInstanceOf(BusinessException.class)
-			.extracting("errorCode")
-			.isEqualTo(ErrorCode.USER_ALREADY_EXISTS);
-
-		// email 重複時應在密碼驗證之前就攔截（成本較低的檢查先做）
-		verify(passwordValidator, never()).validate(any(), any(), any());
-	}
-
-	@Test
-	void createTenant_savesAdminMapping_withCorrectRole() {
-		when(tenantRepository.findByTenantCode("ACME")).thenReturn(Optional.empty());
-		when(userRepository.existsByEmail("admin@acme.test")).thenReturn(false);
-		when(passwordEncoder.encode(any())).thenReturn("hashed");
-
-		service.createTenant(withAdmin("admin@acme.test", "StrongP@ssw0rd"));
-
-		ArgumentCaptor<UserTenantMappingEntity> mappingCaptor = ArgumentCaptor.forClass(UserTenantMappingEntity.class);
-		verify(userTenantMappingRepository).save(mappingCaptor.capture());
-		assertThat(mappingCaptor.getValue().getRoleId()).isEqualTo("ROLE_ADMIN");
-		assertThat(mappingCaptor.getValue().getEnabled()).isTrue();
+		verify(tenantAdminProvisioner, never()).provisionTenantAdmin(any());
 	}
 
 	// ───────── updateTenant ─────────

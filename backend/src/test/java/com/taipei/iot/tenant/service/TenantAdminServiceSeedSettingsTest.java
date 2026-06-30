@@ -2,7 +2,8 @@ package com.taipei.iot.tenant.service;
 
 import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.user.repository.UserTenantMappingRepository;
-import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository;
+import com.taipei.iot.common.auth.port.TenantAuthConfigProvisioner;
+import com.taipei.iot.common.user.port.TenantAdminProvisioner;
 import com.taipei.iot.setting.entity.SystemSettingEntity;
 import com.taipei.iot.setting.enums.SettingKey;
 import com.taipei.iot.setting.repository.SystemSettingRepository;
@@ -54,7 +55,10 @@ class TenantAdminServiceSeedSettingsTest {
 	private SystemSettingRepository systemSettingRepository;
 
 	@Mock
-	private TenantAuthConfigRepository tenantAuthConfigRepository;
+	private TenantAuthConfigProvisioner tenantAuthConfigProvisioner;
+
+	@Mock
+	private TenantAdminProvisioner tenantAdminProvisioner;
 
 	@InjectMocks
 	private TenantAdminService service;
@@ -147,15 +151,13 @@ class TenantAdminServiceSeedSettingsTest {
 		baseRequest.setAdminDisplayName("Admin");
 
 		when(tenantRepository.findByTenantCode("NEW_TENANT")).thenReturn(Optional.empty());
-		when(userRepository.existsByEmail("admin@new.test")).thenReturn(false);
-		when(passwordEncoder.encode(any())).thenReturn("hashed");
 
 		service.createTenant(baseRequest);
 
 		// Settings should be seeded
 		verify(systemSettingRepository, times(SettingKey.values().length)).save(any(SystemSettingEntity.class));
-		// Admin should also be created
-		verify(userRepository).save(any());
+		// Admin provisioning should be called via port
+		verify(tenantAdminProvisioner).provisionTenantAdmin(any());
 	}
 
 }

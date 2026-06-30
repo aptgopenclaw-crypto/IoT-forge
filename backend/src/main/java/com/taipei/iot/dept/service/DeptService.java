@@ -1,8 +1,6 @@
 package com.taipei.iot.dept.service;
 
-import com.taipei.iot.user.entity.UserEntity;
-import com.taipei.iot.user.repository.UserRepository;
-import com.taipei.iot.user.repository.UserTenantMappingRepository;
+import com.taipei.iot.common.user.port.DeptMembershipGuard;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.util.SecurityContextUtils;
@@ -29,9 +27,7 @@ public class DeptService {
 
 	private final DeptInfoRepository deptInfoRepository;
 
-	private final UserTenantMappingRepository userTenantMappingRepository;
-
-	private final UserRepository userRepository;
+	private final DeptMembershipGuard deptMembershipGuard;
 
 	private final DataScopeHelper dataScopeHelper;
 
@@ -162,24 +158,13 @@ public class DeptService {
 		}
 
 		// Check: has active (non-deleted) users in user_tenant_mapping?
-		List<String> blockingUserIds = userTenantMappingRepository
-			.findByTenantIdAndDeptIdAndEnabledTrue(entity.getTenantId(), deptId)
-			.stream()
-			.map(m -> m.getUserId())
-			.collect(Collectors.toList());
-		if (!blockingUserIds.isEmpty()) {
-			List<String> activeNames = userRepository.findAllById(blockingUserIds)
-				.stream()
-				.filter(u -> !u.getDeleted())
-				.map(UserEntity::getDisplayName)
-				.collect(Collectors.toList());
-			if (!activeNames.isEmpty()) {
-				throw new BusinessException(ErrorCode.DEPT_HAS_USERS, String.join(", ", activeNames));
-			}
+		List<String> activeNames = deptMembershipGuard.findActiveMemberDisplayNames(entity.getTenantId(), deptId);
+		if (!activeNames.isEmpty()) {
+			throw new BusinessException(ErrorCode.DEPT_HAS_USERS, String.join(", ", activeNames));
 		}
 
 		// Clear dept_id references in user_tenant_mapping to avoid FK violation
-		userTenantMappingRepository.clearDeptIdByTenantIdAndDeptId(entity.getTenantId(), deptId);
+		deptMembershipGuard.clearDeptAssignments(entity.getTenantId(), deptId);
 
 		deptInfoRepository.delete(entity);
 	}

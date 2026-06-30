@@ -5,7 +5,7 @@ import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.common.auth.port.TokenJtiReader;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
 import com.taipei.iot.common.config.CorsProperties;
-import com.taipei.iot.config.SecurityConfig;
+import com.taipei.iot.auth.config.SecurityConfig;
 import com.taipei.iot.tenant.TenantEnabledCache;
 import com.taipei.iot.user.dto.request.ChangePasswordRequest;
 import com.taipei.iot.user.service.UserSelfService;

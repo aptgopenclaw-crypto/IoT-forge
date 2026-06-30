@@ -1,9 +1,6 @@
 package com.taipei.iot.dept.service;
 
-import com.taipei.iot.user.entity.UserEntity;
-import com.taipei.iot.user.entity.UserTenantMappingEntity;
-import com.taipei.iot.user.repository.UserRepository;
-import com.taipei.iot.user.repository.UserTenantMappingRepository;
+import com.taipei.iot.common.user.port.DeptMembershipGuard;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.dept.dto.CreateDeptRequest;
@@ -41,10 +38,7 @@ class DeptServiceTest {
 	private DeptInfoRepository deptInfoRepository;
 
 	@Mock
-	private UserTenantMappingRepository userTenantMappingRepository;
-
-	@Mock
-	private UserRepository userRepository;
+	private DeptMembershipGuard deptMembershipGuard;
 
 	private DeptInfoEntity root;
 
@@ -231,12 +225,11 @@ class DeptServiceTest {
 	void deleteDept_noChildrenNoUsers_shouldSucceed() {
 		when(deptInfoRepository.findByDeptId(2L)).thenReturn(Optional.of(child1));
 		when(deptInfoRepository.existsByPid(2L)).thenReturn(false);
-		when(userTenantMappingRepository.findByTenantIdAndDeptIdAndEnabledTrue("TENANT_A", 2L))
-			.thenReturn(Collections.emptyList());
+		when(deptMembershipGuard.findActiveMemberDisplayNames("TENANT_A", 2L)).thenReturn(Collections.emptyList());
 
 		deptService.deleteDept(2L);
 
-		verify(userTenantMappingRepository).clearDeptIdByTenantIdAndDeptId("TENANT_A", 2L);
+		verify(deptMembershipGuard).clearDeptAssignments("TENANT_A", 2L);
 		verify(deptInfoRepository).delete(child1);
 	}
 
@@ -253,24 +246,7 @@ class DeptServiceTest {
 	void deleteDept_hasUsers_shouldThrow() {
 		when(deptInfoRepository.findByDeptId(2L)).thenReturn(Optional.of(child1));
 		when(deptInfoRepository.existsByPid(2L)).thenReturn(false);
-
-		UserTenantMappingEntity mapping = UserTenantMappingEntity.builder()
-			.userId("user-admin-001")
-			.tenantId("TENANT_A")
-			.roleId("ROLE_ADMIN")
-			.deptId(2L)
-			.enabled(true)
-			.build();
-		when(userTenantMappingRepository.findByTenantIdAndDeptIdAndEnabledTrue("TENANT_A", 2L))
-			.thenReturn(List.of(mapping));
-
-		UserEntity user = UserEntity.builder()
-			.userId("user-admin-001")
-			.displayName("測試用戶")
-			.email("test@example.com")
-			.passwordHash("hash")
-			.build();
-		when(userRepository.findAllById(List.of("user-admin-001"))).thenReturn(List.of(user));
+		when(deptMembershipGuard.findActiveMemberDisplayNames("TENANT_A", 2L)).thenReturn(List.of("測試用戶"));
 
 		BusinessException ex = assertThrows(BusinessException.class, () -> deptService.deleteDept(2L));
 		assertEquals(ErrorCode.DEPT_HAS_USERS, ex.getErrorCode());
@@ -281,29 +257,11 @@ class DeptServiceTest {
 	void deleteDept_allUsersDeleted_shouldSucceed() {
 		when(deptInfoRepository.findByDeptId(2L)).thenReturn(Optional.of(child1));
 		when(deptInfoRepository.existsByPid(2L)).thenReturn(false);
-
-		UserTenantMappingEntity mapping = UserTenantMappingEntity.builder()
-			.userId("user-viewer-001")
-			.tenantId("TENANT_A")
-			.roleId("ROLE_VIEWER")
-			.deptId(2L)
-			.enabled(true)
-			.build();
-		when(userTenantMappingRepository.findByTenantIdAndDeptIdAndEnabledTrue("TENANT_A", 2L))
-			.thenReturn(List.of(mapping));
-
-		UserEntity deletedUser = UserEntity.builder()
-			.userId("user-viewer-001")
-			.displayName("Viewer User")
-			.email("viewer@test.com")
-			.passwordHash("hash")
-			.deleted(true)
-			.build();
-		when(userRepository.findAllById(List.of("user-viewer-001"))).thenReturn(List.of(deletedUser));
+		when(deptMembershipGuard.findActiveMemberDisplayNames("TENANT_A", 2L)).thenReturn(Collections.emptyList());
 
 		deptService.deleteDept(2L);
 
-		verify(userTenantMappingRepository).clearDeptIdByTenantIdAndDeptId("TENANT_A", 2L);
+		verify(deptMembershipGuard).clearDeptAssignments("TENANT_A", 2L);
 		verify(deptInfoRepository).delete(child1);
 	}
 

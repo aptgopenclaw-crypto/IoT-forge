@@ -19,7 +19,9 @@ import com.taipei.iot.auth.repository.UserResetPasswordTokenRepository;
 import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.auth.service.impl.AuthServiceImpl;
+import com.taipei.iot.auth.service.TurnstileService;
 import com.taipei.iot.rbac.repository.PermissionRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.user.repository.PasswordHistoryRepository;
@@ -127,6 +129,12 @@ class AuthServiceTest {
 
 	@Mock
 	private com.taipei.iot.auth.provider.AuthenticationDispatcher authenticationDispatcher;
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
+
+	@Mock
+	private TurnstileService turnstileService;
 
 	private UserEntity singleTenantUser;
 

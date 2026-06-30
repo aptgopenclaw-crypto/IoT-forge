@@ -11,7 +11,7 @@ import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.common.dto.PageResponse;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
 import com.taipei.iot.common.config.CorsProperties;
-import com.taipei.iot.config.SecurityConfig;
+import com.taipei.iot.auth.config.SecurityConfig;
 import com.taipei.iot.tenant.TenantEnabledCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;

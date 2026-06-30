@@ -86,7 +86,7 @@ class UserAdminServiceTest {
 	private TenantRepository tenantRepository;
 
 	@Mock
-	private com.taipei.iot.auth.policy.PasswordPolicyResolver passwordPolicyResolver;
+	private com.taipei.iot.common.auth.port.PasswordPolicyProvider passwordPolicyResolver;
 
 	private UserEntity targetUser;
 

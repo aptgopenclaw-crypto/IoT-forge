@@ -4,7 +4,8 @@ import com.taipei.iot.audit.dto.AuditQueryRequest;
 import com.taipei.iot.audit.dto.UserEventLogDto;
 import com.taipei.iot.audit.entity.UserEventLogEntity;
 import com.taipei.iot.audit.repository.UserEventLogRepository;
-import com.taipei.iot.dept.service.DataScopeHelper;
+import com.taipei.iot.common.dept.port.VisibleDeptScopeProvider;
+import com.taipei.iot.common.user.port.SuperAdminDirectory;
 import com.taipei.iot.tenant.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,10 @@ class AuditServiceTest {
 	private UserEventLogRepository userEventLogRepository;
 
 	@Mock
-	private DataScopeHelper dataScopeHelper;
+	private VisibleDeptScopeProvider visibleDeptScopeProvider;
+
+	@Mock
+	private SuperAdminDirectory superAdminDirectory;
 
 	@InjectMocks
 	private AuditService auditService;

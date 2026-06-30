@@ -4,7 +4,7 @@ import com.taipei.iot.audit.repository.UserEventLogRepository;
 import com.taipei.iot.setting.entity.SystemSettingEntity;
 import com.taipei.iot.setting.repository.SystemSettingRepository;
 import com.taipei.iot.tenant.TenantEntity;
-import com.taipei.iot.tenant.TenantRepository;
+import com.taipei.iot.common.tenant.TenantIdProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +28,7 @@ class AuditPurgeJobTest {
 	private UserEventLogRepository userEventLogRepository;
 
 	@Mock
-	private TenantRepository tenantRepository;
+	private TenantIdProvider tenantIdProvider;
 
 	@Mock
 	private SystemSettingRepository systemSettingRepository;
@@ -43,11 +43,7 @@ class AuditPurgeJobTest {
 
 	@Test
 	void purgeOldAuditLogs_shouldUsePerTenantRetentionDays() {
-		TenantEntity tenantA = new TenantEntity();
-		tenantA.setTenantId("TENANT_A");
-		TenantEntity tenantB = new TenantEntity();
-		tenantB.setTenantId("TENANT_B");
-		when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenantA, tenantB));
+		when(tenantIdProvider.findEnabledTenantIds()).thenReturn(List.of("TENANT_A", "TENANT_B"));
 
 		// TENANT_A: custom 90 days
 		SystemSettingEntity settingA = SystemSettingEntity.builder()
@@ -85,7 +81,7 @@ class AuditPurgeJobTest {
 
 	@Test
 	void purgeOldAuditLogs_shouldHandleNoTenants() {
-		when(tenantRepository.findByEnabledTrue()).thenReturn(List.of());
+		when(tenantIdProvider.findEnabledTenantIds()).thenReturn(List.of());
 		when(userEventLogRepository.deleteByTenantIdNullAndCreateTimeBefore(any())).thenReturn(0);
 
 		assertDoesNotThrow(() -> auditPurgeJob.purgeOldAuditLogs());
@@ -95,9 +91,7 @@ class AuditPurgeJobTest {
 
 	@Test
 	void purgeOldAuditLogs_shouldUseDefaultForInvalidSettingValue() {
-		TenantEntity tenant = new TenantEntity();
-		tenant.setTenantId("TENANT_X");
-		when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant));
+		when(tenantIdProvider.findEnabledTenantIds()).thenReturn(List.of("TENANT_X"));
 
 		SystemSettingEntity badSetting = SystemSettingEntity.builder()
 			.settingKey("audit_retention_days")

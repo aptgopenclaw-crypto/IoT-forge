@@ -2,7 +2,7 @@ package com.taipei.iot.schema.service;
 
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.enums.ErrorCode;
-import com.taipei.iot.device.repository.DeviceRepository;
+import com.taipei.iot.common.device.port.DeviceTypeUsageGuard;
 import com.taipei.iot.schema.dto.DeviceTemplateResponse;
 import com.taipei.iot.schema.entity.DeviceTemplate;
 import com.taipei.iot.schema.repository.DeviceTemplateRepository;
@@ -20,7 +20,7 @@ public class DeviceTemplateService {
 
 	private final DeviceTemplateRepository deviceTemplateRepository;
 
-	private final DeviceRepository deviceRepository;
+	private final DeviceTypeUsageGuard deviceTypeUsageGuard;
 
 	private static final int MAX_JSONB_SIZE = 10_000;
 
@@ -84,7 +84,7 @@ public class DeviceTemplateService {
 			.orElseThrow(() -> new BusinessException(ErrorCode.DEVICE_TYPE_NOT_DEFINED,
 					"Device type not found: " + deviceType));
 
-		long deviceCount = deviceRepository.countByDeviceType(deviceType);
+		long deviceCount = deviceTypeUsageGuard.countDevicesOfType(deviceType);
 		if (deviceCount > 0) {
 			throw new BusinessException(ErrorCode.DEVICE_TYPE_NOT_DEFINED,
 					"無法刪除設備類型「" + deviceType + "」，尚有 " + deviceCount + " 個設備使用此類型");

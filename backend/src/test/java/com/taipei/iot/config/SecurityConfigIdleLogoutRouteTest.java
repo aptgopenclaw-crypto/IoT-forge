@@ -16,7 +16,7 @@ class SecurityConfigIdleLogoutRouteTest {
 
 	@Test
 	void securityConfig_shouldExplicitlyListIdleLogoutRoute() throws IOException {
-		Path path = Path.of("src/main/java/com/taipei/iot/config/SecurityConfig.java");
+		Path path = Path.of("src/main/java/com/taipei/iot/auth/config/SecurityConfig.java");
 		String source = Files.readString(path);
 
 		assertThat(source).as("SecurityConfig should explicitly declare /v1/auth/idle-logout matcher")
@@ -25,7 +25,7 @@ class SecurityConfigIdleLogoutRouteTest {
 
 	@Test
 	void securityConfig_idleLogoutShouldRequireAuthentication() throws IOException {
-		Path path = Path.of("src/main/java/com/taipei/iot/config/SecurityConfig.java");
+		Path path = Path.of("src/main/java/com/taipei/iot/auth/config/SecurityConfig.java");
 		String source = Files.readString(path);
 
 		// Find the block starting with idle-logout and verify .authenticated() follows
@@ -44,7 +44,7 @@ class SecurityConfigIdleLogoutRouteTest {
 
 	@Test
 	void securityConfig_idleLogoutShouldBePostMethod() throws IOException {
-		Path path = Path.of("src/main/java/com/taipei/iot/config/SecurityConfig.java");
+		Path path = Path.of("src/main/java/com/taipei/iot/auth/config/SecurityConfig.java");
 		String source = Files.readString(path);
 
 		// The matcher should specify POST method

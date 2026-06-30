@@ -3,6 +3,7 @@ package com.taipei.iot.auth.policy;
 import com.taipei.iot.auth.policy.dto.UpdatePasswordPolicyRequest;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
+import com.taipei.iot.common.policy.PasswordPolicy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

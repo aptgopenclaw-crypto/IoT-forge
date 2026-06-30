@@ -4,12 +4,11 @@ import com.taipei.iot.audit.dto.AuditQueryRequest;
 import com.taipei.iot.audit.dto.UserEventLogDto;
 import com.taipei.iot.audit.entity.UserEventLogEntity;
 import com.taipei.iot.audit.repository.UserEventLogRepository;
-import com.taipei.iot.user.entity.UserEntity;
+import com.taipei.iot.common.dept.port.VisibleDeptScopeProvider;
+import com.taipei.iot.common.user.port.SuperAdminDirectory;
 import com.taipei.iot.common.util.SecurityContextUtils;
-import com.taipei.iot.dept.service.DataScopeHelper;
 import com.taipei.iot.common.context.TenantContext;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -41,7 +40,9 @@ public class AuditService {
 
 	private final UserEventLogRepository userEventLogRepository;
 
-	private final DataScopeHelper dataScopeHelper;
+	private final VisibleDeptScopeProvider visibleDeptScopeProvider;
+
+	private final SuperAdminDirectory superAdminDirectory;
 
 	/** 允許的排序欄位白名單 — 防止任意屬性注入 */
 	static final Set<String> ALLOWED_SORT_FIELDS = Set.of("createTime", "username", "userLabel", "eventType",
@@ -72,10 +73,10 @@ public class AuditService {
 			}
 
 			// 排除 SUPER_ADMIN 的操作紀錄：不應出現在各場域的稽核畫面中
-			Subquery<String> superAdminIds = query.subquery(String.class);
-			jakarta.persistence.criteria.Root<UserEntity> userRoot = superAdminIds.from(UserEntity.class);
-			superAdminIds.select(userRoot.get("userId")).where(cb.isTrue(userRoot.get("isSuperAdmin")));
-			predicates.add(cb.not(root.get("userId").in(superAdminIds)));
+			List<String> superAdminIds = superAdminDirectory.getSuperAdminUserIds();
+			if (!superAdminIds.isEmpty()) {
+				predicates.add(cb.not(root.get("userId").in(superAdminIds)));
+			}
 
 			if (!isAdmin) {
 				// DEPT_USER：只能看自己的紀錄
@@ -83,7 +84,7 @@ public class AuditService {
 			}
 			else {
 				// 管理角色：依 DataScope 過濾部門
-				List<Long> visibleDeptIds = dataScopeHelper.getVisibleDeptIds();
+				List<Long> visibleDeptIds = visibleDeptScopeProvider.getVisibleDeptIds();
 				if (!visibleDeptIds.isEmpty()) {
 					// 僅顯示可見部門的紀錄；deptId=null 的紀錄（如登入失敗/跨場域操作）
 					// 只有 ALL scope 才能看到
