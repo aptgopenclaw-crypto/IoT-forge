@@ -21,7 +21,7 @@ class SuperAdminPlatformOnlyMigrationTest {
 
 	@BeforeAll
 	static void loadMigration() throws IOException {
-		Path path = Path.of("src/main/resources/db/migration/V65__rbac__super_admin_platform_only.sql");
+		Path path = Path.of("src/main/resources/db/migration_archive/V65__rbac__super_admin_platform_only.sql");
 		migrationSql = Files.readString(path);
 	}
 

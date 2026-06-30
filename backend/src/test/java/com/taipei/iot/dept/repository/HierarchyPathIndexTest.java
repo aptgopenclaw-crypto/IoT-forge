@@ -19,7 +19,7 @@ class HierarchyPathIndexTest {
 
 	@BeforeAll
 	static void loadMigration() throws IOException {
-		Path path = Path.of("src/main/resources/db/migration/V55__dept__add_hierarchy_path_index.sql");
+		Path path = Path.of("src/main/resources/db/migration_archive/V55__dept__add_hierarchy_path_index.sql");
 		migrationSql = Files.readString(path);
 	}
 
