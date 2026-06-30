@@ -183,47 +183,62 @@
 
 ---
 
-## 五、資料庫設計（TimescaleDB）
+## 五、資料庫設計（原生 PostgreSQL 分區表）
 
-### 啟用 TimescaleDB Extension
+> **儲存方案定案（2026-06-30）**：採**原生 PostgreSQL declarative range partitioning**，不依賴 TimescaleDB。
+> 原因：本機 PG 18.3 僅能裝 `+dfsg` 重打包版（極可能移除 `add_retention_policy`／continuous aggregates 等 TSL 功能），且裝它需改 `shared_preload_libraries` + 重啟 Postgres（共享基礎設施變更）。
+> 原生分區表 + BRIN + 排程 retention 即可滿足需求，schema-agnostic、dev/test 皆可跑，未來規模上來可透過 storage 抽象層平滑換 hypertable。
 
-```sql
-CREATE EXTENSION IF NOT EXISTS timescaledb;
-```
-
-### telemetry_data 表
+### telemetry_data 表（按 ts 月分區）
 
 ```sql
+-- 父表：declarative range partition by ts
+-- 注意：分區鍵 ts 必須是每個 UNIQUE/PK 的一部分 → 複合主鍵 (ts, id)
 CREATE TABLE telemetry_data (
-    id              BIGSERIAL    PRIMARY KEY,
+    id              BIGINT GENERATED ALWAYS AS IDENTITY, -- 或 BIGSERIAL
     tenant_id       VARCHAR(50)  NOT NULL,
     device_id       BIGINT       NOT NULL REFERENCES devices(id),
     device_type     VARCHAR(30)  NOT NULL,
-    ts              TIMESTAMP    NOT NULL,              -- 資料時間點（來自 payload.ts 或 received_at）
+    ts              TIMESTAMP    NOT NULL,              -- 資料時間點（payload.ts 或 received_at）
     received_at     TIMESTAMP    NOT NULL DEFAULT now(),
+    source          VARCHAR(20)  NOT NULL DEFAULT 'MQTT',  -- 來源通道（見多來源接入）
+    source_client_id VARCHAR(50),                          -- 哪個廠商客戶端
     payload         JSONB        NOT NULL,              -- 通過驗證後的 values
     raw_payload     JSONB,                               -- 原始 payload（偵錯用）
     valid           BOOLEAN      NOT NULL DEFAULT true,
-    validation_msg  VARCHAR(500)                         -- 驗證失敗原因
-);
+    validation_msg  VARCHAR(500),                        -- 驗證失敗原因
+    PRIMARY KEY (ts, id)
+) PARTITION BY RANGE (ts);
 
--- 轉換為 Hypertable（按 ts 分區，每 1 天一個 chunk）
-SELECT create_hypertable('telemetry_data', 'ts',
-    chunk_time_interval => INTERVAL '1 day');
+-- 索引（定義在父表，自動套用到各分區）
+CREATE INDEX idx_telemetry_device_ts ON telemetry_data (device_id, ts DESC);
+CREATE INDEX idx_telemetry_tenant_ts ON telemetry_data (tenant_id, ts DESC);
+CREATE INDEX idx_telemetry_type_ts   ON telemetry_data (device_type, ts DESC);
+-- ts 本身用 BRIN（時序資料天然單調遞增，BRIN 體積極小、掃描高效）
+CREATE INDEX idx_telemetry_ts_brin   ON telemetry_data USING BRIN (ts);
 
--- 索引
-CREATE INDEX idx_telemetry_device_ts   ON telemetry_data(device_id, ts DESC);
-CREATE INDEX idx_telemetry_tenant_ts   ON telemetry_data(tenant_id, ts DESC);
-CREATE INDEX idx_telemetry_type_ts     ON telemetry_data(device_type, ts DESC);
-
--- 保留策略（90 天）
-SELECT add_retention_policy('telemetry_data', INTERVAL '90 days');
+-- 初始分區（範例：當月 + 預建下月）
+CREATE TABLE telemetry_data_2026_06 PARTITION OF telemetry_data
+    FOR VALUES FROM ('2026-06-01') TO ('2026-07-01');
+CREATE TABLE telemetry_data_2026_07 PARTITION OF telemetry_data
+    FOR VALUES FROM ('2026-07-01') TO ('2026-08-01');
 ```
+
+### 分區維護與保留（排程取代 TimescaleDB policy）
+
+由 `@Scheduled` job（沿用既有 `@EnableScheduling`）負責：
+
+| 工作 | 頻率 | 行為 |
+|---|---|---|
+| **預建分區** | 每日 | 確保「當月 + 未來 1~2 個月」分區已存在（缺則 `CREATE TABLE ... PARTITION OF`） |
+| **保留清理** | 每日 | 超過保留期（如 90 天）的舊分區 `DROP TABLE`（或 `DETACH` 後封存）——比 `DELETE` 快且不產生 bloat |
+
+> 用 `DROP`/`DETACH` 整個分區做 retention，是原生分區相對 `DELETE` 的最大優勢：O(1) 中繼資料操作、無 vacuum 壓力。
 
 ### 預計後續擴充
 
-- `telemetry_data_hourly`：每小時彙總表（由定時 job 或 continuous aggregate 維護）
-- `telemetry_data_daily`：每日彙總表
+- `telemetry_data_hourly` / `telemetry_data_daily`：彙總表，由 `@Scheduled` job 維護（取代 continuous aggregates）。
+- 規模上來時，可透過 `telemetry.storage` 抽象層，把實作換成 TimescaleDB hypertable 而不動上層。
 
 ---
 
