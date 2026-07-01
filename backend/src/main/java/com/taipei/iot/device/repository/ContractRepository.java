@@ -9,7 +9,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface ContractRepository extends JpaRepository<Contract, Long>, TenantScopedRepository {
+
+	Optional<Contract> findByTenantIdAndContractName(String tenantId, String contractName);
 
 	@Query("""
 			SELECT c FROM Contract c
