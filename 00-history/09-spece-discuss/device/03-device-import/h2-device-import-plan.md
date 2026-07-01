@@ -48,7 +48,7 @@ MODIFY:
 
 ---
 
-## Task 1: 基礎模型與設定
+## Task 1: 基礎模型與設定  ✅ 已完成
 
 **Files:**
 - Create: `backend/src/main/java/com/taipei/iot/import_/ImportError.java`
@@ -222,7 +222,7 @@ git commit -m "feat(import): add base models, ImportProperties config, and Error
 
 ---
 
-## Task 2: FileParser 層（Excel + CSV）
+## Task 2: FileParser 層（Excel + CSV）  ✅ 已完成
 
 **Files:**
 - Create: `backend/src/main/java/com/taipei/iot/import_/parser/FileParser.java`
@@ -460,7 +460,7 @@ git commit -m "feat(import): add FileParser layer (ExcelParser + CsvParser + fac
 
 ---
 
-## Task 3: ImportStrategy 介面 + ImportOrchestrator
+## Task 3: ImportStrategy 介面 + ImportOrchestrator   ✅ 已完成
 
 **Files:**
 - Create: `backend/src/main/java/com/taipei/iot/import_/ImportStrategy.java`
@@ -660,7 +660,7 @@ git commit -m "feat(import): add ImportStrategy interface + ImportOrchestrator e
 
 ---
 
-## Task 4: DeviceImportRow + DeviceImportStrategy
+## Task 4: DeviceImportRow + DeviceImportStrategy   ✅ 已完成
 
 **Files:**
 - Create: `backend/src/main/java/com/taipei/iot/import_/device/DeviceImportRow.java`
@@ -1139,7 +1139,7 @@ git commit -m "feat(import): add DeviceImportStrategy with full validation"
 
 ---
 
-## Task 5: DeviceImportController（匯入 + 範本 + 錯誤報告）
+## Task 5: DeviceImportController（匯入 + 範本 + 錯誤報告）  ✅ 已完成
 
 **Files:**
 - Create: `backend/src/main/java/com/taipei/iot/import_/device/DeviceImportController.java`
@@ -1345,7 +1345,7 @@ git commit -m "feat(import): add DeviceImportController (import + template + err
 
 ---
 
-## Task 6: 後端測試
+## Task 6: 後端測試   ✅ 已完成
 
 **Files:**
 - Create: `backend/src/test/java/com/taipei/iot/import_/parser/ExcelParserTest.java`
@@ -1709,7 +1709,7 @@ git commit -m "test(import): add unit tests for parser, strategy, and controller
 
 ---
 
-## Task 7: 前端 Types + API
+## Task 7: 前端 Types + API   ✅ 已完成
 
 **Files:**
 - Modify: `frontend/src/types/device.ts`
@@ -1787,7 +1787,7 @@ git commit -m "feat(import): add frontend types and API for device import"
 
 ---
 
-## Task 8: 前端 ImportDialog 元件
+## Task 8: 前端 ImportDialog 元件   ✅ 已完成
 
 **Files:**
 - Create: `frontend/src/views/admin/device/ImportDialog.vue`
