@@ -35,14 +35,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/auth/devices/import")
 @RequiredArgsConstructor
-@Tag(name = "Device Import", description = "设备批次汇入（Excel/CSV）")
+@Tag(name = "Device Import", description = "設備批次匯入（Excel/CSV）")
 public class DeviceImportController {
 
 	private static final List<String> TEMPLATE_HEADERS = List.of("device_type", "device_code", "device_name", "twd97_x",
 			"twd97_y", "lng", "lat", "elevation", "dept_name", "contract_name", "property_owner", "installed_at",
 			"parent_device_code", "mount_position", "connectivity_type", "circuit_number");
 
-	private static final List<String> ERROR_REPORT_HEADERS = List.of("列", "字段", "原始值", "错误说明");
+	private static final List<String> ERROR_REPORT_HEADERS = List.of("列", "欄位", "原始值", "錯誤說明");
 
 	private final ImportOrchestrator importOrchestrator;
 
@@ -50,12 +50,23 @@ public class DeviceImportController {
 
 	@PostMapping
 	@PreAuthorize("hasAuthority('DEVICE_MANAGE')")
-	@Operation(summary = "汇入设备", description = "上传 Excel (.xlsx) 或 CSV 档案，先验证全部再整批写入")
+	@Operation(summary = "匯入設備", description = "上傳 Excel (.xlsx) 或 CSV 檔案，先驗證全部再整批寫入")
 	public BaseResponse<ImportResponse> importDevices(@RequestParam("file") MultipartFile file) {
 		ImportResult<DeviceImportRow> result = importOrchestrator.parseAndValidate(file, deviceImportStrategy);
 
 		if (result.hasErrors()) {
-			return BaseResponse.fail(ErrorCode.DEVICE_IMPORT_VALIDATION_FAILED);
+			ImportResponse errorBody = ImportResponse.builder()
+				.entityType("device")
+				.totalRows(result.getValidRows().size() + result.getErrors().size())
+				.successCount(0)
+				.errors(result.getErrors())
+				.build();
+			return BaseResponse.<ImportResponse>builder()
+				.errorCode(ErrorCode.DEVICE_IMPORT_VALIDATION_FAILED.getCode())
+				.errorMsg(ErrorCode.DEVICE_IMPORT_VALIDATION_FAILED.getMessage())
+				.timestamp(System.currentTimeMillis() / 1000)
+				.body(errorBody)
+				.build();
 		}
 
 		ImportResponse response = importOrchestrator.execute(result, deviceImportStrategy);
@@ -64,7 +75,7 @@ public class DeviceImportController {
 
 	@GetMapping("/template")
 	@PreAuthorize("hasAuthority('DEVICE_MANAGE')")
-	@Operation(summary = "下载汇入范本", description = "回传含标题列的 .xlsx 或 .csv 范本")
+	@Operation(summary = "下載匯入範本", description = "回傳含標題列的 .xlsx 或 .csv 範本")
 	public ResponseEntity<byte[]> downloadTemplate(@RequestParam(defaultValue = "xlsx") String format)
 			throws IOException {
 
@@ -76,7 +87,7 @@ public class DeviceImportController {
 
 	@PostMapping("/error-report")
 	@PreAuthorize("hasAuthority('DEVICE_MANAGE')")
-	@Operation(summary = "下载错误报告", description = "将验证错误包装为 CSV 提供下载")
+	@Operation(summary = "下載錯誤報告", description = "將驗證錯誤包裝為 CSV 提供下載")
 	public ResponseEntity<byte[]> downloadErrorReport(@RequestBody ErrorReportRequest request) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8))) {
@@ -101,12 +112,12 @@ public class DeviceImportController {
 
 	private ResponseEntity<byte[]> downloadXlsxTemplate() throws IOException {
 		try (Workbook workbook = new XSSFWorkbook()) {
-			Sheet sheet = workbook.createSheet("设备汇入范本");
+			Sheet sheet = workbook.createSheet("設備匯入範本");
 			Row headerRow = sheet.createRow(0);
 			for (int i = 0; i < TEMPLATE_HEADERS.size(); i++) {
 				headerRow.createCell(i).setCellValue(TEMPLATE_HEADERS.get(i));
 			}
-			// 第二列填入范例资料（选择性）
+			// 第二列填入範例資料（選擇性）
 			Row exampleRow = sheet.createRow(1);
 			exampleRow.createCell(0).setCellValue("STREET_LIGHT");
 			exampleRow.createCell(1).setCellValue("SL-TEMPLATE-001");
