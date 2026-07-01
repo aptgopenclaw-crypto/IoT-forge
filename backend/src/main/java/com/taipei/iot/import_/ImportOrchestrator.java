@@ -34,6 +34,12 @@ public class ImportOrchestrator {
 	 * 解析並驗證上傳檔案，回傳驗證結果。 有錯誤時不回滾 — 由 caller 決定是否回 400。
 	 */
 	public <T> ImportResult<T> parseAndValidate(MultipartFile file, ImportStrategy<T> strategy) {
+		// 0. 檢查檔案大小上限
+		if (file.getSize() > importProperties.getMaxFileSize()) {
+			throw new BusinessException(ErrorCode.DEVICE_IMPORT_FILE_FORMAT,
+					"檔案大小 " + file.getSize() + " bytes 超過上限 " + importProperties.getMaxFileSize() + " bytes");
+		}
+
 		// 1. 檢查空檔案
 		if (file == null || file.isEmpty()) {
 			throw new BusinessException(ErrorCode.DEVICE_IMPORT_FILE_EMPTY);
@@ -101,15 +107,11 @@ public class ImportOrchestrator {
 
 	/**
 	 * 執行匯入（寫入資料庫）。
+	 * @throws IllegalArgumentException 若 result 包含驗證錯誤
 	 */
 	public <T> ImportResponse execute(ImportResult<T> result, ImportStrategy<T> strategy) {
 		if (result.hasErrors()) {
-			return ImportResponse.builder()
-				.entityType(strategy.getEntityType())
-				.totalRows(result.getValidRows().size())
-				.successCount(0)
-				.errors(result.getErrors())
-				.build();
+			throw new IllegalArgumentException("execute() must not be called with errors");
 		}
 
 		List<T> rows = result.getValidRows();
