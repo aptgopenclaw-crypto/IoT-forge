@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import ImportDialog from './ImportDialog.vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -125,6 +126,14 @@ const getStatusType = (status: string) => {
     DECOMMISSIONED: 'danger',
   }
   return map[status] || 'info'
+}
+
+// ── Import Dialog ──
+const importDialogVisible = ref(false)
+
+function handleImported() {
+  ElMessage.success(t('import.importSuccess'))
+  fetchList()
 }
 
 // ── Create / Edit Dialog ──
@@ -256,6 +265,9 @@ onMounted(() => {
       </div>
       <div class="header-actions">
         <el-button type="primary" @click="openCreate">+ {{ t('device.addBtn') }}</el-button>
+        <el-button @click="importDialogVisible = true">
+          {{ t('import.importBtn') }}
+        </el-button>
       </div>
     </div>
 
@@ -452,6 +464,9 @@ onMounted(() => {
         </el-descriptions>
       </template>
     </el-drawer>
+
+    <!-- Import Dialog -->
+    <ImportDialog v-model:visible="importDialogVisible" @imported="handleImported" />
   </div>
 </template>
 
