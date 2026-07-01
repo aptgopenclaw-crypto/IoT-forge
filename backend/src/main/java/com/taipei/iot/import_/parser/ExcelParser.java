@@ -2,6 +2,8 @@ package com.taipei.iot.import_.parser;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import com.taipei.iot.common.enums.ErrorCode;
+import com.taipei.iot.common.exception.BusinessException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -49,7 +51,7 @@ public class ExcelParser implements FileParser {
 			return result;
 		}
 		catch (IOException e) {
-			throw new RuntimeException("Failed to parse Excel file", e);
+			throw new BusinessException(ErrorCode.DEVICE_IMPORT_FILE_FORMAT, "Failed to parse Excel file", e);
 		}
 	}
 

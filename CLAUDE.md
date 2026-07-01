@@ -8,28 +8,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Build (compile + tests)
-cd backend && ./mvnw clean verify
+cd backend && ./mvn clean verify
 
 # Build skipping tests
-./mvnw clean verify -DskipTests
+./mvn clean verify -DskipTests
 
 # Run only unit tests (excludes @Tag("integration"))
-./mvnw test
+./mvn test
 
 # Run a single test class
-./mvnw test -Dtest=AnnouncementServiceTest
+./mvn test -Dtest=AnnouncementServiceTest
 
 # Run a single test method
-./mvnw test -Dtest=AnnouncementServiceTest#createAnnouncement_shouldSucceed
+./mvn test -Dtest=AnnouncementServiceTest#createAnnouncement_shouldSucceed
 
 # Run integration tests only
-./mvnw verify -DskipUTs -Dtest='*IntegrationTest' -DfailIfNoTests=false
+./mvn verify -DskipUTs -Dtest='*IntegrationTest' -DfailIfNoTests=false
 
 # Start the app (needs PostgreSQL, Redis; see application.yml)
-./mvnw spring-boot:run
+./mvn spring-boot:run
 
 # Code formatting check (spring-javaformat, runs on validate)
-./mvnw validate
+./mvn validate
 ```
 
 ### Frontend (Vue 3 / TypeScript / Vite)
