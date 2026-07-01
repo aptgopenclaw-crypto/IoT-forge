@@ -189,3 +189,19 @@ export interface ContractResponse {
   createdAt?: string
   updatedAt?: string
 }
+
+// ── Import ────────────────────────────────────────────────────────────
+
+export interface ImportError {
+  row: number
+  field: string
+  value: string
+  message: string
+}
+
+export interface ImportResponse {
+  entityType: string
+  totalRows: number
+  successCount: number
+  errors: ImportError[]
+}

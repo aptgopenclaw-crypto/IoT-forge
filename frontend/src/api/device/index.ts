@@ -10,6 +10,8 @@ import type {
   CircuitResponse,
   ContractRequest,
   ContractResponse,
+  ImportError,
+  ImportResponse,
 } from '@/types/device'
 
 // ── Device ──────────────────────────────────────────────────────────────
@@ -116,3 +118,33 @@ export const createContract = (data: ContractRequest) =>
 
 export const updateContract = (id: number, data: ContractRequest) =>
   axiosIns.put<unknown, BaseResponse<ContractResponse>>(`/auth/contracts/${id}`, data)
+
+// ── Import ────────────────────────────────────────────────────────────
+
+export const importDevices = (file: File) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return axiosIns.post<unknown, BaseResponse<ImportResponse>>(
+    '/auth/devices/import',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  )
+}
+
+export const downloadImportTemplate = (format: 'xlsx' | 'csv' = 'xlsx') => {
+  return axiosIns.get('/auth/devices/import/template', {
+    params: { format },
+    responseType: 'blob',
+  })
+}
+
+export const downloadErrorReport = (payload: {
+  originalFileName: string
+  headers: string[]
+  rows: string[][]
+  errors: ImportError[]
+}) => {
+  return axiosIns.post('/auth/devices/import/error-report', payload, {
+    responseType: 'blob',
+  })
+}
