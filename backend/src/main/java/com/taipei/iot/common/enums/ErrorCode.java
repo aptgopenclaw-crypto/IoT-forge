@@ -115,6 +115,12 @@ public enum ErrorCode {
 	// 87xxx: 儀表板
 	DASHBOARD_LAYOUT_NOT_FOUND("87001", 404, "儀表板版面不存在"), DASHBOARD_DEFAULT_NOT_FOUND("87002", 404, "儀表板預設版面不存在"),
 
+	// A2xx: 設備匯入
+	DEVICE_IMPORT_FILE_EMPTY("A200", 400, "上傳檔案為空"),
+	DEVICE_IMPORT_FILE_FORMAT("A201", 400, "不支援的檔案格式，僅允許 .xlsx 與 .csv"),
+	DEVICE_IMPORT_MAX_ROWS_EXCEEDED("A202", 400, "匯入筆數超過單次上限"),
+	DEVICE_IMPORT_VALIDATION_FAILED("A203", 400, "部分資料驗證未通過"), DEVICE_IMPORT_HEADER_MISMATCH("A204", 400, "檔案標題列與範本不符"),
+
 	// 88xxx: 智慧路燈 (IoT) — Phase 7
 	IOT_DEVICE_ALREADY_REGISTERED("88001", 409, "設備已註冊 IoT 功能"), IOT_DEVICE_TOKEN_INVALID("88002", 401, "設備 Token 無效"),
 	IOT_TELEMETRY_FORMAT_NOT_FOUND("88010", 404, "Telemetry Format 不存在"),

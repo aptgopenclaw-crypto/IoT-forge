@@ -189,3 +189,9 @@ iot:
   no-signal-detection:
     enabled: ${IOT_NO_SIGNAL_ENABLED:true}
     interval-ms: ${IOT_NO_SIGNAL_INTERVAL:300000}
+
+# ── Device Import ──────────────────────────────────────────
+import:
+  max-rows: 500
+  max-file-size: 10485760
+  allowed-extensions: xlsx,csv
