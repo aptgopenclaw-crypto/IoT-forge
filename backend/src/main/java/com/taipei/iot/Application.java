@@ -1,6 +1,6 @@
 package com.taipei.iot;
 
-import com.taipei.iot.tenant.TenantProperties;
+import com.taipei.iot.tenant.config.TenantProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

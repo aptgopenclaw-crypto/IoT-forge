@@ -11,7 +11,7 @@ import com.taipei.iot.auth.config.SecurityConfig;
 import com.taipei.iot.platform.announcement.dto.PlatformAnnouncementRequest;
 import com.taipei.iot.platform.announcement.dto.PlatformAnnouncementResponse;
 import com.taipei.iot.platform.announcement.service.PlatformAnnouncementService;
-import com.taipei.iot.tenant.TenantEnabledCache;
+import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Nested;

@@ -4,7 +4,7 @@ import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.common.interceptor.DeprecatedApiInterceptor;
 import com.taipei.iot.common.interceptor.RateLimitInterceptor;
 import com.taipei.iot.common.resolver.PaginationArgumentResolver;
-import com.taipei.iot.tenant.TenantInterceptor;
+import com.taipei.iot.tenant.interceptor.TenantInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;

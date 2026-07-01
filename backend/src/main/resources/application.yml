@@ -170,6 +170,8 @@ user:
 
 # ── Phase 7: IoT / MQTT ──────────────────────────────────
 mqtt:
+  # 預設停用：本機/CI 無 broker 時不啟動訂閱；部署設 MQTT_ENABLED=true 啟用
+  enabled: ${MQTT_ENABLED:false}
   broker-url: ${MQTT_BROKER_URL:tcp://localhost:1883}
   client-id: ${MQTT_CLIENT_ID:taipei-iot-server}
   username: ${MQTT_USERNAME:}
@@ -178,6 +180,8 @@ mqtt:
   command-topic-prefix: device/
   qos: 1
   completion-timeout: 30000
+  # MQTT topic 不攜帶租戶；單棚/單租戶部署以此預設租戶寫入
+  default-tenant-id: ${MQTT_DEFAULT_TENANT_ID:DEFAULT}
 
 iot:
   device-token:

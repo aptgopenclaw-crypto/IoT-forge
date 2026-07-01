@@ -1,5 +1,7 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.tenant.aspect.TenantSystemContextAspect;
+
 import com.taipei.iot.common.tenant.RunInSystemTenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

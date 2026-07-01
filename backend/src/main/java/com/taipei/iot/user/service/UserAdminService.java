@@ -12,7 +12,7 @@ import com.taipei.iot.dept.repository.DeptInfoRepository;
 import com.taipei.iot.dept.service.DataScopeHelper;
 import com.taipei.iot.rbac.service.RoleService;
 import com.taipei.iot.common.context.TenantContext;
-import com.taipei.iot.tenant.TenantRepository;
+import com.taipei.iot.tenant.repository.TenantRepository;
 import com.taipei.iot.user.dto.request.AddTenantRoleRequest;
 import com.taipei.iot.user.dto.request.CreateUserRequest;
 import com.taipei.iot.user.dto.request.UpdateUserRequest;
@@ -363,7 +363,7 @@ public class UserAdminService {
 		String tenantId = req.getTenantId() != null ? req.getTenantId() : TenantContext.getCurrentTenantId();
 
 		// 場域存在與啟用檢核（N-3: 與 login gate 對齊，停用場域不可新增 mapping）
-		com.taipei.iot.tenant.TenantEntity tenant = tenantRepository.findById(tenantId)
+		com.taipei.iot.tenant.entity.TenantEntity tenant = tenantRepository.findById(tenantId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.TENANT_NOT_FOUND));
 		if (!Boolean.TRUE.equals(tenant.getEnabled())) {
 			throw new BusinessException(ErrorCode.TENANT_DISABLED);

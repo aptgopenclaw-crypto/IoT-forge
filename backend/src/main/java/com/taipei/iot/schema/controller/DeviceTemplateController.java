@@ -55,6 +55,36 @@ public class DeviceTemplateController {
 		return BaseResponse.success(templateService.updateSchema(deviceType, schema));
 	}
 
+	@GetMapping("/{deviceType}/schema/attributes")
+	@PreAuthorize("hasAuthority('DEVICE_VIEW')")
+	@Operation(summary = "取得設備模板 attributes Schema", description = "回傳靜態屬性欄位定義段")
+	public BaseResponse<Map<String, Object>> getAttributesSchema(@PathVariable String deviceType) {
+		return BaseResponse.success(templateService.getAttributesSchema(deviceType));
+	}
+
+	@PutMapping("/{deviceType}/schema/attributes")
+	@PreAuthorize("hasAuthority('DEVICE_TEMPLATE_MANAGE')")
+	@Operation(summary = "更新設備模板 attributes Schema", description = "僅更新靜態屬性段，保留 telemetry 段；deviceType 不存在則自動建立")
+	public BaseResponse<Map<String, Object>> updateAttributesSchema(@PathVariable String deviceType,
+			@RequestBody Map<String, Object> attributesSchema) {
+		return BaseResponse.success(templateService.updateAttributesSchema(deviceType, attributesSchema));
+	}
+
+	@GetMapping("/{deviceType}/schema/telemetry")
+	@PreAuthorize("hasAuthority('DEVICE_VIEW')")
+	@Operation(summary = "取得設備模板 telemetry Schema", description = "回傳時序量測欄位定義段")
+	public BaseResponse<Map<String, Object>> getTelemetrySchema(@PathVariable String deviceType) {
+		return BaseResponse.success(templateService.getTelemetrySchema(deviceType));
+	}
+
+	@PutMapping("/{deviceType}/schema/telemetry")
+	@PreAuthorize("hasAuthority('DEVICE_TEMPLATE_MANAGE')")
+	@Operation(summary = "更新設備模板 telemetry Schema", description = "僅更新時序量測段，保留 attributes 段；deviceType 不存在則自動建立")
+	public BaseResponse<Map<String, Object>> updateTelemetrySchema(@PathVariable String deviceType,
+			@RequestBody Map<String, Object> telemetrySchema) {
+		return BaseResponse.success(templateService.updateTelemetrySchema(deviceType, telemetrySchema));
+	}
+
 	@DeleteMapping("/{deviceType}")
 	@PreAuthorize("hasAuthority('DEVICE_TEMPLATE_MANAGE')")
 	@Operation(summary = "刪除設備模板", description = "僅在無 Device 使用該類型時可刪除")

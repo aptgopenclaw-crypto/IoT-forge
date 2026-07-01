@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,64 @@ public class DeviceTemplateService {
 		template.setVersion(template.getVersion() != null ? template.getVersion() + 1 : 1);
 		deviceTemplateRepository.save(template);
 		return template.getSchema();
+	}
+
+	private static final String ATTRIBUTES_KEY = "attributes";
+
+	private static final String TELEMETRY_KEY = "telemetry";
+
+	/**
+	 * 取得指定設備型別 schema 的 {@code attributes}（靜態屬性）段。
+	 */
+	public Map<String, Object> getAttributesSchema(String deviceType) {
+		return getSection(deviceType, ATTRIBUTES_KEY);
+	}
+
+	/**
+	 * 取得指定設備型別 schema 的 {@code telemetry}（時序量測）段。
+	 */
+	public Map<String, Object> getTelemetrySchema(String deviceType) {
+		return getSection(deviceType, TELEMETRY_KEY);
+	}
+
+	/**
+	 * 更新 {@code attributes} 段，保留 {@code telemetry} 段不動；deviceType 不存在則自動建立。
+	 */
+	@Transactional
+	public Map<String, Object> updateAttributesSchema(String deviceType, Map<String, Object> attributesSchema) {
+		return updateSection(deviceType, ATTRIBUTES_KEY, attributesSchema);
+	}
+
+	/**
+	 * 更新 {@code telemetry} 段，保留 {@code attributes} 段不動；deviceType 不存在則自動建立。
+	 */
+	@Transactional
+	public Map<String, Object> updateTelemetrySchema(String deviceType, Map<String, Object> telemetrySchema) {
+		return updateSection(deviceType, TELEMETRY_KEY, telemetrySchema);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> getSection(String deviceType, String key) {
+		Map<String, Object> schema = getSchema(deviceType);
+		Object section = schema != null ? schema.get(key) : null;
+		return section instanceof Map ? new HashMap<>((Map<String, Object>) section) : new HashMap<>();
+	}
+
+	private Map<String, Object> updateSection(String deviceType, String key, Map<String, Object> section) {
+		DeviceTemplate template = deviceTemplateRepository.findByDeviceType(deviceType)
+			.orElseGet(() -> DeviceTemplate.builder().deviceType(deviceType).schema(new HashMap<>()).build());
+
+		Map<String, Object> schema = template.getSchema() != null ? new HashMap<>(template.getSchema())
+				: new HashMap<>();
+		Map<String, Object> normalized = section != null ? new HashMap<>(section) : new HashMap<>();
+		schema.put(key, normalized);
+		schema.putIfAbsent(ATTRIBUTES_KEY, new HashMap<>());
+		schema.putIfAbsent(TELEMETRY_KEY, new HashMap<>());
+
+		template.setSchema(schema);
+		template.setVersion(template.getVersion() != null ? template.getVersion() + 1 : 1);
+		deviceTemplateRepository.save(template);
+		return normalized;
 	}
 
 	public List<DeviceTemplateResponse> listDeviceTypes() {

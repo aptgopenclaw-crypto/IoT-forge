@@ -289,3 +289,7 @@ INSERT INTO system_settings (id, tenant_id, setting_key, setting_value, descript
 INSERT INTO system_settings (id, tenant_id, setting_key, setting_value, description, created_at, updated_at, version) VALUES (23, 'DEFAULT', 'notification_retention_days', '90', '通知保留天數（已讀通知超過此天數將自動歸檔）', '2026-06-15 09:54:43.074172', '2026-06-15 09:54:43.074172', 0);
 INSERT INTO system_settings (id, tenant_id, setting_key, setting_value, description, created_at, updated_at, version) VALUES (26, '__PLATFORM__', 'notification_retention_days', '90', '通知保留天數（已讀通知超過此天數將自動歸檔）', '2026-06-15 09:54:43.074172', '2026-06-15 09:54:43.074172', 0);
 
+-- Advance the sequence past manually inserted IDs to prevent duplicate PK
+-- errors when TenantAdminService.seedDefaultSettings() inserts rows for new tenants.
+SELECT setval('system_settings_id_seq', COALESCE((SELECT MAX(id) FROM system_settings), 1));
+

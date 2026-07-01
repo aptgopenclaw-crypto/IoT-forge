@@ -8,7 +8,7 @@ import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.auth.config.SecurityConfig;
 import com.taipei.iot.setting.dto.SystemSettingDto;
 import com.taipei.iot.setting.service.SystemSettingService;
-import com.taipei.iot.tenant.TenantEnabledCache;
+import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;

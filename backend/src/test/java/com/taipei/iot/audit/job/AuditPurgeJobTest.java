@@ -3,7 +3,7 @@ package com.taipei.iot.audit.job;
 import com.taipei.iot.audit.repository.UserEventLogRepository;
 import com.taipei.iot.setting.entity.SystemSettingEntity;
 import com.taipei.iot.setting.repository.SystemSettingRepository;
-import com.taipei.iot.tenant.TenantEntity;
+import com.taipei.iot.tenant.entity.TenantEntity;
 import com.taipei.iot.common.tenant.TenantIdProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

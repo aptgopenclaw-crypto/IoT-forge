@@ -10,7 +10,7 @@ import com.taipei.iot.dispatch.dto.WorkOrderResponse;
 import com.taipei.iot.dispatch.enums.WorkOrderStatus;
 import com.taipei.iot.dispatch.service.WorkOrderService;
 import com.taipei.iot.dispatch.controller.WorkOrderController;
-import com.taipei.iot.tenant.TenantEnabledCache;
+import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;

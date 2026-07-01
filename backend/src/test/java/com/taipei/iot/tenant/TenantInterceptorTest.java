@@ -1,5 +1,8 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.tenant.interceptor.TenantInterceptor;
+import com.taipei.iot.tenant.config.TenantProperties;
+
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;

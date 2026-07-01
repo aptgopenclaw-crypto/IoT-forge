@@ -3,7 +3,7 @@ package com.taipei.iot.config;
 import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.common.interceptor.DeprecatedApiInterceptor;
 import com.taipei.iot.common.interceptor.RateLimitInterceptor;
-import com.taipei.iot.tenant.TenantInterceptor;
+import com.taipei.iot.tenant.interceptor.TenantInterceptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;

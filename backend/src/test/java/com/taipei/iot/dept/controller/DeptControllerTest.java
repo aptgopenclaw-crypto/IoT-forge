@@ -22,8 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.taipei.iot.common.interceptor.RateLimitInterceptor;
-import com.taipei.iot.tenant.TenantInterceptor;
-import com.taipei.iot.tenant.TenantEnabledCache;
+import com.taipei.iot.tenant.interceptor.TenantInterceptor;
+import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 

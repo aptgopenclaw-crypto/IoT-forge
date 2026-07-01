@@ -1,6 +1,10 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.tenant.entity.TenantEntity;
+import com.taipei.iot.tenant.repository.TenantRepository;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

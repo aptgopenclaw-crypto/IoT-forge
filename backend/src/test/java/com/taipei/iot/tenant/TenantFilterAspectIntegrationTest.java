@@ -1,5 +1,7 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.tenant.aspect.TenantFilterAspect;
+
 import com.taipei.iot.test.repository.TestTenantAwareRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;

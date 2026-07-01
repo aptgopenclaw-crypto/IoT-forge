@@ -61,7 +61,7 @@ import lombok.extern.slf4j.Slf4j;
  * </ul>
  *
  * @see com.taipei.iot.common.context.TenantContext
- * @see com.taipei.iot.tenant.TenantFilterAspect
+ * @see com.taipei.iot.tenant.aspect.TenantFilterAspect
  */
 @Slf4j
 public final class TenantAwareQuery {

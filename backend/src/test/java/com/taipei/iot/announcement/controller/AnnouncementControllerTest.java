@@ -12,7 +12,7 @@ import com.taipei.iot.common.dto.PageResponse;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
 import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.auth.config.SecurityConfig;
-import com.taipei.iot.tenant.TenantEnabledCache;
+import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;

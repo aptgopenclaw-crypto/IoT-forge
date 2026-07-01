@@ -215,6 +215,28 @@ const tenantStaticAdminRoutes: RouteRecordRaw[] = [
     name: 'ContractList',
     component: () => import('@/views/admin/device/ContractListView.vue'),
   },
+  // ── Telemetry ───────────────────────────────────────────────────
+  {
+    path: '/telemetry/live',
+    name: 'TelemetryLive',
+    component: () => import('@/views/admin/telemetry/TelemetryLiveView.vue'),
+  },
+  {
+    path: '/telemetry/history',
+    name: 'TelemetryHistory',
+    component: () => import('@/views/admin/telemetry/TelemetryHistoryView.vue'),
+  },
+  // ── Event Rule ──────────────────────────────────────────────────
+  {
+    path: '/event-rules/list',
+    name: 'EventRuleList',
+    component: () => import('@/views/admin/eventrule/EventRuleListView.vue'),
+  },
+  {
+    path: '/event-rules/logs',
+    name: 'EventRuleLogs',
+    component: () => import('@/views/admin/eventrule/EventRuleLogsView.vue'),
+  },
 ]
 
 const router = createRouter({

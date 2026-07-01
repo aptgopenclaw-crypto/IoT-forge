@@ -2,7 +2,7 @@ package com.taipei.iot.user.entity;
 
 import com.taipei.iot.common.tenant.TenantAware;
 import com.taipei.iot.rbac.entity.RoleEntity;
-import com.taipei.iot.tenant.TenantEntity;
+import com.taipei.iot.tenant.entity.TenantEntity;
 import com.taipei.iot.common.tenant.TenantEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

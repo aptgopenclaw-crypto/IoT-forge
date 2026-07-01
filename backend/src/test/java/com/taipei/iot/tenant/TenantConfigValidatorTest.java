@@ -1,5 +1,8 @@
 package com.taipei.iot.tenant;
 
+import com.taipei.iot.tenant.validation.TenantConfigValidator;
+import com.taipei.iot.tenant.entity.TenantEntity;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

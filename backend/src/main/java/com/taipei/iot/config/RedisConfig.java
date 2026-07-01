@@ -33,7 +33,7 @@ public class RedisConfig {
 
 	/**
 	 * [Tenant v2 T-3] 提供 Redis Pub/Sub listener 容器，供
-	 * {@link com.taipei.iot.tenant.TenantEnabledCache} 等需要跨實例廣播 cache invalidation
+	 * {@link com.taipei.iot.tenant.cache.TenantEnabledCache} 等需要跨實例廣播 cache invalidation
 	 * 的元件使用。設計依據：{@code 01-docs/new-feature/cache/02-implementation-patterns.md} Pattern
 	 * 2。
 	 */
