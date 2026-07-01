@@ -1,0 +1,61 @@
+package com.taipei.iot.import_.parser;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+@Component
+public class CsvParser implements FileParser {
+
+	@Override
+	public String supportedExtension() {
+		return "csv";
+	}
+
+	@Override
+	public List<Map<String, String>> parse(InputStream inputStream) {
+		try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+				CSVParser csvParser = new CSVParser(reader,
+						CSVFormat.DEFAULT.builder()
+							.setHeader()
+							.setSkipHeaderRecord(true)
+							.setTrim(true)
+							.setIgnoreEmptyLines(true)
+							.build())) {
+
+			List<Map<String, String>> result = new ArrayList<>();
+			Map<String, Integer> headerMap = csvParser.getHeaderMap();
+			// 統一 header 為 lowercase
+			Map<String, String> headerLowerMap = new HashMap<>();
+			if (headerMap != null) {
+				for (String h : headerMap.keySet()) {
+					headerLowerMap.put(h.toLowerCase(), h);
+				}
+			}
+
+			for (CSVRecord record : csvParser) {
+				Map<String, String> rowMap = new LinkedHashMap<>();
+				for (Map.Entry<String, String> entry : headerLowerMap.entrySet()) {
+					rowMap.put(entry.getKey(), record.get(entry.getValue()));
+				}
+				// 略過全空列
+				if (rowMap.values().stream().allMatch(v -> v == null || v.isBlank())) {
+					continue;
+				}
+				result.add(rowMap);
+			}
+			return result;
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Failed to parse CSV file", e);
+		}
+	}
+
+}
