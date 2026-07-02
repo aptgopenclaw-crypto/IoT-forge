@@ -6,6 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"iot-forge-cli/cmd/iotforge/device"
+	"iot-forge-cli/cmd/iotforge/telemetry"
+	"iot-forge-cli/cmd/iotforge/dispatch"
 	"iot-forge-cli/pkg/config"
 )
 
@@ -46,11 +49,14 @@ func init() {
 
 	viper.BindEnv("endpoint", "IOTFORGE_ENDPOINT")
 	viper.BindEnv("output", "IOTFORGE_OUTPUT")
-	viper.BindEnv("api_token", "IOTFORGE_API_TOKEN")
+	viper.BindEnv("api-token", "IOTFORGE_API_TOKEN")
 
 	viper.BindPFlag("endpoint", rootCmd.PersistentFlags().Lookup("endpoint"))
 	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
-	viper.BindPFlag("api_token", rootCmd.PersistentFlags().Lookup("api-token"))
+	viper.BindPFlag("api-token", rootCmd.PersistentFlags().Lookup("api-token"))
+	rootCmd.AddCommand(device.NewCmd())
+	rootCmd.AddCommand(telemetry.NewCmd())
+	rootCmd.AddCommand(dispatch.NewCmd())
 }
 
 func initConfig() {
@@ -61,7 +67,7 @@ func initConfig() {
 	}
 	viper.SetDefault("endpoint", cfg.Endpoint)
 	viper.SetDefault("output", cfg.DefaultOutput)
-	viper.SetDefault("api_token", cfg.APIToken)
+	viper.SetDefault("api-token", cfg.APIToken)
 }
 
 func resolveConfig() (*config.Config, error) {
@@ -75,7 +81,7 @@ func resolveConfig() (*config.Config, error) {
 	if v := viper.GetString("output"); v != "" {
 		cfg.DefaultOutput = v
 	}
-	if v := viper.GetString("api_token"); v != "" {
+	if v := viper.GetString("api-token"); v != "" {
 		cfg.APIToken = v
 	}
 	return cfg, nil

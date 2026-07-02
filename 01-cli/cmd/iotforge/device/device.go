@@ -1,12 +1,6 @@
 package device
 
-import (
-	"iot-forge-cli/pkg/client"
-	"iot-forge-cli/pkg/config"
-
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-)
+import "github.com/spf13/cobra"
 
 // NewCmd creates the parent device command.
 func NewCmd() *cobra.Command {
@@ -23,24 +17,6 @@ func NewCmd() *cobra.Command {
 	cmd.AddCommand(newDecommissionCmd())
 	cmd.AddCommand(newStatsCmd())
 	return cmd
-}
-
-func resolveConfig() (*config.Config, error) {
-	cfg, err := config.Load()
-	if err != nil {
-		return nil, err
-	}
-	if v := viper.GetString("endpoint"); v != "" {
-		cfg.Endpoint = v
-	}
-	if v := viper.GetString("api_token"); v != "" {
-		cfg.APIToken = v
-	}
-	return cfg, nil
-}
-
-func buildClient(cfg *config.Config) *client.Client {
-	return client.NewClientFromConfig(cfg)
 }
 
 // toAnySlice converts a typed slice to []any.

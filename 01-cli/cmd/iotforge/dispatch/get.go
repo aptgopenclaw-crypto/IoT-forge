@@ -1,6 +1,7 @@
 package dispatch
 
 import (
+	"iot-forge-cli/pkg/cliutil"
 	"context"
 	"fmt"
 	"strconv"
@@ -26,12 +27,12 @@ func runGet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid dispatch ID: %s", args[0])
 	}
 
-	cfg, err := resolveConfig()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		return err
 	}
 
-	c := buildClient(cfg)
+	c := cliutil.BuildClient(cfg)
 	dispatch, err := c.GetDispatch(context.Background(), id)
 	if err != nil {
 		return err

@@ -1,6 +1,7 @@
 package device
 
 import (
+	"iot-forge-cli/pkg/cliutil"
 	"context"
 	"fmt"
 	"os"
@@ -37,16 +38,16 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	}
 
 	var req dto.DeviceRequest
-	if err := parseInput(data, &req); err != nil {
+	if err := cliutil.ParseInput(data, &req); err != nil {
 		return err
 	}
 
-	cfg, err := resolveConfig()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		return err
 	}
 
-	c := buildClient(cfg)
+	c := cliutil.BuildClient(cfg)
 	device, err := c.UpdateDevice(context.Background(), id, &req)
 	if err != nil {
 		return err

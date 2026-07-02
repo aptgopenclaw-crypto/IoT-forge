@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"iot-forge-cli/pkg/client"
+	"iot-forge-cli/pkg/cliutil"
 	"iot-forge-cli/pkg/dto"
 	"iot-forge-cli/pkg/output"
 
@@ -41,12 +42,12 @@ func runQuery(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid device ID: %s", args[0])
 	}
 
-	cfg, err := resolveConfig()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		return err
 	}
 
-	c := buildClient(cfg)
+	c := cliutil.BuildClient(cfg)
 	resp, err := c.QueryTelemetry(context.Background(), deviceID, &client.QueryTelemetryFilter{
 		From:     from,
 		To:       to,

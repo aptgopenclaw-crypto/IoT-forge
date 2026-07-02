@@ -2,16 +2,15 @@ package device
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
+	"iot-forge-cli/pkg/cliutil"
 	"iot-forge-cli/pkg/dto"
 	"iot-forge-cli/pkg/output"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"sigs.k8s.io/yaml"
 )
 
 var filePath string
@@ -34,16 +33,16 @@ func runCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	var req dto.DeviceRequest
-	if err := parseInput(data, &req); err != nil {
+	if err := cliutil.ParseInput(data, &req); err != nil {
 		return err
 	}
 
-	cfg, err := resolveConfig()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		return err
 	}
 
-	c := buildClient(cfg)
+	c := cliutil.BuildClient(cfg)
 	device, err := c.CreateDevice(context.Background(), &req)
 	if err != nil {
 		return err
@@ -56,14 +55,4 @@ func runCreate(cmd *cobra.Command, args []string) error {
 		output.NewTableRenderer(fmtFmt, nil).Render([]any{device})
 	}
 	return nil
-}
-
-func parseInput(data []byte, target any) error {
-	if err := json.Unmarshal(data, target); err == nil {
-		return nil
-	}
-	if err := yaml.Unmarshal(data, target); err == nil {
-		return nil
-	}
-	return fmt.Errorf("file must be valid JSON or YAML")
 }

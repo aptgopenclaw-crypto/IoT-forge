@@ -1,6 +1,7 @@
 package device
 
 import (
+	"iot-forge-cli/pkg/cliutil"
 	"context"
 	"fmt"
 	"strconv"
@@ -30,12 +31,12 @@ func runGet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid device ID: %s", args[0])
 	}
 
-	cfg, err := resolveConfig()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		return err
 	}
 
-	c := buildClient(cfg)
+	c := cliutil.BuildClient(cfg)
 	device, err := c.GetDevice(context.Background(), id, tree)
 	if err != nil {
 		return err

@@ -1,6 +1,7 @@
 package device
 
 import (
+	"iot-forge-cli/pkg/cliutil"
 	"context"
 	"fmt"
 
@@ -19,12 +20,12 @@ func newStatsCmd() *cobra.Command {
 }
 
 func runStats(cmd *cobra.Command, args []string) error {
-	cfg, err := resolveConfig()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		return err
 	}
 
-	c := buildClient(cfg)
+	c := cliutil.BuildClient(cfg)
 	stats, err := c.GetDeviceStats(context.Background())
 	if err != nil {
 		return err

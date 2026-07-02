@@ -2,17 +2,16 @@ package dispatch
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
 
+	"iot-forge-cli/pkg/cliutil"
 	"iot-forge-cli/pkg/dto"
 	"iot-forge-cli/pkg/output"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"sigs.k8s.io/yaml"
 )
 
 var filePath string
@@ -41,18 +40,16 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	}
 
 	var req dto.DispatchRequest
-	if err := json.Unmarshal(data, &req); err == nil {
-		// JSON
-	} else if err := yaml.Unmarshal(data, &req); err != nil {
-		return fmt.Errorf("file must be valid JSON or YAML")
+	if err := cliutil.ParseInput(data, &req); err != nil {
+		return err
 	}
 
-	cfg, err := resolveConfig()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		return err
 	}
 
-	c := buildClient(cfg)
+	c := cliutil.BuildClient(cfg)
 	result, err := c.UpdateDispatch(context.Background(), id, &req)
 	if err != nil {
 		return err

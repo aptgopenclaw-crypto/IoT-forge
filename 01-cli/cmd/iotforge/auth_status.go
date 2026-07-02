@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"iot-forge-cli/pkg/config"
+	"iot-forge-cli/pkg/cliutil"
 
 	"github.com/spf13/cobra"
 )
@@ -25,7 +25,7 @@ func init() {
 }
 
 func runAuthStatus(cmd *cobra.Command, args []string) error {
-	cfg, err := config.Load()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		fmt.Println("Not logged in (config not found)")
 		return nil

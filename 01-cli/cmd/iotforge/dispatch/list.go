@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"iot-forge-cli/pkg/client"
+	"iot-forge-cli/pkg/cliutil"
 	"iot-forge-cli/pkg/dto"
 	"iot-forge-cli/pkg/output"
 
@@ -35,12 +36,12 @@ func newListCmd() *cobra.Command {
 }
 
 func runList(cmd *cobra.Command, args []string) error {
-	cfg, err := resolveConfig()
+	cfg, err := cliutil.ResolveConfig()
 	if err != nil {
 		return err
 	}
 
-	c := buildClient(cfg)
+	c := cliutil.BuildClient(cfg)
 	filter := &client.ListDispatchFilter{
 		Keyword: keywordFilter,
 		Page:    page,
