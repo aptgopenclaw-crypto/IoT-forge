@@ -3,9 +3,10 @@
 ## Meta
 
 - **Date:** 2026-07-02
-- **Status:** Draft
+- **Status:** Implemented (v1)
 - **Authors:** Planning session
 - **Related:** IoT-forge backend (multi-tenant IoT platform)
+- **Implementation:** 9 tasks, 9 commits, pushed to `main`
 
 ## 1. Overview
 
