@@ -121,6 +121,9 @@
 ### DevOps & Tools
 - **Maven**: 後端構建 / 依賴管理
 - **npm**: 前端包管理
+- **Go**: 1.26+ (CLI 工具)
+- **Cobra**: v1.10.2 (CLI 命令框架)
+- **Viper**: v1.21.0 (CLI 配置管理)
 - **PostgreSQL + PostGIS**: 主數據庫
 - **Redis**: 緩存層
 - **MCP Tools**: codegraph（代碼圖譜）、postgres（SQL 查詢）
