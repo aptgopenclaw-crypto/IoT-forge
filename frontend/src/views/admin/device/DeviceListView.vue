@@ -333,41 +333,41 @@ onMounted(() => {
       <el-form ref="formRef" :model="form" label-position="top">
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Device Type" required>
+            <el-form-item :label="t('device.filterType')" required>
               <el-select v-model="form.deviceType" style="width: 100%">
                 <el-option v-for="opt in deviceTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value" v-show="opt.value !== ''" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Device Code" required>
+            <el-form-item :label="t('device.colCode')" required>
               <el-input v-model="form.deviceCode" maxlength="100" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="Device Name">
+        <el-form-item :label="t('device.colName')">
           <el-input v-model="form.deviceName" maxlength="200" />
         </el-form-item>
         <el-row :gutter="16">
           <el-col :span="8">
-            <el-form-item label="TWD97 X">
+            <el-form-item :label="t('device.twd97X')">
               <el-input-number v-model="form.twd97X" :precision="3" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="TWD97 Y">
+            <el-form-item :label="t('device.twd97Y')">
               <el-input-number v-model="form.twd97Y" :precision="3" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Elevation">
+            <el-form-item :label="t('device.elevation')">
               <el-input-number v-model="form.elevation" :precision="3" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="8">
-            <el-form-item label="Connectivity">
+            <el-form-item :label="t('device.connectivity')">
               <el-select v-model="form.connectivityType" clearable style="width: 100%">
                 <el-option label="Cellular" value="CELLULAR" />
                 <el-option label="WiFi" value="WIFI" />
@@ -378,36 +378,36 @@ onMounted(() => {
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Mount Position">
+            <el-form-item :label="t('device.mountPosition')">
               <el-input v-model="form.mountPosition" maxlength="50" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Installed At">
+            <el-form-item :label="t('device.installedAt')">
               <el-date-picker v-model="form.installedAt" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Dept ID">
+            <el-form-item :label="t('device.colDept')">
               <el-input-number v-model="form.deptId" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Property Owner">
+            <el-form-item :label="t('device.propertyOwner')">
               <el-input v-model="form.propertyOwner" maxlength="200" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Contract ID">
+            <el-form-item :label="t('device.contractId')">
               <el-input-number v-model="form.contractId" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Circuit ID">
+            <el-form-item :label="t('device.circuitId')">
               <el-input-number v-model="form.circuitId" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>

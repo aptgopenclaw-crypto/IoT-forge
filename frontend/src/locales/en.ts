@@ -855,6 +855,12 @@ export default {
     elevation: 'Elevation (m)',
     taipowerCoord: 'Taipower Coord Ref',
     taipowerCoordPlaceholder: 'Taipower original coordinate code',
+    twd97X: 'TM2 X',
+    twd97Y: 'TM2 Y',
+    connectivity: 'Connectivity',
+    propertyOwner: 'Property Owner',
+    contractId: 'Contract',
+    circuitId: 'Circuit',
     errors: {
       typeRequired: 'Device type is required',
       codeRequired: 'Device code is required',
@@ -904,6 +910,7 @@ export default {
     deleteConfirm: 'Delete circuit "{number}"?',
     deletedSuccess: 'Circuit deleted',
     loadFailed: 'Failed to load circuits',
+    panelBoxDeviceId: 'Panel Box Device',
     errors: {
       numberRequired: 'Circuit number is required',
     },

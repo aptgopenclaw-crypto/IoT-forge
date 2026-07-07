@@ -166,25 +166,25 @@ onMounted(fetchList)
       destroy-on-close
     >
       <el-form ref="formRef" :model="form" label-position="top">
-        <el-form-item label="Circuit Number" required>
+        <el-form-item :label="t('circuit.colNumber')" required>
           <el-input v-model="form.circuitNumber" maxlength="50" />
         </el-form-item>
-        <el-form-item label="Circuit Name">
+        <el-form-item :label="t('circuit.colName')">
           <el-input v-model="form.circuitName" maxlength="200" />
         </el-form-item>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Taipower Account">
+            <el-form-item :label="t('circuit.colTaipower')">
               <el-input v-model="form.taipowerAccount" maxlength="50" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Usage Type">
+            <el-form-item :label="t('circuit.colUsageType')">
               <el-input v-model="form.usageType" maxlength="50" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="Panel Box Device ID">
+        <el-form-item :label="t('circuit.panelBoxDeviceId')">
           <el-input-number v-model="form.panelBoxDeviceId" :min="0" style="width: 100%" />
         </el-form-item>
       </el-form>

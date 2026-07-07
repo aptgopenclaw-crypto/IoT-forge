@@ -202,70 +202,70 @@ onMounted(fetchList)
       <el-form ref="formRef" :model="form" label-position="top">
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Contract Code" required>
+            <el-form-item :label="t('contract.colCode')" required>
               <el-input v-model="form.contractCode" maxlength="100" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Contract Name" required>
+            <el-form-item :label="t('contract.colName')" required>
               <el-input v-model="form.contractName" maxlength="300" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Contractor Name">
+            <el-form-item :label="t('contract.colContractor')">
               <el-input v-model="form.contractorName" maxlength="200" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Contractor Contact">
+            <el-form-item :label="t('contract.colContractorContact')">
               <el-input v-model="form.contractorContact" maxlength="200" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="8">
-            <el-form-item label="Budget Year">
+            <el-form-item :label="t('contract.colBudgetYear')">
               <el-input-number v-model="form.budgetYear" :min="2000" :max="2100" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Procurement No.">
+            <el-form-item :label="t('contract.colProcurementNo')">
               <el-input v-model="form.procurementNumber" maxlength="100" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="Quantity">
+            <el-form-item :label="t('contract.colQuantity')">
               <el-input-number v-model="form.quantity" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Start Date">
+            <el-form-item :label="t('contract.colStartDate')">
               <el-date-picker v-model="form.startDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="End Date">
+            <el-form-item :label="t('contract.colEndDate')">
               <el-date-picker v-model="form.endDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="Asset Category">
+            <el-form-item :label="t('contract.colAssetCategory')">
               <el-input v-model="form.assetCategory" maxlength="50" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Warranty (years)">
+            <el-form-item :label="t('contract.colWarrantyYears')">
               <el-input-number v-model="form.warrantyYears" :min="0" :max="50" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="Acceptance Date">
+        <el-form-item :label="t('contract.colAcceptanceDate')">
           <el-date-picker v-model="form.acceptanceDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
         </el-form-item>
       </el-form>

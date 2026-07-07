@@ -852,6 +852,12 @@ export default {
     elevation: '高程 (m)',
     taipowerCoord: '台电坐标参考码',
     taipowerCoordPlaceholder: '台电原始坐标码',
+    twd97X: '二度分带 X',
+    twd97Y: '二度分带 Y',
+    connectivity: '连接类型',
+    propertyOwner: '资产管理人',
+    contractId: '所属合同',
+    circuitId: '所属回路',
     errors: {
       typeRequired: '请选择设备类型',
       codeRequired: '请输入设备代码',
@@ -880,6 +886,7 @@ export default {
     deleteConfirm: '确定要删除回路「{number}」吗？',
     deletedSuccess: '回路已删除',
     loadFailed: '加载回路数据失败',
+    panelBoxDeviceId: '配电箱设备',
     errors: {
       numberRequired: '请输入回路编号',
     },

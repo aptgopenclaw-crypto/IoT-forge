@@ -856,6 +856,12 @@ export default {
     elevation: '高程 (m)',
     taipowerCoord: '台電坐標參考碼',
     taipowerCoordPlaceholder: '台電原始坐標碼',
+    twd97X: '二度分帶 X',
+    twd97Y: '二度分帶 Y',
+    connectivity: '連線類型',
+    propertyOwner: '資產管理人',
+    contractId: '所屬契約',
+    circuitId: '所屬迴路',
     errors: {
       typeRequired: '請選擇設備類型',
       codeRequired: '請輸入設備代碼',
@@ -905,6 +911,7 @@ export default {
     deleteConfirm: '確定要刪除迴路「{number}」嗎？',
     deletedSuccess: '迴路已刪除',
     loadFailed: '載入迴路資料失敗',
+    panelBoxDeviceId: '配電箱設備',
     errors: {
       numberRequired: '請輸入迴路編號',
     },
