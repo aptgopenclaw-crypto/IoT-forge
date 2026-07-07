@@ -12,6 +12,7 @@ import com.taipei.iot.device.entity.Contract;
 import com.taipei.iot.device.enums.DeviceStatus;
 import com.taipei.iot.device.repository.DeviceRepository;
 import com.taipei.iot.device.repository.ContractRepository;
+import com.taipei.iot.common.dept.port.VisibleDeptScopeProvider;
 import com.taipei.iot.common.dispatch.port.OpenWorkOrderCounter;
 import com.taipei.iot.schema.service.DeviceTemplateService;
 import com.taipei.iot.common.context.TenantContext;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,10 +42,14 @@ public class DeviceService {
 
 	private final DeviceTemplateService deviceTemplateService;
 
+	private final VisibleDeptScopeProvider visibleDeptScopeProvider;
+
 	// ── 查詢 ─────────────────────────────────────────────────────────
 
 	public Page<DeviceResponse> listDevices(String deviceType, DeviceStatus status, String keyword, Pageable pageable) {
-		Page<Device> page = deviceRepository.findByFilters(deviceType, status, keyword, null, pageable);
+		List<Long> visibleDeptIds = visibleDeptScopeProvider.getVisibleDeptIds();
+		Collection<Long> deptFilter = visibleDeptIds.isEmpty() ? null : visibleDeptIds;
+		Page<Device> page = deviceRepository.findByFilters(deviceType, status, keyword, deptFilter, pageable);
 		return page.map(this::toResponse);
 	}
 
