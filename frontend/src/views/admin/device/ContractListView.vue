@@ -3,6 +3,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listContracts, createContract, updateContract } from '@/api/device'
+import ContractImportDialog from './ContractImportDialog.vue'
 import type { ContractRequest, ContractResponse } from '@/types/device'
 
 const { t } = useI18n()
@@ -12,6 +13,12 @@ const loading = ref(false)
 const filterStatus = ref('')
 const keyword = ref('')
 const pagination = reactive({ page: 0, size: 20, total: 0 })
+const importDialogVisible = ref(false)
+
+function handleImported() {
+  ElMessage.success(t('contract.importSuccess'))
+  fetchList()
+}
 
 const statusOptions = [
   { value: '', label: t('common.all') },
@@ -152,6 +159,7 @@ onMounted(fetchList)
         <p class="page-subtitle">{{ t('contract.subtitle') }}</p>
       </div>
       <div class="header-actions">
+        <el-button @click="importDialogVisible = true">{{ t('import.importBtn') }}</el-button>
         <el-button type="primary" @click="openCreate">+ {{ t('contract.addBtn') }}</el-button>
       </div>
     </div>
@@ -287,6 +295,8 @@ onMounted(fetchList)
       />
     </div>
   </div>
+
+  <ContractImportDialog v-model:visible="importDialogVisible" @imported="handleImported" />
 </template>
 
 <style scoped>

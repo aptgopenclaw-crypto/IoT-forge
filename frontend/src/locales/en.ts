@@ -957,6 +957,10 @@ export default {
     deleteConfirm: 'Delete contract "{code}"?',
     deletedSuccess: 'Contract deleted',
     loadFailed: 'Failed to load contracts',
+    importTitle: 'Import Contracts',
+    importSuccess: 'Contracts imported successfully',
+    importFailed: 'Import failed',
+    importSuccessMessage: 'Successfully imported {count} contracts',
     errors: {
       codeRequired: 'Contract code is required',
       nameRequired: 'Contract name is required',

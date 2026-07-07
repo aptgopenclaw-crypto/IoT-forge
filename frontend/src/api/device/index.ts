@@ -178,3 +178,33 @@ export const downloadCircuitErrorReport = (payload: {
     responseType: 'blob',
   })
 }
+
+// ── Contract Import ───────────────────────────────────────────────────
+
+export const importContracts = (file: File) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return axiosIns.post<unknown, BaseResponse<ImportResponse>>(
+    '/auth/contracts/import',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  )
+}
+
+export const downloadContractImportTemplate = (format: 'xlsx' | 'csv' = 'xlsx') => {
+  return axiosIns.get('/auth/contracts/import/template', {
+    params: { format },
+    responseType: 'blob',
+  })
+}
+
+export const downloadContractErrorReport = (payload: {
+  originalFileName: string
+  headers: string[]
+  rows: string[][]
+  errors: ImportError[]
+}) => {
+  return axiosIns.post('/auth/contracts/import/error-report', payload, {
+    responseType: 'blob',
+  })
+}

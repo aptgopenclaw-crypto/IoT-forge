@@ -15,6 +15,8 @@ public interface ContractRepository extends JpaRepository<Contract, Long>, Tenan
 
 	Optional<Contract> findByTenantIdAndContractName(String tenantId, String contractName);
 
+	Optional<Contract> findByTenantIdAndContractCode(String tenantId, String contractCode);
+
 	@Query("""
 			SELECT c FROM Contract c
 			WHERE (:status IS NULL OR c.status = :status)

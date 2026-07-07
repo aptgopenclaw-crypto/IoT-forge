@@ -933,6 +933,10 @@ export default {
     deleteConfirm: '确定要删除合同「{code}」吗？',
     deletedSuccess: '合同已删除',
     loadFailed: '加载合同数据失败',
+    importTitle: '导入标案合同',
+    importSuccess: '标案合同导入成功',
+    importFailed: '导入失败',
+    importSuccessMessage: '成功导入 {count} 笔合同',
     errors: {
       codeRequired: '请输入合同代码',
       nameRequired: '请输入合同名称',

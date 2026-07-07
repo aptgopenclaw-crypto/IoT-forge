@@ -958,6 +958,10 @@ export default {
     deleteConfirm: '確定要刪除契約「{code}」嗎？',
     deletedSuccess: '契約已刪除',
     loadFailed: '載入契約資料失敗',
+    importTitle: '匙入標案契約',
+    importSuccess: '標案契約匙入成功',
+    importFailed: '匙入失敗',
+    importSuccessMessage: '成功匙入 {count} 筆契約',
     errors: {
       codeRequired: '請輸入契約代碼',
       nameRequired: '請輸入契約名稱',
