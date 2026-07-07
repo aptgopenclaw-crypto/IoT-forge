@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import ImportDialog from './ImportDialog.vue'
+import DeviceWorkOrderHistory from './DeviceWorkOrderHistory.vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -420,48 +421,55 @@ onMounted(() => {
     </el-dialog>
 
     <!-- Detail Drawer -->
-    <el-drawer v-model="detailDrawerVisible" :title="t('device.viewBtn')" size="500px" v-loading="detailLoading">
+    <el-drawer v-model="detailDrawerVisible" :title="t('device.viewBtn')" size="560px" v-loading="detailLoading">
       <template v-if="detailDevice">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="設備 ID" :span="2">{{ detailDevice.id }}</el-descriptions-item>
-          <el-descriptions-item label="設備類型">{{ detailDevice.deviceType }}</el-descriptions-item>
-          <el-descriptions-item label="設備代碼">{{ detailDevice.deviceCode }}</el-descriptions-item>
-          <el-descriptions-item label="設備名稱" :span="2">{{ detailDevice.deviceName }}</el-descriptions-item>
-          <el-descriptions-item label="狀態">
-            <el-tag :type="getStatusType(detailDevice.status)" size="small">{{ detailDevice.status }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="安裝日期">{{ detailDevice.installedAt || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="除役日期" :span="2">{{ detailDevice.decommissionedAt || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="所屬部門">{{ detailDevice.deptName || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="部門 ID">{{ detailDevice.deptId ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="標案契約編號">{{ detailDevice.contractCode || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="財產所有人" :span="2">{{ detailDevice.propertyOwner || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="父設備 ID">{{ detailDevice.parentDeviceId ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="父設備代碼">{{ detailDevice.parentDeviceCode || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="掛載位置">{{ detailDevice.mountPosition || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="連線方式">{{ detailDevice.connectivityType || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="迴路編號">{{ detailDevice.circuitNumber || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="迴路 ID">{{ detailDevice.circuitId ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="TWD97 X">{{ detailDevice.twd97X ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="TWD97 Y">{{ detailDevice.twd97Y ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="經度">{{ detailDevice.lng ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="緯度">{{ detailDevice.lat ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="海拔高度">{{ detailDevice.elevation ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="TWD67 X">{{ detailDevice.twd67X ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="TWD67 Y">{{ detailDevice.twd67Y ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="台電座標">{{ detailDevice.taipowerCoord || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="最後心跳" :span="2">
-            {{ detailDevice.lastHeartbeatAt ? new Date(detailDevice.lastHeartbeatAt).toLocaleString() : '-' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="子設備數量">{{ detailDevice.childrenCount }}</el-descriptions-item>
-          <el-descriptions-item label="建立者">{{ detailDevice.createdBy || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="建立時間" :span="2">
-            {{ detailDevice.createdAt ? new Date(detailDevice.createdAt).toLocaleString() : '-' }}
-          </el-descriptions-item>
-          <el-descriptions-item label="更新時間" :span="2">
-            {{ detailDevice.updatedAt ? new Date(detailDevice.updatedAt).toLocaleString() : '-' }}
-          </el-descriptions-item>
-        </el-descriptions>
+        <el-tabs>
+          <el-tab-pane :label="t('device.basicInfo')">
+            <el-descriptions :column="2" border>
+              <el-descriptions-item label="設備 ID" :span="2">{{ detailDevice.id }}</el-descriptions-item>
+              <el-descriptions-item label="設備類型">{{ detailDevice.deviceType }}</el-descriptions-item>
+              <el-descriptions-item label="設備代碼">{{ detailDevice.deviceCode }}</el-descriptions-item>
+              <el-descriptions-item label="設備名稱" :span="2">{{ detailDevice.deviceName }}</el-descriptions-item>
+              <el-descriptions-item label="狀態">
+                <el-tag :type="getStatusType(detailDevice.status)" size="small">{{ detailDevice.status }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="安裝日期">{{ detailDevice.installedAt || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="除役日期" :span="2">{{ detailDevice.decommissionedAt || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="所屬部門">{{ detailDevice.deptName || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="部門 ID">{{ detailDevice.deptId ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="標案契約編號">{{ detailDevice.contractCode || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="財產所有人" :span="2">{{ detailDevice.propertyOwner || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="父設備 ID">{{ detailDevice.parentDeviceId ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="父設備代碼">{{ detailDevice.parentDeviceCode || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="掛載位置">{{ detailDevice.mountPosition || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="連線方式">{{ detailDevice.connectivityType || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="迴路編號">{{ detailDevice.circuitNumber || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="迴路 ID">{{ detailDevice.circuitId ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="TWD97 X">{{ detailDevice.twd97X ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="TWD97 Y">{{ detailDevice.twd97Y ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="經度">{{ detailDevice.lng ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="緯度">{{ detailDevice.lat ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="海拔高度">{{ detailDevice.elevation ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="TWD67 X">{{ detailDevice.twd67X ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="TWD67 Y">{{ detailDevice.twd67Y ?? '-' }}</el-descriptions-item>
+              <el-descriptions-item label="台電座標">{{ detailDevice.taipowerCoord || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="最後心跳" :span="2">
+                {{ detailDevice.lastHeartbeatAt ? new Date(detailDevice.lastHeartbeatAt).toLocaleString() : '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="子設備數量">{{ detailDevice.childrenCount }}</el-descriptions-item>
+              <el-descriptions-item label="建立者">{{ detailDevice.createdBy || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="建立時間" :span="2">
+                {{ detailDevice.createdAt ? new Date(detailDevice.createdAt).toLocaleString() : '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="更新時間" :span="2">
+                {{ detailDevice.updatedAt ? new Date(detailDevice.updatedAt).toLocaleString() : '-' }}
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-tab-pane>
+          <el-tab-pane :label="t('workOrder.historyTab')">
+            <DeviceWorkOrderHistory :device-id="detailDevice.id" />
+          </el-tab-pane>
+        </el-tabs>
       </template>
     </el-drawer>
 
