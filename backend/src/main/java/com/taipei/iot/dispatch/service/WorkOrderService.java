@@ -16,6 +16,7 @@ import com.taipei.iot.dispatch.enums.WorkOrderStatus;
 import com.taipei.iot.dispatch.repository.WorkOrderLogRepository;
 import com.taipei.iot.dispatch.repository.WorkOrderRepository;
 import com.taipei.iot.common.context.TenantContext;
+import com.taipei.iot.common.util.SecurityContextUtils;
 import com.taipei.iot.workflow.model.WorkflowContext;
 import com.taipei.iot.workflow.service.WorkflowEngine;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,13 @@ public class WorkOrderService {
 
 	public Page<WorkOrderResponse> list(Long deviceId, WorkOrderStatus status, WorkOrderSourceType sourceType,
 			String keyword, Pageable pageable) {
-		return workOrderRepository.findByFilters(deviceId, status, sourceType, keyword, pageable).map(this::toResponse);
+		// Data scope：ADMIN / DEPT_ADMIN 可見全部；其餘角色只能看自己建立的工單
+		String createdByFilter = null;
+		if (!SecurityContextUtils.hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN", "ROLE_DEPT_ADMIN")) {
+			createdByFilter = SecurityContextUtils.requireCurrentUserIdStrict();
+		}
+		return workOrderRepository.findByFilters(deviceId, status, sourceType, createdByFilter, keyword, pageable)
+			.map(this::toResponse);
 	}
 
 	public Page<WorkOrderResponse> listMyTasks(String userId, Pageable pageable) {

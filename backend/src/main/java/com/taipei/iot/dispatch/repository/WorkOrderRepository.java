@@ -20,13 +20,15 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long>, Ten
 			WHERE (:deviceId IS NULL OR w.deviceId = :deviceId)
 			  AND (:status IS NULL OR w.status = :status)
 			  AND (:sourceType IS NULL OR w.sourceType = :sourceType)
+			  AND (:createdBy IS NULL OR w.createdBy = :createdBy)
 			  AND (:keyword IS NULL
 			       OR LOWER(w.description) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%'))
 			       OR LOWER(w.reporterName) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%')))
 			ORDER BY w.createdAt DESC
 			""")
 	Page<WorkOrder> findByFilters(@Param("deviceId") Long deviceId, @Param("status") WorkOrderStatus status,
-			@Param("sourceType") WorkOrderSourceType sourceType, @Param("keyword") String keyword, Pageable pageable);
+			@Param("sourceType") WorkOrderSourceType sourceType, @Param("createdBy") String createdBy,
+			@Param("keyword") String keyword, Pageable pageable);
 
 	@Query("""
 			SELECT w FROM WorkOrder w

@@ -2,7 +2,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listWorkOrders, approveWorkOrder, rejectWorkOrder } from '@/api/device'
+import { useAuthStore } from '@/stores/authStore'
 import type { WorkOrderResponse } from '@/types/device'
+
+const authStore = useAuthStore()
 
 const tableData = ref<WorkOrderResponse[]>([])
 const loading = ref(false)
@@ -29,7 +32,7 @@ async function fetchList(page = 0) {
 async function handleApprove(row: WorkOrderResponse) {
   try {
     await ElMessageBox.confirm('核准此工單？', '確認', { type: 'info' })
-    await approveWorkOrder(row.id, 'system')
+    await approveWorkOrder(row.id, authStore.userInfo?.userId ?? '')
     ElMessage.success('已核准')
     fetchList(pagination.page)
   } catch { /* cancelled */ }
@@ -44,7 +47,7 @@ function openReject(row: WorkOrderResponse) {
 async function handleReject() {
   if (!rejectTargetId.value || !rejectReason.value.trim()) return
   try {
-    await rejectWorkOrder(rejectTargetId.value, 'system', rejectReason.value.trim())
+    await rejectWorkOrder(rejectTargetId.value, authStore.userInfo?.userId ?? '', rejectReason.value.trim())
     ElMessage.success('已駁回')
     rejectDialogVisible.value = false
     fetchList(pagination.page)

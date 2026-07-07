@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   listWorkOrders,
   assignWorkOrder,
+  rejectWorkOrder,
 } from '@/api/device'
+import { useAuthStore } from '@/stores/authStore'
 import type { WorkOrderResponse } from '@/types/device'
+
+const authStore = useAuthStore()
 
 // ── Table ──
 const tableData = ref<WorkOrderResponse[]>([])
@@ -63,13 +67,15 @@ function openReject(row: WorkOrderResponse) {
 async function handleReject() {
   if (!rejectTargetId.value || !rejectReason.value.trim()) return
   try {
-    await ElMessageBox.confirm('確定駁回此工單？', '確認', { type: 'warning' })
-    // 透過 workflow 駁回（先透過 assign + reject 組合）
-    // 簡化：直接更新狀態
+    await rejectWorkOrder(
+      rejectTargetId.value,
+      authStore.userInfo?.userId ?? '',
+      rejectReason.value.trim(),
+    )
     ElMessage.success('已駁回')
     rejectDialogVisible.value = false
     fetchList(pagination.page)
-  } catch { /* cancelled */ }
+  } catch { /* error handled */ }
 }
 
 onMounted(() => fetchList())
