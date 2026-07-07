@@ -7,8 +7,9 @@ import {
   createWorkOrder,
   getWorkOrder,
   closeWorkOrder,
+  listDevices,
 } from '@/api/device'
-import type { WorkOrderRequest, WorkOrderResponse } from '@/types/device'
+import type { WorkOrderRequest, WorkOrderResponse, DeviceResponse } from '@/types/device'
 
 const { t } = useI18n()
 
@@ -76,6 +77,29 @@ const statusTagType = (status: string) => {
 const createDialogVisible = ref(false)
 const creating = ref(false)
 
+// ── Device select (remote search) ──
+const deviceOptions = ref<DeviceResponse[]>([])
+const deviceSearchLoading = ref(false)
+
+async function searchDevices(query: string) {
+  deviceSearchLoading.value = true
+  try {
+    const res = await listDevices({ keyword: query || undefined, size: 50 })
+    if (res.errorCode === '00000') {
+      deviceOptions.value = res.body.content
+    }
+  } finally {
+    deviceSearchLoading.value = false
+  }
+}
+
+function handleDeviceSelect(deviceId: number) {
+  const selected = deviceOptions.value.find(d => d.id === deviceId)
+  if (selected) {
+    createForm.deviceCode = selected.deviceCode
+  }
+}
+
 const createForm = reactive<WorkOrderRequest>({
   deviceCode: '',
   deviceId: null,
@@ -96,6 +120,8 @@ function openCreate() {
   createForm.reporterName = ''
   createForm.reporterContact = ''
   createForm.description = ''
+  deviceOptions.value = []
+  searchDevices('')
   createDialogVisible.value = true
 }
 
@@ -141,6 +167,54 @@ async function handleClose(row: WorkOrderResponse) {
   } catch { /* cancelled */ }
 }
 
+// ── Workflow step helpers ──
+const WORKFLOW_STEPS = [
+  { label: '設備障礙通報' },
+  { label: '派工審核' },
+  { label: '施工執行' },
+  { label: '施工驗證' },
+  { label: '結案' },
+]
+
+function statusToStepIndex(status: string): number {
+  switch (status) {
+    case 'PENDING':     return 1   // 派工審核中
+    case 'ASSIGNED':    return 2   // 施工執行（尚未到場）
+    case 'IN_PROGRESS': return 2   // 施工執行中
+    case 'REVIEWING':   return 3   // 施工驗證中
+    case 'COMPLETED':   return 4   // 待結案
+    case 'CLOSED':      return 4   // 已結案
+    case 'REJECTED':    return -1  // 已駁回
+    default:            return 0
+  }
+}
+
+function statusToStepLabel(status: string): string {
+  switch (status) {
+    case 'PENDING':     return '派工審核'
+    case 'ASSIGNED':    return '待到場施工'
+    case 'IN_PROGRESS': return '施工中'
+    case 'REVIEWING':   return '待驗證結案'
+    case 'COMPLETED':   return '待結案'
+    case 'REJECTED':    return '已駁回'
+    case 'CLOSED':      return '已結案'
+    default:            return status
+  }
+}
+
+function stepLabelType(status: string): string {
+  switch (status) {
+    case 'PENDING':     return 'warning'
+    case 'ASSIGNED':    return 'primary'
+    case 'IN_PROGRESS': return 'warning'
+    case 'REVIEWING':   return ''
+    case 'COMPLETED':   return 'success'
+    case 'CLOSED':      return 'info'
+    case 'REJECTED':    return 'danger'
+    default:            return 'info'
+  }
+}
+
 onMounted(() => {
   fetchList()
 })
@@ -169,8 +243,15 @@ onMounted(() => {
     <el-table :data="tableData" v-loading="loading" stripe>
       <el-table-column prop="id" label="ID" width="70" />
       <el-table-column prop="deviceCode" label="設備代碼" width="120" />
-      <el-table-column prop="deviceName" label="設備名稱" min-width="160" />
+      <el-table-column prop="deviceName" label="設備名稱" min-width="140" />
       <el-table-column prop="orderType" label="類型" width="90" />
+      <el-table-column label="目前步驟" width="130">
+        <template #default="{ row }">
+          <el-tag :type="stepLabelType(row.status)" size="small">
+            {{ statusToStepLabel(row.status) }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="狀態" width="110">
         <template #default="{ row }">
           <el-tag :type="statusTagType(row.status)" size="small">{{ row.status }}</el-tag>
@@ -206,8 +287,24 @@ onMounted(() => {
     <!-- Create Dialog -->
     <el-dialog v-model="createDialogVisible" title="新增工單" width="500px" destroy-on-close>
       <el-form label-position="top">
-        <el-form-item label="設備代碼" required>
-          <el-input v-model="createForm.deviceCode" placeholder="請輸入設備代碼，如 SL-001" maxlength="100" />
+        <el-form-item label="設備" required>
+          <el-select
+            v-model="createForm.deviceId"
+            filterable
+            remote
+            :remote-method="searchDevices"
+            :loading="deviceSearchLoading"
+            placeholder="搜尋設備代碼或名稱"
+            style="width: 100%"
+            @change="handleDeviceSelect"
+          >
+            <el-option
+              v-for="d in deviceOptions"
+              :key="d.id"
+              :value="d.id"
+              :label="`${d.deviceCode}${d.deviceName ? ' — ' + d.deviceName : ''}`"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="工單類型" required>
           <el-select v-model="createForm.orderType" style="width: 100%">
@@ -249,8 +346,23 @@ onMounted(() => {
     </el-dialog>
 
     <!-- Detail Drawer -->
-    <el-drawer v-model="detailDrawerVisible" title="工單明細" size="500px" v-loading="detailLoading">
+    <el-drawer v-model="detailDrawerVisible" title="工單明細" size="520px" v-loading="detailLoading">
       <template v-if="detailDevice">
+        <!-- 流程進度條 -->
+        <div class="workflow-steps-bar">
+          <el-steps
+            v-if="statusToStepIndex(detailDevice.status) >= 0"
+            :active="statusToStepIndex(detailDevice.status)"
+            :finish-status="detailDevice.status === 'CLOSED' ? 'success' : 'finish'"
+            align-center
+            size="small"
+          >
+            <el-step v-for="s in WORKFLOW_STEPS" :key="s.label" :title="s.label" />
+          </el-steps>
+          <div v-else class="rejected-banner">
+            <el-tag type="danger" size="large">✖ 已駁回—{{ detailDevice.rejectReason || '無駁回原因' }}</el-tag>
+          </div>
+        </div>
         <el-descriptions :column="2" border>
           <el-descriptions-item label="ID" :span="2">{{ detailDevice.id }}</el-descriptions-item>
           <el-descriptions-item label="設備代碼">{{ detailDevice.deviceCode || detailDevice.deviceId || '-' }}</el-descriptions-item>
@@ -285,4 +397,13 @@ onMounted(() => {
 .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .filter-bar .el-select { width: 160px; }
 .filter-bar .el-input { width: 240px; }
+.workflow-steps-bar {
+  padding: 16px 8px 20px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  margin-bottom: 16px;
+}
+.rejected-banner {
+  text-align: center;
+  padding: 8px 0;
+}
 </style>

@@ -43,9 +43,10 @@ public class UserAdminController {
 	@PreAuthorize("hasAuthority('USER_LIST')")
 	@Operation(summary = "取得使用者列表", description = "以分頁方式回傳使用者清單，可選 keyword 關鍵字搜尋")
 	public BaseResponse<PageResponse<UserListItemDto>> listUsers(@PaginationParams(maxSize = 500) PageQuery pageQuery,
-			@RequestParam(required = false) String keyword, @RequestParam(required = false) Long deptId) {
+			@RequestParam(required = false) String keyword, @RequestParam(required = false) Long deptId,
+			@RequestParam(required = false) String roleId) {
 		return BaseResponse
-			.success(userAdminService.listUsers(pageQuery.getPage(), pageQuery.getSize(), keyword, deptId));
+			.success(userAdminService.listUsers(pageQuery.getPage(), pageQuery.getSize(), keyword, deptId, roleId));
 	}
 
 	@GetMapping("/{userId}")

@@ -92,9 +92,33 @@ public class UserAdminService {
 
 	@Transactional(readOnly = true)
 	public PageResponse<UserListItemDto> listUsers(int page, int size, String keyword, Long deptId) {
+		return listUsers(page, size, keyword, deptId, null);
+	}
+
+	@Transactional(readOnly = true)
+	public PageResponse<UserListItemDto> listUsers(int page, int size, String keyword, Long deptId, String roleId) {
 		String tenantId = TenantContext.getCurrentTenantId();
 		Pageable pageable = PageRequest.of(page, size);
 		String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+
+		// roleId 過濾：直接用 role-based query，不走 data-scope 分支
+		if (roleId != null && !roleId.isBlank()) {
+			List<UserTenantMappingEntity> byRole = userTenantMappingRepository
+				.findByTenantIdAndRoleIdAndEnabledTrueOrderByUserIdAsc(tenantId, roleId);
+			Map<Long, String> deptNameMap = resolveDeptNameMap(byRole);
+			List<UserListItemDto> filtered = byRole.stream()
+				.filter(m -> kw == null || (m.getUser() != null
+						&& (m.getUser().getDisplayName().toLowerCase().contains(kw.toLowerCase())
+								|| m.getUser().getEmail().toLowerCase().contains(kw.toLowerCase()))))
+				.map(m -> toUserListItemDto(m, deptNameMap))
+				.collect(Collectors.toList());
+			int total = filtered.size();
+			int fromIdx = Math.min(page * size, total);
+			int toIdx = Math.min(fromIdx + size, total);
+			org.springframework.data.domain.Page<UserListItemDto> slicedPage = new org.springframework.data.domain.PageImpl<>(
+					filtered.subList(fromIdx, toIdx), pageable, total);
+			return PageConversionHelper.from(slicedPage.getContent(), slicedPage);
+		}
 
 		Page<UserTenantMappingEntity> mappingPage;
 		if (TenantContext.isSystemContext()) {

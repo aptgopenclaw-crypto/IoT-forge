@@ -97,6 +97,7 @@ public class WorkOrderService {
 			.reportedAt(LocalDateTime.now())
 			.description(request.getDescription())
 			.locationSnapshot(request.getLocationSnapshot())
+			.createdBy(SecurityContextUtils.requireCurrentUserIdStrict())
 			.build();
 
 		wo = workOrderRepository.save(wo);

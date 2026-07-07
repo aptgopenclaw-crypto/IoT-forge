@@ -17,6 +17,7 @@ export interface UserListQuery {
   size?: number
   keyword?: string
   deptId?: number | null
+  roleId?: string
 }
 
 export interface CreateUserRequest {

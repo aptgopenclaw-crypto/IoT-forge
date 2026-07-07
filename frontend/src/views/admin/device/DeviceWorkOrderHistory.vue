@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
-import { listWorkOrders, closeWorkOrder } from '@/api/device'
+import { listWorkOrders } from '@/api/device'
 import type { WorkOrderResponse } from '@/types/device'
 
 const props = defineProps<{ deviceId: number }>()
@@ -29,21 +28,6 @@ async function fetchList() {
     }
   } finally {
     loading.value = false
-  }
-}
-
-async function handleClose(row: WorkOrderResponse) {
-  try {
-    await ElMessageBox.confirm(t('workOrder.closeConfirm'), t('common.warning'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning',
-    })
-    await closeWorkOrder(row.id, 'system')
-    ElMessage.success(t('workOrder.closedSuccess'))
-    fetchList()
-  } catch {
-    // cancelled
   }
 }
 
@@ -85,19 +69,6 @@ onMounted(fetchList)
       <el-table-column :label="t('workOrder.colReportedAt')" min-width="140">
         <template #default="{ row }">
           {{ row.reportedAt ? new Date(row.reportedAt).toLocaleString() : '-' }}
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('common.actions')" width="80" fixed="right">
-        <template #default="{ row }">
-          <el-button
-            v-if="row.status === 'COMPLETED' || row.status === 'REJECTED'"
-            link
-            type="primary"
-            size="small"
-            @click="handleClose(row)"
-          >
-            {{ t('workOrder.closeBtn') }}
-          </el-button>
         </template>
       </el-table-column>
     </el-table>

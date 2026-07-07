@@ -74,7 +74,7 @@ public class WorkOrderController {
 	}
 
 	@PostMapping("/{id}/assign")
-	@PreAuthorize("hasAuthority('WORK_ORDER_MANAGE')")
+	@PreAuthorize("hasAuthority('WORK_ORDER_DISPATCH')")
 	@Operation(summary = "指派工單")
 	public BaseResponse<WorkOrderResponse> assign(@PathVariable Long id, @RequestBody Map<String, String> body) {
 		String currentUserId = SecurityContextUtils.requireCurrentUserIdStrict();
@@ -82,7 +82,7 @@ public class WorkOrderController {
 	}
 
 	@PostMapping("/{id}/start")
-	@PreAuthorize("hasAuthority('WORK_ORDER_MANAGE')")
+	@PreAuthorize("hasAuthority('WORK_ORDER_EXECUTE')")
 	@Operation(summary = "到場打卡", description = "技師 GPS 打卡開始維修")
 	public BaseResponse<WorkOrderResponse> startWork(@PathVariable Long id,
 			@RequestBody(required = false) Map<String, BigDecimal> gps) {
@@ -93,7 +93,7 @@ public class WorkOrderController {
 	}
 
 	@PostMapping("/{id}/complete")
-	@PreAuthorize("hasAuthority('WORK_ORDER_MANAGE')")
+	@PreAuthorize("hasAuthority('WORK_ORDER_EXECUTE')")
 	@Operation(summary = "完成維修", description = "技師填寫完成紀錄，進入覆核狀態")
 	public BaseResponse<WorkOrderResponse> complete(@PathVariable Long id, @RequestBody Map<String, Object> body) {
 		return BaseResponse.success(workOrderService.complete(id, (String) body.get("remark"),
@@ -101,14 +101,14 @@ public class WorkOrderController {
 	}
 
 	@PostMapping("/{id}/approve")
-	@PreAuthorize("hasAuthority('WORK_ORDER_MANAGE')")
+	@PreAuthorize("hasAuthority('WORK_ORDER_APPROVE')")
 	@Operation(summary = "核准工單")
 	public BaseResponse<WorkOrderResponse> approve(@PathVariable Long id, @RequestBody Map<String, String> body) {
 		return BaseResponse.success(workOrderService.approve(id, body.get("reviewerId")));
 	}
 
 	@PostMapping("/{id}/reject")
-	@PreAuthorize("hasAuthority('WORK_ORDER_MANAGE')")
+	@PreAuthorize("hasAnyAuthority('WORK_ORDER_DISPATCH', 'WORK_ORDER_APPROVE')")
 	@Operation(summary = "駁回工單")
 	public BaseResponse<WorkOrderResponse> reject(@PathVariable Long id, @RequestBody Map<String, String> body) {
 		return BaseResponse.success(workOrderService.reject(id, body.get("reviewerId"), body.get("reason")));

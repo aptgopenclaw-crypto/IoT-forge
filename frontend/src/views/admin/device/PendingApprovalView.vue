@@ -6,10 +6,28 @@ import {
   assignWorkOrder,
   rejectWorkOrder,
 } from '@/api/device'
+import { listUsers } from '@/api/user'
 import { useAuthStore } from '@/stores/authStore'
 import type { WorkOrderResponse } from '@/types/device'
+import type { UserListItemDto } from '@/types/user'
 
 const authStore = useAuthStore()
+
+// ── Operator options ──
+const operatorOptions = ref<UserListItemDto[]>([])
+const operatorLoading = ref(false)
+
+async function loadOperators(keyword?: string) {
+  operatorLoading.value = true
+  try {
+    const res = await listUsers({ roleId: 'ROLE_OPERATOR', keyword, size: 200 })
+    if (res.errorCode === '00000') {
+      operatorOptions.value = res.body.content
+    }
+  } finally {
+    operatorLoading.value = false
+  }
+}
 
 // ── Table ──
 const tableData = ref<WorkOrderResponse[]>([])
@@ -38,6 +56,8 @@ const assigneeUserId = ref('')
 function openAssign(row: WorkOrderResponse) {
   assignTargetId.value = row.id
   assigneeUserId.value = ''
+  operatorOptions.value = []
+  loadOperators()
   assignDialogVisible.value = true
 }
 
@@ -125,8 +145,23 @@ onMounted(() => fetchList())
     <!-- Assign Dialog -->
     <el-dialog v-model="assignDialogVisible" title="核准派工 — 指派施工人員" width="400px" destroy-on-close>
       <el-form label-position="top">
-        <el-form-item label="施工人員 ID" required>
-          <el-input v-model="assigneeUserId" placeholder="輸入使用者 ID" />
+        <el-form-item label="施工人員" required>
+          <el-select
+            v-model="assigneeUserId"
+            filterable
+            remote
+            :remote-method="loadOperators"
+            :loading="operatorLoading"
+            placeholder="搜尋施工人員姓名"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="u in operatorOptions"
+              :key="u.userId"
+              :value="u.userId"
+              :label="`${u.displayName}${u.deptName ? ' (' + u.deptName + ')' : ''}`"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
