@@ -3,8 +3,8 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { useAuthStore } from '@/stores/authStore'
 import { listUsers } from '@/api/user'
-import { setDelegate, listMyDelegates } from '@/api/workflow'
-import type { DelegateSettingDto } from '@/api/workflow'
+import { setDelegate, listMyDelegates, listWorkflowDefinitions } from '@/api/workflow'
+import type { DelegateSettingDto, WorkflowDefinitionItem } from '@/api/workflow'
 import type { UserListItemDto } from '@/types/user'
 
 const authStore = useAuthStore()
@@ -14,10 +14,11 @@ const deptUsers = ref<UserListItemDto[]>([])
 const loadingUsers = ref(false)
 const delegateRecords = ref<DelegateSettingDto[]>([])
 const loadingRecords = ref(false)
+const workflowDefs = ref<WorkflowDefinitionItem[]>([])
 
 const form = reactive({
   delegateTo: '',
-  businessType: 'ASSET_TRANSFER',
+  businessType: '',
   effectiveFrom: '',
   effectiveTo: '',
 })
@@ -44,8 +45,9 @@ function delegateStatus(record: DelegateSettingDto) {
 }
 
 function businessTypeLabel(type: string | null) {
-  if (type === 'ASSET_TRANSFER') return '資產異動'
-  return type ?? '—'
+  if (!type) return '—'
+  const def = workflowDefs.value.find(d => d.code === type)
+  return def ? def.name : type
 }
 
 async function loadRecords() {
@@ -74,6 +76,13 @@ onMounted(async () => {
     loadingUsers.value = false
   }
   await loadRecords()
+  try {
+    const res = await listWorkflowDefinitions()
+    workflowDefs.value = res.body ?? []
+    if (workflowDefs.value.length > 0 && !form.businessType) {
+      form.businessType = workflowDefs.value[0].code
+    }
+  } catch { /* silent */ }
 })
 
 async function handleSubmit() {
@@ -130,7 +139,12 @@ async function handleSubmit() {
 
         <el-form-item label="業務類型" prop="businessType">
           <el-select v-model="form.businessType" placeholder="請選擇業務類型" style="width: 100%">
-            <el-option label="資產異動" value="ASSET_TRANSFER" />
+            <el-option
+              v-for="def in workflowDefs"
+              :key="def.code"
+              :label="def.name"
+              :value="def.code"
+            />
           </el-select>
         </el-form-item>
 

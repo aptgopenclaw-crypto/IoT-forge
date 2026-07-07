@@ -9,10 +9,12 @@ import com.taipei.iot.workflow.dto.WorkflowRejectRequest;
 import com.taipei.iot.workflow.dto.WorkflowResubmitRequest;
 import com.taipei.iot.workflow.dto.WorkflowStartRequest;
 import com.taipei.iot.workflow.entity.DelegateSettingEntity;
+import com.taipei.iot.workflow.entity.WorkflowDefinitionEntity;
 import com.taipei.iot.workflow.entity.WorkflowInstanceEntity;
 import com.taipei.iot.workflow.entity.WorkflowStepLogEntity;
 import com.taipei.iot.workflow.model.WorkflowContext;
 import com.taipei.iot.workflow.repository.DelegateSettingRepository;
+import com.taipei.iot.workflow.repository.WorkflowDefinitionRepository;
 import com.taipei.iot.workflow.exception.WorkflowPermissionException;
 import com.taipei.iot.workflow.dto.WorkflowSlaDto;
 import com.taipei.iot.workflow.service.WorkflowEngine;
@@ -49,6 +51,15 @@ public class WorkflowPocController {
 	private final WorkflowSlaService workflowSlaService;
 
 	private final DelegateSettingRepository delegateSettingRepository;
+
+	private final WorkflowDefinitionRepository workflowDefinitionRepository;
+
+	@GetMapping("/definitions")
+	@PreAuthorize("hasAuthority('WORKFLOW_DELEGATE_MANAGE')")
+	@Operation(summary = "取得流程定義清單", description = "回傳當前租戶可用的工作流程定義（供代理設定的業務類型選單使用）")
+	public BaseResponse<List<WorkflowDefinitionEntity>> listDefinitions() {
+		return BaseResponse.success(workflowDefinitionRepository.findAllEnabled());
+	}
 
 	@PostMapping("/start")
 	@PreAuthorize("isAuthenticated()")

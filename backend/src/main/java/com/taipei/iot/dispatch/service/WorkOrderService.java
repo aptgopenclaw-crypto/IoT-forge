@@ -113,7 +113,7 @@ public class WorkOrderService {
 		// 啟動 workflow（設備障礙派工簽核）
 		WorkflowContext context = WorkflowContext.builder()
 			.businessId(wo.getId().toString())
-			.businessType("WORK_ORDER")
+			.businessType("work_order_dispatch")
 			.applicantId(request.getReporterName())
 			.departmentId(deptId)
 			.build();

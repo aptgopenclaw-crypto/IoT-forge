@@ -11,9 +11,11 @@ import {
   updateDevice,
   deleteDevice,
   decommissionDevice,
+  listCircuits,
+  listContracts,
 } from '@/api/device'
 import { listDeviceTypeNames } from '@/api/schema'
-import type { DeviceRequest, DeviceResponse } from '@/types/device'
+import type { DeviceRequest, DeviceResponse, CircuitResponse, ContractResponse } from '@/types/device'
 
 const { t } = useI18n()
 
@@ -144,6 +146,32 @@ const editingId = ref<number | null>(null)
 const saving = ref(false)
 const formRef = ref()
 
+// ── Circuit / Contract select options ──
+const circuitOptions = ref<CircuitResponse[]>([])
+const contractOptions = ref<ContractResponse[]>([])
+const circuitLoading = ref(false)
+const contractLoading = ref(false)
+
+async function searchCircuits(keyword: string) {
+  circuitLoading.value = true
+  try {
+    const res = await listCircuits({ keyword: keyword || undefined, size: 100 })
+    if (res.errorCode === '00000') circuitOptions.value = res.body.content
+  } finally {
+    circuitLoading.value = false
+  }
+}
+
+async function searchContracts(keyword: string) {
+  contractLoading.value = true
+  try {
+    const res = await listContracts({ keyword: keyword || undefined, size: 100 })
+    if (res.errorCode === '00000') contractOptions.value = res.body.content
+  } finally {
+    contractLoading.value = false
+  }
+}
+
 const form = reactive<DeviceRequest>({
   deviceType: '',
   deviceCode: '',
@@ -188,6 +216,10 @@ function openCreate() {
   dialogMode.value = 'create'
   editingId.value = null
   resetForm()
+  circuitOptions.value = []
+  contractOptions.value = []
+  searchCircuits('')
+  searchContracts('')
   dialogVisible.value = true
 }
 
@@ -210,6 +242,10 @@ async function openEdit(row: DeviceResponse) {
   form.mountPosition = row.mountPosition ?? ''
   form.connectivityType = row.connectivityType ?? ''
   form.circuitId = row.circuitId
+  // 預載選單（確保已選值能顯示）
+  circuitOptions.value = []
+  contractOptions.value = []
+  await Promise.all([searchCircuits(''), searchContracts('')])
   dialogVisible.value = true
 }
 
@@ -404,12 +440,44 @@ onMounted(() => {
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item :label="t('device.contractId')">
-              <el-input-number v-model="form.contractId" :min="0" style="width: 100%" />
+              <el-select
+                v-model="form.contractId"
+                filterable
+                remote
+                clearable
+                :remote-method="searchContracts"
+                :loading="contractLoading"
+                :placeholder="t('contract.searchPlaceholder')"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="c in contractOptions"
+                  :key="c.id"
+                  :value="c.id"
+                  :label="`${c.contractCode} — ${c.contractName}`"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item :label="t('device.circuitId')">
-              <el-input-number v-model="form.circuitId" :min="0" style="width: 100%" />
+              <el-select
+                v-model="form.circuitId"
+                filterable
+                remote
+                clearable
+                :remote-method="searchCircuits"
+                :loading="circuitLoading"
+                :placeholder="t('circuit.searchPlaceholder')"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="c in circuitOptions"
+                  :key="c.id"
+                  :value="c.id"
+                  :label="`${c.circuitNumber}${c.circuitName ? ' — ' + c.circuitName : ''}`"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
