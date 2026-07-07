@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { computed, ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/stores/authStore'
 import {
   listEventRules,
   createEventRule,
@@ -13,6 +14,8 @@ import { listDeviceTypeNames } from '@/api/schema'
 import type { EventRuleResponse, EventRuleRequest, TriggerMode, ActionType } from '@/types/telemetry'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
+const canManageRules = computed(() => authStore.userInfo?.permissions.includes('EVENT_RULE_MANAGE') ?? false)
 
 // ── Filter / table ──
 const tableData = ref<EventRuleResponse[]>([])
@@ -208,7 +211,7 @@ onMounted(() => {
         </el-form-item>
         <el-form-item>
           <el-button @click="handleSearch">{{ t('common.query') }}</el-button>
-          <el-button type="primary" @click="openCreate">{{ t('common.add') }}</el-button>
+          <el-button v-if="canManageRules" type="primary" @click="openCreate">{{ t('common.add') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -231,7 +234,7 @@ onMounted(() => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="t('common.actions')" width="200" fixed="right">
+      <el-table-column v-if="canManageRules" :label="t('common.actions')" width="200" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="openEdit(row)">{{ t('common.edit') }}</el-button>
           <el-button

@@ -39,7 +39,6 @@ export default {
     deleted: 'Deleted',
     saveSuccess: 'Saved',
     refresh: 'Refresh',
-    requiredFields: 'Please fill in all required fields',
   },
   lang: {
     zhTW: '繁體中文',

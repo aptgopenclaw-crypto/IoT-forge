@@ -39,7 +39,6 @@ export default {
     deleted: '已刪除',
     saveSuccess: '儲存成功',
     refresh: '重新整理',
-    requiredFields: '請填寫必填欄位',
   },
   lang: {
     zhTW: '繁體中文',
