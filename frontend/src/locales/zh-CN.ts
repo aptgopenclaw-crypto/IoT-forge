@@ -815,6 +815,7 @@ export default {
     colDept: '部门',
     colStatus: '状态',
     colChildren: '组件',
+    colLastHeartbeat: '最后心跳',
     viewDetail: '查看详情',
     basicInfo: '基本信息',
     installedAt: '安装日期',
@@ -892,6 +893,10 @@ export default {
     deletedSuccess: '回路已删除',
     loadFailed: '加载回路数据失败',
     panelBoxDeviceId: '配电箱设备',
+    importTitle: '导入回路',
+    importSuccess: '回路导入成功',
+    importFailed: '导入失败',
+    importSuccessMessage: '成功导入 {count} 笔回路',
     errors: {
       numberRequired: '请输入回路编号',
     },

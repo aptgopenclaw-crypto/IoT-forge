@@ -819,6 +819,7 @@ export default {
     colDept: '部門',
     colStatus: '狀態',
     colChildren: '元件',
+    colLastHeartbeat: '最後心跳',
     viewDetail: '檢視詳情',
     basicInfo: '基本資訊',
     installedAt: '安裝日期',
@@ -917,6 +918,10 @@ export default {
     deletedSuccess: '迴路已刪除',
     loadFailed: '載入迴路資料失敗',
     panelBoxDeviceId: '配電箱設備',
+    importTitle: '匙入迴路',
+    importSuccess: '迴路匙入成功',
+    importFailed: '匙入失敗',
+    importSuccessMessage: '成功匙入 {count} 筆迴路',
     errors: {
       numberRequired: '請輸入迴路編號',
     },

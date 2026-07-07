@@ -818,6 +818,7 @@ export default {
     colDept: 'Department',
     colStatus: 'Status',
     colChildren: 'Components',
+    colLastHeartbeat: 'Last Heartbeat',
     viewDetail: 'View Detail',
     basicInfo: 'Basic Information',
     installedAt: 'Installed',
@@ -916,6 +917,10 @@ export default {
     deletedSuccess: 'Circuit deleted',
     loadFailed: 'Failed to load circuits',
     panelBoxDeviceId: 'Panel Box Device',
+    importTitle: 'Import Circuits',
+    importSuccess: 'Circuits imported successfully',
+    importFailed: 'Import failed',
+    importSuccessMessage: 'Successfully imported {count} circuits',
     errors: {
       numberRequired: 'Circuit number is required',
     },

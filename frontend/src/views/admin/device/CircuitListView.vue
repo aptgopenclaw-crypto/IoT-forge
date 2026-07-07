@@ -3,6 +3,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listCircuits, createCircuit, updateCircuit, deleteCircuit } from '@/api/device'
+import CircuitImportDialog from './CircuitImportDialog.vue'
 import type { CircuitRequest, CircuitResponse } from '@/types/device'
 
 const { t } = useI18n()
@@ -11,6 +12,12 @@ const tableData = ref<CircuitResponse[]>([])
 const loading = ref(false)
 const keyword = ref('')
 const pagination = reactive({ page: 0, size: 20, total: 0 })
+const importDialogVisible = ref(false)
+
+function handleImported() {
+  ElMessage.success(t('circuit.importSuccess'))
+  fetchList()
+}
 
 async function fetchList() {
   loading.value = true
@@ -131,6 +138,7 @@ onMounted(fetchList)
         <p class="page-subtitle">{{ t('circuit.subtitle') }}</p>
       </div>
       <div class="header-actions">
+        <el-button @click="importDialogVisible = true">{{ t('import.importBtn') }}</el-button>
         <el-button type="primary" @click="openCreate">+ {{ t('circuit.addBtn') }}</el-button>
       </div>
     </div>
@@ -206,6 +214,8 @@ onMounted(fetchList)
       />
     </div>
   </div>
+
+  <CircuitImportDialog v-model:visible="importDialogVisible" @imported="handleImported" />
 </template>
 
 <style scoped>

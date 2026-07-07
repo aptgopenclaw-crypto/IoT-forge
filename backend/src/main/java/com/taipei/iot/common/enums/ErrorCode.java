@@ -120,6 +120,8 @@ public enum ErrorCode {
 	DEVICE_IMPORT_FILE_FORMAT("A201", 400, "不支援的檔案格式，僅允許 .xlsx 與 .csv"),
 	DEVICE_IMPORT_MAX_ROWS_EXCEEDED("A202", 400, "匯入筆數超過單次上限"),
 	DEVICE_IMPORT_VALIDATION_FAILED("A203", 400, "部分資料驗證未通過"), DEVICE_IMPORT_HEADER_MISMATCH("A204", 400, "檔案標題列與範本不符"),
+	CIRCUIT_IMPORT_VALIDATION_FAILED("A210", 400, "迴路資料驗證未通過"),
+	CIRCUIT_IMPORT_HEADER_MISMATCH("A211", 400, "檔案標題列與範本不符"),
 
 	// 88xxx: 智慧路燈 (IoT) — Phase 7
 	IOT_DEVICE_ALREADY_REGISTERED("88001", 409, "設備已註冊 IoT 功能"), IOT_DEVICE_TOKEN_INVALID("88002", 401, "設備 Token 無效"),

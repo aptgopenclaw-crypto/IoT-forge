@@ -148,3 +148,33 @@ export const downloadErrorReport = (payload: {
     responseType: 'blob',
   })
 }
+
+// ── Circuit Import ────────────────────────────────────────────────────
+
+export const importCircuits = (file: File) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return axiosIns.post<unknown, BaseResponse<ImportResponse>>(
+    '/auth/circuits/import',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  )
+}
+
+export const downloadCircuitImportTemplate = (format: 'xlsx' | 'csv' = 'xlsx') => {
+  return axiosIns.get('/auth/circuits/import/template', {
+    params: { format },
+    responseType: 'blob',
+  })
+}
+
+export const downloadCircuitErrorReport = (payload: {
+  originalFileName: string
+  headers: string[]
+  rows: string[][]
+  errors: ImportError[]
+}) => {
+  return axiosIns.post('/auth/circuits/import/error-report', payload, {
+    responseType: 'blob',
+  })
+}
