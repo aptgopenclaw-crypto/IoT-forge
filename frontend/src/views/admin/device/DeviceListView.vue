@@ -44,8 +44,8 @@ async function loadDeviceTypeOptions() {
 const statusOptions = [
   { value: '', label: t('common.all') },
   { value: 'ACTIVE', label: t('device.statusActive') },
-  { value: 'REPORTED', label: 'Reported' },
-  { value: 'UNDER_REPAIR', label: 'Under Repair' },
+  { value: 'REPORTED', label: t('device.statusReported') },
+  { value: 'UNDER_REPAIR', label: t('device.statusUnderRepair') },
   { value: 'INACTIVE', label: t('device.statusInactive') },
   { value: 'DECOMMISSIONED', label: t('device.statusDecommissioned') },
 ]
@@ -290,7 +290,7 @@ onMounted(() => {
       <el-table-column prop="deviceType" :label="t('device.colType')" width="120" />
       <el-table-column :label="t('device.colStatus')" width="120">
         <template #default="{ row }">
-          <el-tag :type="getStatusType(row.status)" size="small">{{ row.status }}</el-tag>
+          <el-tag :type="getStatusType(row.status)" size="small">{{ statusOptions.find(o => o.value === row.status)?.label ?? row.status }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="deptName" :label="t('device.colDept')" width="140" />
