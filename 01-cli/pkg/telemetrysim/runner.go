@@ -12,11 +12,22 @@ import (
 
 // Run executes the full simulation loop:
 //  1. Initialise random source
-//  2. Load SimPlan (devices + schemas)
+//  2. Load SimPlan (devices + schemas) via JWT API calls
 //  3. Tick at cfg.Interval, sending one batch per tick
 //  4. Stop when cfg.Duration elapses or ctx is cancelled
 //  5. Print final summary
 func Run(ctx context.Context, c *client.Client, cfg SimulatorConfig) error {
+	fmt.Printf("Loading devices and schemas (tenant=%s)…\n", cfg.TenantID)
+	plan, err := LoadPlan(ctx, c, cfg)
+	if err != nil {
+		return fmt.Errorf("load plan: %w", err)
+	}
+	printPlanSummary(plan, cfg)
+	return RunWithPlan(ctx, c, cfg, plan)
+}
+
+// RunWithPlan is like Run but accepts a pre-built SimPlan, bypassing API calls.
+func RunWithPlan(ctx context.Context, c *client.Client, cfg SimulatorConfig, plan *SimPlan) error {
 	// ── 1. Random source ──────────────────────────────────────────────────────
 	seed := cfg.Seed
 	if seed == 0 {
@@ -24,15 +35,7 @@ func Run(ctx context.Context, c *client.Client, cfg SimulatorConfig) error {
 	}
 	rnd := rand.New(rand.NewSource(seed))
 
-	// ── 2. Load plan ──────────────────────────────────────────────────────────
-	fmt.Printf("Loading devices and schemas (tenant=%s)…\n", cfg.TenantID)
-	plan, err := LoadPlan(ctx, c, cfg)
-	if err != nil {
-		return fmt.Errorf("load plan: %w", err)
-	}
-	printPlanSummary(plan, cfg)
-
-	// ── 3. Context with optional duration ────────────────────────────────────
+	// ── 2. Context with optional duration ────────────────────────────────────
 	runCtx := ctx
 	if cfg.Duration > 0 {
 		var cancel context.CancelFunc
@@ -40,7 +43,7 @@ func Run(ctx context.Context, c *client.Client, cfg SimulatorConfig) error {
 		defer cancel()
 	}
 
-	// ── 4. Event loop ─────────────────────────────────────────────────────────
+	// ── 3. Event loop ─────────────────────────────────────────────────────────
 	ticker := time.NewTicker(cfg.Interval)
 	defer ticker.Stop()
 
