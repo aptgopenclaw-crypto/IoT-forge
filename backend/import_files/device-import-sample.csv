@@ -1,0 +1,6 @@
+﻿device_type,device_code,device_name,twd97_x,twd97_y,lng,lat,elevation,dept_name,contract_name,property_owner,installed_at,parent_device_code,mount_position,connectivity_type,circuit_number
+STREET_LIGHT,SL-IMPORT-001,測試路燈 001,302500.00,2771000.00,121.55000,25.03000,10.0,,,台北市工務局,2025-01-15,,路桿,DIRECT,
+CONTROLLER,CT-IMPORT-001,控制器 001,302600.00,2771100.00,121.55100,25.03100,12.5,,,,2025-03-20,,,WIFI,
+LUMINAIRE,LM-IMPORT-001,燈具 001,302700.00,2771200.00,121.55200,25.03200,8.0,,,燈具廠商,2025-06-01,,燈桿頂,LORAWAN,
+PANEL_BOX,PB-IMPORT-001,配電箱 001,,,121.55300,25.03300,,,,,,,,NONE,
+POWER_EQUIPMENT,PE-IMPORT-001,電力設備 001,302900.00,2771400.00,121.55400,25.03400,5.5,,,,2025-09-10,SL-IMPORT-001,,NB_IOT,

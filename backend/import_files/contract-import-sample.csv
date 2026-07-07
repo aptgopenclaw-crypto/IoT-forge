@@ -1,0 +1,4 @@
+contract_code,contract_name,budget_year,procurement_number,contractor_name,contractor_contact,asset_category,quantity,start_date,end_date,acceptance_date,warranty_years
+C-114-001,114年路燈維護契約,114,114-PROC-001,台光工程股份有限公司,王大明 02-12345678,路燈,500,2025-01-01,2025-12-31,2025-02-01,2
+C-114-002,114年景觀照明維護契約,114,114-PROC-002,美光照明有限公司,陳小玲 02-98765432,景觀燈,120,2025-03-01,2026-02-28,2025-02-01,1
+C-113-003,113年控制器維護契約,113,113-PROC-003,智慧控制系統公司,李志明 04-55566677,控制器,80,2024-01-01,2024-12-31,2024-02-15,3
