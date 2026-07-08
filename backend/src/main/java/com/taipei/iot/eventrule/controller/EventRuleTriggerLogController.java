@@ -3,11 +3,17 @@ package com.taipei.iot.eventrule.controller;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.common.dto.PageResponse;
 import com.taipei.iot.common.response.BaseResponse;
+import com.taipei.iot.device.repository.DeviceRepository;
 import com.taipei.iot.eventrule.dto.EventRuleTriggerLogResponse;
+import com.taipei.iot.eventrule.repository.EventRuleRepository;
 import com.taipei.iot.eventrule.repository.EventRuleTriggerLogRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +38,10 @@ public class EventRuleTriggerLogController {
 
 	private final EventRuleTriggerLogRepository logRepository;
 
+	private final EventRuleRepository ruleRepository;
+
+	private final DeviceRepository deviceRepository;
+
 	@GetMapping("/{id}/logs")
 	@PreAuthorize("hasAuthority('EVENT_RULE_VIEW')")
 	@Operation(summary = "指定規則的觸發記錄", description = "依時間窗分頁，預設最近 7 天")
@@ -43,7 +53,7 @@ public class EventRuleTriggerLogController {
 		Page<EventRuleTriggerLogResponse> result = logRepository
 			.findByRuleIdInWindow(tenantId, id, window[0], window[1], PageRequest.of(page, size))
 			.map(EventRuleTriggerLogResponse::from);
-		return BaseResponse.success(toPageResponse(result));
+		return BaseResponse.success(toPageResponse(result, enrichNames(result.getContent())));
 	}
 
 	@GetMapping("/logs")
@@ -57,7 +67,34 @@ public class EventRuleTriggerLogController {
 		Page<EventRuleTriggerLogResponse> result = logRepository
 			.findByTenantInWindow(tenantId, window[0], window[1], severity, PageRequest.of(page, size))
 			.map(EventRuleTriggerLogResponse::from);
-		return BaseResponse.success(toPageResponse(result));
+		return BaseResponse.success(toPageResponse(result, enrichNames(result.getContent())));
+	}
+
+	/** 批次查詢規則名稱與設備名稱，填入回應中。 */
+	private List<EventRuleTriggerLogResponse> enrichNames(List<EventRuleTriggerLogResponse> items) {
+		if (items.isEmpty()) {
+			return items;
+		}
+
+		// 收集所有 ruleId / deviceId
+		Set<Long> ruleIds = items.stream().map(EventRuleTriggerLogResponse::ruleId).collect(Collectors.toSet());
+		Set<Long> deviceIds = items.stream().map(EventRuleTriggerLogResponse::deviceId).collect(Collectors.toSet());
+
+		// 批次查詢名稱
+		Map<Long, String> ruleNames = ruleRepository.findAllById(ruleIds)
+			.stream()
+			.collect(Collectors.toMap(com.taipei.iot.eventrule.entity.EventRule::getId,
+					com.taipei.iot.eventrule.entity.EventRule::getName));
+		Map<Long, String> deviceNames = deviceRepository.findAllById(deviceIds)
+			.stream()
+			.collect(Collectors.toMap(com.taipei.iot.device.entity.Device::getId,
+					com.taipei.iot.device.entity.Device::getDeviceName));
+
+		// 填入名稱
+		return items.stream()
+			.map(item -> item.withRuleName(ruleNames.getOrDefault(item.ruleId(), null))
+				.withDeviceName(deviceNames.getOrDefault(item.deviceId(), null)))
+			.toList();
 	}
 
 	private LocalDateTime[] resolveWindow(Instant from, Instant to, int defaultDays) {
@@ -67,9 +104,9 @@ public class EventRuleTriggerLogController {
 				LocalDateTime.ofInstant(toInstant, ZoneOffset.UTC) };
 	}
 
-	private <T> PageResponse<T> toPageResponse(Page<T> p) {
+	private <T> PageResponse<T> toPageResponse(Page<?> p, List<T> enrichedContent) {
 		return PageResponse.<T>builder()
-			.content(p.getContent())
+			.content(enrichedContent)
 			.totalElements(p.getTotalElements())
 			.totalPages(p.getTotalPages())
 			.page(p.getNumber())

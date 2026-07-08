@@ -18,8 +18,8 @@ public interface EventRuleTriggerLogRepository extends JpaRepository<EventRuleTr
 	@Query("""
 			SELECT l FROM EventRuleTriggerLog l
 			WHERE l.tenantId = :tenantId AND l.ruleId = :ruleId
-			  AND (:from IS NULL OR l.triggeredAt >= :from)
-			  AND (:to IS NULL OR l.triggeredAt < :to)
+			  AND l.triggeredAt >= :from
+			  AND l.triggeredAt < :to
 			ORDER BY l.triggeredAt DESC
 			""")
 	Page<EventRuleTriggerLog> findByRuleIdInWindow(@Param("tenantId") String tenantId, @Param("ruleId") Long ruleId,
@@ -28,8 +28,8 @@ public interface EventRuleTriggerLogRepository extends JpaRepository<EventRuleTr
 	@Query("""
 			SELECT l FROM EventRuleTriggerLog l
 			WHERE l.tenantId = :tenantId
-			  AND (:from IS NULL OR l.triggeredAt >= :from)
-			  AND (:to IS NULL OR l.triggeredAt < :to)
+			  AND l.triggeredAt >= :from
+			  AND l.triggeredAt < :to
 			  AND (:severity IS NULL OR l.severity = :severity)
 			ORDER BY l.triggeredAt DESC
 			""")

@@ -21,6 +21,9 @@ export const listDeviceTypeNames = () =>
 export const getDeviceSchema = (deviceType: string) =>
   axiosIns.get<unknown, BaseResponse<Record<string, unknown>>>(`/auth/device-templates/${deviceType}/schema`)
 
+export const getTelemetrySchema = (deviceType: string) =>
+  axiosIns.get<unknown, BaseResponse<Record<string, unknown>>>(`/auth/device-templates/${deviceType}/schema/telemetry`)
+
 export const updateDeviceSchema = (deviceType: string, schema: Record<string, unknown>) =>
   axiosIns.put<unknown, BaseResponse<Record<string, unknown>>>(`/auth/device-templates/${deviceType}/schema`, schema)
 

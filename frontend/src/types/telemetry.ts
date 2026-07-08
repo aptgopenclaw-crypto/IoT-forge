@@ -102,7 +102,9 @@ export interface EventRuleTriggerLogResponse {
   id: number
   tenantId: string
   ruleId: number
+  ruleName?: string | null
   deviceId: number
+  deviceName?: string | null
   triggeredAt: string
   severity?: string
   matchedValues?: Record<string, unknown>

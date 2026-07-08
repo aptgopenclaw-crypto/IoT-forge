@@ -76,8 +76,9 @@ public class ConditionEvaluator {
 			case LTE -> compareNumeric(actual, expected) <= 0;
 			case EQ -> compareEqual(actual, expected);
 			case NEQ -> !compareEqual(actual, expected);
+			case BETWEEN -> evaluateBetween(actual, expected);
 			default -> {
-				log.warn("[ConditionEvaluator] operator {} not yet implemented (v1 supports GT/LT/EQ)", operator);
+				log.warn("[ConditionEvaluator] operator {} not yet implemented", operator);
 				yield false;
 			}
 		};
@@ -103,6 +104,28 @@ public class ConditionEvaluator {
 			return Double.compare(an.doubleValue(), en.doubleValue()) == 0;
 		}
 		return String.valueOf(actual).equals(String.valueOf(expected));
+	}
+
+	/**
+	 * BETWEEN 求值：actual 是否在 [min, max] 區間內（含邊界）。
+	 * <p>
+	 * {@code expected} 須為 {@link List}{@code <Numeric>} 且長度為 2，否則回傳 {@code false}。
+	 */
+	private boolean evaluateBetween(Object actual, Object expected) {
+		if (!(expected instanceof List<?> list) || list.size() != 2) {
+			log.warn("[ConditionEvaluator] BETWEEN requires [min, max] array, got: {}", expected);
+			return false;
+		}
+		try {
+			double a = toDouble(actual);
+			double min = toDouble(list.get(0));
+			double max = toDouble(list.get(1));
+			return a >= min && a <= max;
+		}
+		catch (NumberFormatException ex) {
+			log.warn("[ConditionEvaluator] BETWEEN numeric conversion failed: actual={} expected={}", actual, expected);
+			return false;
+		}
 	}
 
 	private double toDouble(Object v) {

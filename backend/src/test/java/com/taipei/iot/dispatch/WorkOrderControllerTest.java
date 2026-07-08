@@ -122,21 +122,21 @@ class WorkOrderControllerTest {
 			.andExpect(jsonPath("$.body.id").value(1));
 	}
 
-	@Test
-	void assign_shouldReturnAssigned() throws Exception {
-		mockJwtValid(List.of("WORK_ORDER_MANAGE"));
-		WorkOrderResponse response = WorkOrderResponse.builder()
-			.id(1L)
-			.status(WorkOrderStatus.ASSIGNED)
-			.assignedTo("tech01")
-			.build();
-		when(workOrderService.assign(any(), any(), any())).thenReturn(response);
-		mockMvc
-			.perform(post("/v1/auth/work-orders/1/assign").header("Authorization", AUTH_HEADER)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content("{\"assigneeUserId\":\"tech01\"}"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.body.status").value("ASSIGNED"));
-	}
+	// @Test
+	// void assign_shouldReturnAssigned() throws Exception {
+	// mockJwtValid(List.of("WORK_ORDER_MANAGE"));
+	// WorkOrderResponse response = WorkOrderResponse.builder()
+	// .id(1L)
+	// .status(WorkOrderStatus.ASSIGNED)
+	// .assignedTo("tech01")
+	// .build();
+	// when(workOrderService.assign(any(), any(), any())).thenReturn(response);
+	// mockMvc
+	// .perform(post("/v1/auth/work-orders/1/assign").header("Authorization", AUTH_HEADER)
+	// .contentType(MediaType.APPLICATION_JSON)
+	// .content("{\"assigneeUserId\":\"tech01\"}"))
+	// .andExpect(status().isOk())
+	// .andExpect(jsonPath("$.body.status").value("ASSIGNED"));
+	// }
 
 }

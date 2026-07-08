@@ -237,6 +237,11 @@ const tenantStaticAdminRoutes: RouteRecordRaw[] = [
     name: 'EventRuleLogs',
     component: () => import('@/views/admin/eventrule/EventRuleLogsView.vue'),
   },
+  {
+    path: '/event-rules/notifications',
+    name: 'EventRuleNotification',
+    component: () => import('@/views/admin/eventrule/EventRuleNotificationView.vue'),
+  },
 ]
 
 const router = createRouter({

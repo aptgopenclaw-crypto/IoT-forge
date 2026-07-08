@@ -115,9 +115,76 @@ class ConditionEvaluatorTest {
 	}
 
 	@Test
-	void unsupportedOperator_returnsFalse() {
-		Map<String, Object> values = Map.of("temperature", 80.0);
-		assertThat(evaluator.evaluate(leaf("temperature", ConditionOperator.BETWEEN, 75), values)).isFalse();
+	void between_valueInRange_returnsTrue() {
+		Map<String, Object> values = Map.of("rssi", -75.0);
+		assertThat(evaluator.evaluate(leaf("rssi", ConditionOperator.BETWEEN, List.of(-100, -50)), values)).isTrue();
+	}
+
+	@Test
+	void between_valueBelowMin_returnsFalse() {
+		Map<String, Object> values = Map.of("rssi", -120.0);
+		assertThat(evaluator.evaluate(leaf("rssi", ConditionOperator.BETWEEN, List.of(-100, -50)), values)).isFalse();
+	}
+
+	@Test
+	void between_valueAboveMax_returnsFalse() {
+		Map<String, Object> values = Map.of("rssi", -30.0);
+		assertThat(evaluator.evaluate(leaf("rssi", ConditionOperator.BETWEEN, List.of(-100, -50)), values)).isFalse();
+	}
+
+	@Test
+	void between_valueAtMinEdge_returnsTrue() {
+		Map<String, Object> values = Map.of("rssi", -100.0);
+		assertThat(evaluator.evaluate(leaf("rssi", ConditionOperator.BETWEEN, List.of(-100, -50)), values)).isTrue();
+	}
+
+	@Test
+	void between_valueAtMaxEdge_returnsTrue() {
+		Map<String, Object> values = Map.of("rssi", -50.0);
+		assertThat(evaluator.evaluate(leaf("rssi", ConditionOperator.BETWEEN, List.of(-100, -50)), values)).isTrue();
+	}
+
+	@Test
+	void between_notAList_returnsFalse() {
+		Map<String, Object> values = Map.of("rssi", -75.0);
+		assertThat(evaluator.evaluate(leaf("rssi", ConditionOperator.BETWEEN, "not-an-array"), values)).isFalse();
+	}
+
+	@Test
+	void between_wrongListSize_returnsFalse() {
+		Map<String, Object> values = Map.of("rssi", -75.0);
+		assertThat(evaluator.evaluate(leaf("rssi", ConditionOperator.BETWEEN, List.of(-100, -50, 0)), values))
+			.isFalse();
+	}
+
+	@Test
+	void gte_numberAboveThreshold_returnsTrue() {
+		Map<String, Object> values = Map.of("voltage", 220.0);
+		assertThat(evaluator.evaluate(leaf("voltage", ConditionOperator.GTE, 220), values)).isTrue();
+	}
+
+	@Test
+	void gte_numberBelowThreshold_returnsFalse() {
+		Map<String, Object> values = Map.of("voltage", 200.0);
+		assertThat(evaluator.evaluate(leaf("voltage", ConditionOperator.GTE, 220), values)).isFalse();
+	}
+
+	@Test
+	void lte_numberBelowThreshold_returnsTrue() {
+		Map<String, Object> values = Map.of("current", 15.0);
+		assertThat(evaluator.evaluate(leaf("current", ConditionOperator.LTE, 20), values)).isTrue();
+	}
+
+	@Test
+	void neq_differentValue_returnsTrue() {
+		Map<String, Object> values = Map.of("status", "ok");
+		assertThat(evaluator.evaluate(leaf("status", ConditionOperator.NEQ, "fault"), values)).isTrue();
+	}
+
+	@Test
+	void neq_sameValue_returnsFalse() {
+		Map<String, Object> values = Map.of("status", "fault");
+		assertThat(evaluator.evaluate(leaf("status", ConditionOperator.NEQ, "fault"), values)).isFalse();
 	}
 
 }

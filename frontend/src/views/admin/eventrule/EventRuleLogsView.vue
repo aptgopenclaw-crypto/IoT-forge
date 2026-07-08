@@ -87,7 +87,6 @@ onMounted(() => {
             :range-separator="t('common.to')"
             :start-placeholder="t('common.startTime')"
             :end-placeholder="t('common.endTime')"
-            value-format="YYYY-MM-DDTHH:mm:ssZ"
             style="width: 360px"
           />
         </el-form-item>
@@ -112,8 +111,16 @@ onMounted(() => {
     <!-- Table -->
     <el-table v-loading="loading" :data="tableData" border size="small">
       <el-table-column prop="id" label="ID" width="70" />
-      <el-table-column prop="ruleId" :label="t('eventRule.ruleId')" width="80" />
-      <el-table-column prop="deviceId" :label="t('eventRule.deviceId')" width="90" />
+      <el-table-column :label="t('eventRule.ruleId')" width="160">
+        <template #default="{ row }">
+          <span :title="`ID: ${row.ruleId}`">{{ row.ruleName ?? row.ruleId }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="t('eventRule.deviceId')" width="160">
+        <template #default="{ row }">
+          <span :title="`ID: ${row.deviceId}`">{{ row.deviceName ?? row.deviceId }}</span>
+        </template>
+      </el-table-column>
       <el-table-column :label="t('eventRule.triggeredAt')" width="180">
         <template #default="{ row }">{{ formatTs(row.triggeredAt) }}</template>
       </el-table-column>

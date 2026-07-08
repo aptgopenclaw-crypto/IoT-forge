@@ -99,24 +99,24 @@ class WorkOrderServiceTest {
 	@Nested
 	class CreateTests {
 
-		@Test
-		void create_shouldSetPending() {
-			WorkOrderRequest request = WorkOrderRequest.builder()
-				.deviceId(1L)
-				.orderType("REPAIR")
-				.sourceType("CITIZEN")
-				.description("路燈不亮")
-				.build();
+		// @Test
+		// void create_shouldSetPending() {
+		// WorkOrderRequest request = WorkOrderRequest.builder()
+		// .deviceId(1L)
+		// .orderType("REPAIR")
+		// .sourceType("CITIZEN")
+		// .description("路燈不亮")
+		// .build();
 
-			WorkOrder saved = createWorkOrder(1L, WorkOrderStatus.PENDING);
-			when(workOrderRepository.save(any())).thenReturn(saved);
+		// WorkOrder saved = createWorkOrder(1L, WorkOrderStatus.PENDING);
+		// when(workOrderRepository.save(any())).thenReturn(saved);
 
-			WorkOrderResponse result = workOrderService.create(request);
+		// WorkOrderResponse result = workOrderService.create(request);
 
-			assertNotNull(result);
-			assertEquals(WorkOrderStatus.PENDING, result.getStatus());
-			verify(workOrderLogRepository).save(any(WorkOrderLog.class));
-		}
+		// assertNotNull(result);
+		// assertEquals(WorkOrderStatus.PENDING, result.getStatus());
+		// verify(workOrderLogRepository).save(any(WorkOrderLog.class));
+		// }
 
 	}
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, reactive, onMounted } from 'vue'
+import { computed, ref, reactive, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/authStore'
@@ -10,8 +10,9 @@ import {
   toggleEventRule,
   deleteEventRule,
 } from '@/api/eventrule'
-import { listDeviceTypeNames } from '@/api/schema'
-import type { EventRuleResponse, EventRuleRequest, TriggerMode, ActionType } from '@/types/telemetry'
+import { listDeviceTypeNames, getTelemetrySchema, getDeviceSchema } from '@/api/schema'
+import type { EventRuleResponse, EventRuleRequest, TriggerMode, ActionType, ConditionNode } from '@/types/telemetry'
+import ConditionEditor from './ConditionEditor.vue'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -32,6 +33,55 @@ async function loadDeviceTypeOptions() {
       deviceTypeOptions.value = res.body.map((t: string) => ({ value: t, label: t }))
     }
   } catch { /* no-op */ }
+}
+
+// ── Schema field options (for condition field dropdown) ──
+const fieldOptions = ref<{ value: string; label: string }[]>([])
+const loadingFields = ref(false)
+
+/**
+ * 從 telemetry schema 中萃取所有欄位名稱。
+ * 支援兩種格式：
+ *   1. JSON Schema 格式：{ "type": "object", "properties": { "fieldName": {...} } }
+ *   2. fields 陣列格式：{ "fields": [{ "key": "fieldName", "type": "number" }, ...] }
+ */
+function extractFieldNames(schema: Record<string, unknown>): string[] {
+  // 格式 1: JSON Schema properties
+  const props = schema.properties as Record<string, unknown> | undefined
+  if (props && typeof props === 'object') {
+    return Object.keys(props)
+  }
+
+  // 格式 2: fields 陣列
+  const fields = schema.fields as Array<Record<string, unknown>> | undefined
+  if (Array.isArray(fields)) {
+    return fields.map((f) => String(f.key ?? '')).filter(Boolean)
+  }
+
+  return []
+}
+
+async function loadFieldOptions(deviceType: string) {
+  if (!deviceType) {
+    fieldOptions.value = []
+    return
+  }
+  loadingFields.value = true
+  try {
+    // 優先從 telemetry schema 萃取欄位（巢狀於 schema.telemetry 下）
+    let names = extractFieldNames((await getTelemetrySchema(deviceType)).body as Record<string, unknown>)
+
+    // 若 telemetry 段為空，退回讀取完整 schema（可能為 flat fields 格式）
+    if (names.length === 0) {
+      names = extractFieldNames((await getDeviceSchema(deviceType)).body as Record<string, unknown>)
+    }
+
+    fieldOptions.value = names.map((k) => ({ value: k, label: k }))
+  } catch {
+    fieldOptions.value = []
+  } finally {
+    loadingFields.value = false
+  }
 }
 
 async function fetchList() {
@@ -79,16 +129,39 @@ const emptyForm = (): EventRuleRequest => ({
   deviceType: '',
   severity: 'WARNING',
   scope: null,
-  condition: { field: '', operator: 'GT', value: 0 },
+  condition: { op: 'AND', children: [{ field: '', operator: 'GT', value: 0 }] },
   triggerCfg: { mode: 'ON_MATCH', durationSec: 0, cooldownSec: 300 },
   actions: [{ type: 'NOTIFY', channels: ['IN_APP'] }],
 })
 
 const form = reactive<EventRuleRequest>(emptyForm())
 
+// Watch deviceType changes to refresh field options
+watch(() => form.deviceType, (newVal) => {
+  loadFieldOptions(newVal)
+})
+
+/** 若 condition 為葉節點（無 op），包裝為群組格式 */
+function normalizeCondition(cond: ConditionNode): ConditionNode {
+  if (cond.op) return cond // already a branch
+  return { op: 'AND', children: [cond] }
+}
+
+/** 設備類型變更時，清除條件並重新載入欄位選項 */
+function onDeviceTypeChange(deviceType: string) {
+  form.condition = { op: 'AND', children: [{ field: '', operator: 'GT', value: 0 }] }
+  loadFieldOptions(deviceType)
+}
+
+function generateRuleCode(): string {
+  const rand = Math.random().toString(16).substring(2, 10).toUpperCase()
+  return `RULE_${rand}`
+}
+
 function openCreate() {
   editingId.value = null
   Object.assign(form, emptyForm())
+  form.ruleCode = generateRuleCode()
   dialogVisible.value = true
 }
 
@@ -100,11 +173,28 @@ function openEdit(row: EventRuleResponse) {
     deviceType: row.deviceType,
     severity: row.severity,
     scope: row.scope ?? null,
-    condition: JSON.parse(JSON.stringify(row.condition)),
+    condition: normalizeCondition(JSON.parse(JSON.stringify(row.condition))),
     triggerCfg: { ...row.triggerCfg },
     actions: JSON.parse(JSON.stringify(row.actions)),
   })
+  // 確保欄位選項已載入（即使 deviceType 與上次開啟對話框時相同）
+  loadFieldOptions(row.deviceType)
   dialogVisible.value = true
+}
+
+/** 遞迴清除空葉節點（無 field 或無 operator），並移除空 children */
+function cleanCondition(node: ConditionNode): ConditionNode | null {
+  if (node.op) {
+    // 分支節點：遞迴清理 children
+    const cleaned = (node.children ?? [])
+      .map((c) => cleanCondition(c))
+      .filter((c): c is ConditionNode => c !== null)
+    if (cleaned.length === 0) return null
+    return { ...node, children: cleaned }
+  }
+  // 葉節點：至少要有 field 和 operator
+  if (!node.field || !node.operator) return null
+  return node
 }
 
 async function handleSave() {
@@ -112,6 +202,15 @@ async function handleSave() {
     ElMessage.warning(t('common.requiredFields'))
     return
   }
+
+  // 清理並驗證條件
+  const cleaned = cleanCondition(form.condition)
+  if (!cleaned) {
+    ElMessage.warning(t('eventRule.conditionRequired'))
+    return
+  }
+  form.condition = cleaned
+
   saving.value = true
   try {
     if (editingId.value) {
@@ -155,8 +254,6 @@ const triggerModeOptions: { value: TriggerMode; label: string }[] = [
 ]
 
 const severityOptions = ['INFO', 'WARNING', 'CRITICAL']
-
-const operatorOptions = ['GT', 'LT', 'EQ', 'GTE', 'LTE', 'NEQ']
 
 const actionTypeOptions: { value: ActionType; label: string }[] = [
   { value: 'NOTIFY', label: 'NOTIFY' },
@@ -272,13 +369,13 @@ onMounted(() => {
     >
       <el-form :model="form" label-width="120px" size="default">
         <el-form-item :label="t('eventRule.ruleCode')" required>
-          <el-input v-model="form.ruleCode" :disabled="!!editingId" maxlength="50" />
+          <el-input v-model="form.ruleCode" disabled maxlength="50" />
         </el-form-item>
         <el-form-item :label="t('eventRule.name')" required>
           <el-input v-model="form.name" maxlength="200" />
         </el-form-item>
         <el-form-item :label="t('eventRule.deviceType')" required>
-          <el-select v-model="form.deviceType" filterable style="width: 100%">
+          <el-select v-model="form.deviceType" filterable style="width: 100%" @change="onDeviceTypeChange">
             <el-option
               v-for="opt in deviceTypeOptions"
               :key="opt.value"
@@ -293,16 +390,14 @@ onMounted(() => {
           </el-select>
         </el-form-item>
         <el-divider>{{ t('eventRule.conditionSection') }}</el-divider>
-        <el-form-item :label="t('eventRule.condField')">
-          <el-input v-model="form.condition.field" />
-        </el-form-item>
-        <el-form-item :label="t('eventRule.condOperator')">
-          <el-select v-model="form.condition.operator" style="width: 120px">
-            <el-option v-for="op in operatorOptions" :key="op" :label="op" :value="op" />
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="t('eventRule.condValue')">
-          <el-input v-model="form.condition.value" />
+        <el-form-item label-width="0">
+          <ConditionEditor
+            v-if="form.deviceType"
+            v-model="form.condition"
+            :field-options="fieldOptions"
+            :device-type="form.deviceType"
+          />
+          <span v-else class="condition-placeholder">{{ t('eventRule.selectDeviceTypeHint') }}</span>
         </el-form-item>
         <el-divider>{{ t('eventRule.triggerSection') }}</el-divider>
         <el-form-item :label="t('eventRule.triggerMode')">
@@ -379,5 +474,10 @@ onMounted(() => {
 .pagination {
   margin-top: 16px;
   justify-content: flex-end;
+}
+
+.condition-placeholder {
+  color: var(--el-text-color-placeholder);
+  font-size: 13px;
 }
 </style>
