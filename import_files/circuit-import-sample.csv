@@ -1,6 +1,0 @@
-circuit_number,circuit_name,taipower_account,usage_type,panel_box_device_id
-CR-001,北區主幹迴路,T123456789,路燈,
-CR-002,南區主幹迴路,T987654321,路燈,
-CR-003,中央公園迴路,T111222333,景觀照明,
-CR-004,市政大樓迴路,T444555666,辦公照明,
-CR-005,停車場迴路,T777888999,停車場照明,
