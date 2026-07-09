@@ -65,6 +65,12 @@ class EventRuleControllerTest {
 	private com.taipei.iot.eventrule.repository.EventRuleTriggerLogRepository logRepository;
 
 	@MockitoBean
+	private com.taipei.iot.eventrule.repository.EventRuleRepository eventRuleRepositoryForLog;
+
+	@MockitoBean
+	private com.taipei.iot.device.repository.DeviceRepository deviceRepository;
+
+	@MockitoBean
 	private JwtUtil jwtUtil;
 
 	@MockitoBean

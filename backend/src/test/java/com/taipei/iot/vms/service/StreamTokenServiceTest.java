@@ -17,6 +17,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +38,7 @@ class StreamTokenServiceTest {
 	@BeforeEach
 	void setUp() {
 		service = new StreamTokenService(redisTemplate);
-		when(redisTemplate.opsForValue()).thenReturn(valueOps);
+		lenient().when(redisTemplate.opsForValue()).thenReturn(valueOps);
 	}
 
 	@Nested
