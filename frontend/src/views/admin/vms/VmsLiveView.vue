@@ -98,8 +98,7 @@ onUnmounted(stopAutoRefresh)
       </div>
 
       <div v-else-if="loadingStream" class="loading">
-        <el-svg-icon name="Loading" class="spin" />
-        <span>{{ t('common.loading') }}</span>
+        <span>{{ t('common.loading') }}...</span>
       </div>
 
       <div v-else-if="streamError" class="error">
@@ -183,12 +182,5 @@ onUnmounted(stopAutoRefresh)
 }
 .unsupported {
   padding: 40px;
-}
-.spin {
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 </style>

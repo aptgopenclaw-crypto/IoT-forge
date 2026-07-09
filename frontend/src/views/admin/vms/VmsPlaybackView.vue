@@ -118,8 +118,7 @@ loadCameras()
       </div>
 
       <div v-if="loadingPlayback" class="loading">
-        <el-svg-icon name="Loading" class="spin" />
-        <span>{{ t('common.loading') }}</span>
+        <span>{{ t('common.loading') }}...</span>
       </div>
 
       <div v-if="playbackError" class="error">
@@ -203,12 +202,5 @@ loadCameras()
   width: 100%;
   height: 100%;
   border: none;
-}
-.spin {
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 </style>
