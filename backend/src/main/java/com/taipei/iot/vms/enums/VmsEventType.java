@@ -1,0 +1,7 @@
+package com.taipei.iot.vms.enums;
+
+public enum VmsEventType {
+
+	MOTION_DETECT, CAMERA_OFFLINE, CAMERA_ONLINE, VIDEO_LOST, RECORDING_STARTED, RECORDING_STOPPED, UNKNOWN
+
+}

@@ -1,0 +1,10 @@
+﻿特性,HLS (HTTP Live Streaming),WebRTC (Web Real-Time Communication),MJPEG (Motion JPEG),RTSP (Real Time Streaming Protocol),DASH (Dynamic Adaptive Streaming)
+延遲,⚠️ 高（3~30秒）,✅ 極低（0.1~0.5秒）,✅ 低（0.5~1秒）,✅ 低（1~2秒）,⚠️ 高（3~30秒）
+瀏覽器原生支援,✅ Safari 原生；Chrome/Firefox 需 hls.js,✅ 所有現代瀏覽器原生支援,✅ 所有瀏覽器（僅 <img> 標籤）,❌ 瀏覽器不支援，需插件或轉碼,✅ 所有瀏覽器需 dash.js
+通訊協定,HTTP/HTTPS,UDP (SRTP/SCTP)，TCP 作 fallback,HTTP/HTTPS,TCP/UDP (RTP),HTTP/HTTPS
+視訊編碼,"H.264, H.265 (HEVC)","H.264, VP8, VP9, AV1",JPEG (逐幀),"H.264, H.265","H.264, H.265, VP9"
+自適應碼率 (ABR),✅ 支援,⚠️ 有限（透過 Simulcast）,❌ 不支援,❌ 不支援,✅ 支援
+雙向通訊,❌ 單向,✅ 雙向（音訊+視訊+數據）,❌ 單向,⚠️ 有限（控制指令）,❌ 單向
+防火牆穿透,✅ 極佳（走 HTTP 443）,⚠️ 中等（需 STUN/TURN 伺服器）,✅ 極佳（走 HTTP）,❌ 差（需開專用 Port）,✅ 極佳（走 HTTP）
+擴展性/CDN,✅ 極佳（可輕鬆上 CDN）,❌ 差（點對點架構，需 SFU/MCU）,⚠️ 中等,❌ 差,✅ 極佳
+適用場景,直播、VOD、大規模分發,視訊會議、即時監控、互動應用,簡單監控、快照輪播,傳統 CCTV、NVR 直連,大型 VOD 平台（Netflix/YouTube）
