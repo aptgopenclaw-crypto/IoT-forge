@@ -21,13 +21,14 @@ import java.util.List;
  * Nx Witness VMS Adapter。
  *
  * <p>
- * 透過 Nx Witness REST API (ec2) 與 VMS 伺服器通訊。 每次呼叫動態建立 {@link RestClient}，依該租戶第一個啟用的 Nx
- * 伺服器連線資訊進行請求。
+ * 透過 Nx Witness REST API (ec2) 與 VMS 伺服器通訊。 認證方式從 HTTP Basic 改為 REST API v1
+ * session-based（{@link NxSessionManager}），每次呼叫由 {@code NxSessionManager} 取得有效的 session
+ * token。
  * </p>
  *
  * <p>
  * Nx Witness API 參考：{@code POST /ec2/cameras/{id}/streams}、 {@code PUT
- * /ec2/cameras/{id}/ptz}、{@code GET /ec2/cameras} 等。
+ * /ec2/cameras/{id}/ptz}、{@code GET /ec2/cameras} 等。 串流輸出經 ZLMediaKit 統一轉為 WebRTC。
  * </p>
  */
 @Slf4j
@@ -36,6 +37,8 @@ import java.util.List;
 public class NxWitnessAdapter implements VmsAdapter {
 
 	private final VmsServerRepository vmsServerRepository;
+
+	private final NxSessionManager nxSessionManager;
 
 	@Override
 	public VmsType getType() {
@@ -161,20 +164,15 @@ public class NxWitnessAdapter implements VmsAdapter {
 	}
 
 	/**
-	 * 建立針對特定 VMS 伺服器的 RestClient。 package-private 以便測試覆寫。
+	 * 建立針對特定 VMS 伺服器的 RestClient。 使用 {@link NxSessionManager#getToken(VmsServer)} 取得
+	 * session token 作為 Bearer token。 package-private 以便測試覆寫。
 	 */
 	RestClient buildRestClient(VmsServer server) {
-		RestClient.Builder builder = RestClient.builder().baseUrl(server.getBaseUrl());
-
-		// 依認證類型設定 Authorization header
-		switch (server.getAuthType()) {
-			case BASIC -> builder.defaultHeader("Authorization", "Basic " + java.util.Base64.getEncoder()
-				.encodeToString((server.getAuthUsername() + ":" + server.getAuthPassword()).getBytes()));
-			case TOKEN -> builder.defaultHeader("Authorization", "Bearer " + server.getApiToken());
-			case CERT -> log.warn("CERT 認證尚未實作，Nx Witness adapter 將以無認證方式連線");
-		}
-
-		return builder.build();
+		String token = nxSessionManager.getToken(server);
+		return RestClient.builder()
+			.baseUrl(server.getBaseUrl())
+			.defaultHeader("Authorization", "Bearer " + token)
+			.build();
 	}
 
 	// ── Nx Witness API 請求/回應 DTO（內部類別） ────────────────

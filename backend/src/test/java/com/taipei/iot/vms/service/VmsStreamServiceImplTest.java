@@ -15,6 +15,7 @@ import com.taipei.iot.vms.enums.CameraStatus;
 import com.taipei.iot.vms.enums.VmsAuthType;
 import com.taipei.iot.vms.enums.VmsType;
 import com.taipei.iot.vms.repository.VmsCameraRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

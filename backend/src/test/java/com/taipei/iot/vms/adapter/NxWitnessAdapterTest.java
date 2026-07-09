@@ -25,6 +25,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
@@ -37,6 +38,9 @@ class NxWitnessAdapterTest {
 
 	@Mock
 	private VmsServerRepository vmsServerRepository;
+
+	@Mock
+	private NxSessionManager nxSessionManager;
 
 	private NxWitnessAdapter adapter;
 
@@ -61,12 +65,15 @@ class NxWitnessAdapterTest {
 		mockServer = MockRestServiceServer.bindTo(builder).build();
 		// 注入 mock RestClient 取代內部建立的 client（透過覆寫 buildRestClient）
 		RestClient restClient = builder.build();
-		adapter = new NxWitnessAdapter(vmsServerRepository) {
+		adapter = new NxWitnessAdapter(vmsServerRepository, nxSessionManager) {
 			@Override
 			RestClient buildRestClient(VmsServer server) {
 				return restClient;
 			}
 		};
+		// NxSessionManager mock 回傳固定的 session token；部分測試（如 resolveServer 失敗）不會走到，
+		// 因此使用 lenient 避免 UnnecessaryStubbingException
+		lenient().when(nxSessionManager.getToken(testServer)).thenReturn("mock-session-token");
 	}
 
 	@AfterEach
