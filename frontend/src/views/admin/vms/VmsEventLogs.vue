@@ -162,7 +162,7 @@ onMounted(loadCameras)
 
       <div class="pagination-wrapper" v-if="pagination.total > pagination.size">
         <el-pagination
-          v-model:current-page="pagination.page + 1"
+          :current-page="pagination.page + 1"
           :page-size="pagination.size"
           :total="pagination.total"
           layout="total, prev, pager, next"

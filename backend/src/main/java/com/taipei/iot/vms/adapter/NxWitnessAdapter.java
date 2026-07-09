@@ -144,8 +144,12 @@ public class NxWitnessAdapter implements VmsAdapter {
 			});
 
 		if (response == null) {
+			log.warn("NX 回傳 null，無攝影機資料 (server={})", server.getBaseUrl());
 			return List.of();
 		}
+
+		log.info("NX 回傳 {} 台攝影機 (server={}): {}", response.size(), server.getBaseUrl(),
+				response.stream().map(NxDevice::name).toList());
 
 		return response.stream()
 			.map(d -> VmsCamera.builder()
@@ -163,15 +167,19 @@ public class NxWitnessAdapter implements VmsAdapter {
 
 	@Override
 	public boolean healthCheck() {
+		VmsServer server = null;
 		try {
-			VmsServer server = resolveServer();
+			server = resolveServer();
 			// GET /rest/v1/system/info 免授權；使用 buildRestClient 以利測試注入 mock
 			RestClient client = buildRestClient(server);
 			var response = client.get().uri("/rest/v1/system/info").retrieve().body(NxSystemInfoResponse.class);
 			return response != null && response.name() != null;
 		}
 		catch (Exception ex) {
-			log.warn("Nx Witness 健康檢查失敗: {}", ex.getMessage());
+			String serverUrl = server != null ? server.getBaseUrl() : "unknown";
+			log.warn("Nx Witness 健康檢查失敗: server={}, errorType={}, detail={}", serverUrl, ex.getClass().getSimpleName(),
+					ex.getMessage());
+			log.debug("Nx Witness 健康檢查異常堆疊", ex);
 			return false;
 		}
 	}
@@ -192,17 +200,18 @@ public class NxWitnessAdapter implements VmsAdapter {
 	/**
 	 * 建立針對特定 VMS 伺服器的 RestClient。 使用 {@link NxSessionManager#getToken(VmsServer)} 取得
 	 * session token 作為 Bearer token。 內建連線逾時（5s）與讀取逾時（15s），避免 VMS 掛掉時 thread hung。
-	 * package-private 以便測試覆寫。
+	 * 使用信任所有憑證的 SSLContext（Nx Witness 使用自簽憑證）。 package-private 以便測試覆寫。
 	 */
 	RestClient buildRestClient(VmsServer server) {
 		String token = nxSessionManager.getToken(server);
+		String baseUrl = server.getBaseUrl().replaceAll("/+$", ""); // 移除尾部 slash
 
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
 		factory.setConnectTimeout(Duration.ofSeconds(5));
 		factory.setReadTimeout(Duration.ofSeconds(15));
 
 		return RestClient.builder()
-			.baseUrl(server.getBaseUrl())
+			.baseUrl(baseUrl)
 			.defaultHeader("Authorization", "Bearer " + token)
 			.requestFactory(factory)
 			.build();
