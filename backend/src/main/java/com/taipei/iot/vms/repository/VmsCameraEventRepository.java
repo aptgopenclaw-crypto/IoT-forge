@@ -1,5 +1,6 @@
 package com.taipei.iot.vms.repository;
 
+import com.taipei.iot.common.tenant.TenantScopedRepository;
 import com.taipei.iot.vms.entity.VmsCameraEvent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 @Repository
-public interface VmsCameraEventRepository extends JpaRepository<VmsCameraEvent, Long> {
+public interface VmsCameraEventRepository extends JpaRepository<VmsCameraEvent, Long>, TenantScopedRepository {
 
 	Page<VmsCameraEvent> findByTenantIdAndCameraIdAndOccurredAtBetween(String tenantId, Long cameraId,
 			LocalDateTime from, LocalDateTime to, Pageable pageable);
