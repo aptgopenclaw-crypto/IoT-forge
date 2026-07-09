@@ -4,7 +4,9 @@ import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.dto.CameraStreamInfo;
 import com.taipei.iot.vms.dto.PtzCommand;
+import com.taipei.iot.vms.entity.VmsCamera;
 import com.taipei.iot.vms.entity.VmsServer;
+import com.taipei.iot.vms.enums.CameraStatus;
 import com.taipei.iot.vms.enums.VmsAuthType;
 import com.taipei.iot.vms.enums.VmsType;
 import com.taipei.iot.vms.repository.VmsServerRepository;
@@ -147,17 +149,106 @@ class NxWitnessAdapterTest {
 	}
 
 	@Nested
+	@DisplayName("listCameras")
+	class ListCameras {
+
+		@Test
+		@DisplayName("成功列出 Camera 類型裝置")
+		void success() {
+			when(vmsServerRepository.findByTenantIdAndIsActiveTrue("tenant-1")).thenReturn(List.of(testServer));
+
+			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/devices?deviceType=Camera&_orderBy=name"))
+				.andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(
+						"""
+								[
+									{"id":"cam-001","name":"Camera 1","status":"Online","deviceType":"Camera","vendor":"ACTi","model":"ACM-1231","isLicenseUsed":false},
+									{"id":"cam-002","name":"Camera 2","status":"Offline","deviceType":"Camera","vendor":"Hikvision","model":"DS-2CD","group":{"id":"g1","name":"Floor 1"},"isLicenseUsed":true}
+								]
+								""",
+						MediaType.APPLICATION_JSON));
+
+			List<VmsCamera> result = adapter.listCameras(1, 100);
+
+			assertThat(result).hasSize(2);
+			assertThat(result.get(0).getVmsCameraId()).isEqualTo("cam-001");
+			assertThat(result.get(0).getDisplayName()).isEqualTo("Camera 1");
+			assertThat(result.get(0).getStatus()).isEqualTo(CameraStatus.ONLINE);
+			assertThat(result.get(0).getMetadata()).containsEntry("vendor", "ACTi");
+			assertThat(result.get(1).getStatus()).isEqualTo(CameraStatus.OFFLINE);
+			assertThat(result.get(1).getMetadata()).containsEntry("groupName", "Floor 1");
+			mockServer.verify();
+		}
+
+		@Test
+		@DisplayName("空陣列回傳 empty list")
+		void emptyArray_returnsEmptyList() {
+			when(vmsServerRepository.findByTenantIdAndIsActiveTrue("tenant-1")).thenReturn(List.of(testServer));
+
+			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/devices?deviceType=Camera&_orderBy=name"))
+				.andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+
+			List<VmsCamera> result = adapter.listCameras(1, 100);
+
+			assertThat(result).isEmpty();
+			mockServer.verify();
+		}
+
+	}
+
+	@Nested
+	@DisplayName("getCameraInfo")
+	class GetCameraInfo {
+
+		@Test
+		@DisplayName("成功取得裝置資訊")
+		void success() {
+			when(vmsServerRepository.findByTenantIdAndIsActiveTrue("tenant-1")).thenReturn(List.of(testServer));
+
+			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/devices/cam-001"))
+				.andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess("""
+						{"id":"cam-001","name":"Camera 1","status":"Online","deviceType":"Camera"}
+						""", MediaType.APPLICATION_JSON));
+
+			VmsCamera result = adapter.getCameraInfo("cam-001");
+
+			assertThat(result.getVmsCameraId()).isEqualTo("cam-001");
+			assertThat(result.getDisplayName()).isEqualTo("Camera 1");
+			assertThat(result.getStatus()).isEqualTo(CameraStatus.ONLINE);
+			mockServer.verify();
+		}
+
+		@Test
+		@DisplayName("裝置不存在（404）拋 VMS_CAMERA_NOT_FOUND")
+		void notFound_throwsException() {
+			when(vmsServerRepository.findByTenantIdAndIsActiveTrue("tenant-1")).thenReturn(List.of(testServer));
+
+			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/devices/cam-999"))
+				.andExpect(method(HttpMethod.GET))
+				.andRespond(withResourceNotFound());
+
+			assertThatThrownBy(() -> adapter.getCameraInfo("cam-999")).isInstanceOf(BusinessException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.VMS_CAMERA_NOT_FOUND);
+		}
+
+	}
+
+	@Nested
 	@DisplayName("healthCheck")
 	class HealthCheck {
 
 		@Test
-		@DisplayName("VMS 正常時回傳 true")
+		@DisplayName("VMS 正常時回傳 true（GET /rest/v1/system/info）")
 		void serverUp_returnsTrue() {
 			when(vmsServerRepository.findByTenantIdAndIsActiveTrue("tenant-1")).thenReturn(List.of(testServer));
 
-			mockServer.expect(requestTo("http://nx-test:7001/ec2/server/info"))
+			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/system/info"))
 				.andExpect(method(HttpMethod.GET))
-				.andRespond(withSuccess());
+				.andRespond(withSuccess("""
+						{"name":"Test System","version":"5.1.0","customization":"basic"}
+						""", MediaType.APPLICATION_JSON));
 
 			boolean result = adapter.healthCheck();
 			assertThat(result).isTrue();
@@ -168,7 +259,7 @@ class NxWitnessAdapterTest {
 		void serverDown_returnsFalse() {
 			when(vmsServerRepository.findByTenantIdAndIsActiveTrue("tenant-1")).thenReturn(List.of(testServer));
 
-			mockServer.expect(requestTo("http://nx-test:7001/ec2/server/info"))
+			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/system/info"))
 				.andExpect(method(HttpMethod.GET))
 				.andRespond(withServerError());
 

@@ -7,15 +7,18 @@ import com.taipei.iot.vms.dto.CameraStreamInfo;
 import com.taipei.iot.vms.dto.PtzCommand;
 import com.taipei.iot.vms.entity.VmsCamera;
 import com.taipei.iot.vms.entity.VmsServer;
+import com.taipei.iot.vms.enums.CameraStatus;
 import com.taipei.iot.vms.enums.VmsType;
 import com.taipei.iot.vms.repository.VmsServerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Nx Witness VMS Adapter。
@@ -103,14 +106,25 @@ public class NxWitnessAdapter implements VmsAdapter {
 		VmsServer server = resolveServer();
 		RestClient client = buildRestClient(server);
 
-		// GET /ec2/cameras/{id}
-		var response = client.get().uri("/ec2/cameras/{id}", cameraId).retrieve().body(NxCameraInfoResponse.class);
+		// GET /rest/v1/devices/{id} → 取得單一裝置資訊
+		// 404 視為 null，由下游拋 BusinessException
+		var device = client.get()
+			.uri("/rest/v1/devices/{id}", cameraId)
+			.retrieve()
+			.onStatus(status -> status.value() == 404, (req, res) -> {
+			})
+			.body(NxDevice.class);
 
-		if (response == null) {
+		if (device == null) {
 			throw new BusinessException(ErrorCode.VMS_CAMERA_NOT_FOUND, "相機不存在: " + cameraId);
 		}
 
-		return VmsCamera.builder().vmsCameraId(cameraId).displayName(response.displayName()).server(server).build();
+		return VmsCamera.builder()
+			.vmsCameraId(device.id())
+			.displayName(device.name())
+			.server(server)
+			.status(mapStatus(device.status()))
+			.build();
 	}
 
 	@Override
@@ -118,19 +132,30 @@ public class NxWitnessAdapter implements VmsAdapter {
 		VmsServer server = resolveServer();
 		RestClient client = buildRestClient(server);
 
-		// GET /ec2/cameras?page={page}&pageSize={size}
+		// GET /rest/v1/devices?_filter=deviceType=Camera&_orderBy=name
+		// 只取 deviceType=Camera 的裝置，依名稱排序
+		// REST API v1 直接回傳 JSON array，使用 ParameterizedTypeReference 解析
 		var response = client.get()
-			.uri("/ec2/cameras?page={page}&pageSize={size}", page, size)
+			.uri("/rest/v1/devices?deviceType=Camera&_orderBy=name")
 			.retrieve()
-			.body(NxCameraListResponse.class);
+			.body(new ParameterizedTypeReference<List<NxDevice>>() {
+			});
 
-		if (response == null || response.cameras() == null) {
+		if (response == null) {
 			return List.of();
 		}
 
-		return response.cameras()
-			.stream()
-			.map(c -> VmsCamera.builder().vmsCameraId(c.id()).displayName(c.displayName()).server(server).build())
+		return response.stream()
+			.map(d -> VmsCamera.builder()
+				.vmsCameraId(d.id())
+				.displayName(d.name())
+				.server(server)
+				.status(mapStatus(d.status()))
+				.metadata(Map.of("vendor", d.vendor() != null ? d.vendor() : "", "model",
+						d.model() != null ? d.model() : "", "physicalId", d.physicalId() != null ? d.physicalId() : "",
+						"deviceType", d.deviceType() != null ? d.deviceType() : "", "groupName",
+						d.group() != null ? d.group().name() : "", "isLicenseUsed", d.isLicenseUsed()))
+				.build())
 			.toList();
 	}
 
@@ -138,11 +163,10 @@ public class NxWitnessAdapter implements VmsAdapter {
 	public boolean healthCheck() {
 		try {
 			VmsServer server = resolveServer();
+			// GET /rest/v1/system/info 免授權；使用 buildRestClient 以利測試注入 mock
 			RestClient client = buildRestClient(server);
-
-			// GET /ec2/server/info 確認連線
-			client.get().uri("/ec2/server/info").retrieve().toBodilessEntity();
-			return true;
+			var response = client.get().uri("/rest/v1/system/info").retrieve().body(NxSystemInfoResponse.class);
+			return response != null && response.name() != null;
 		}
 		catch (Exception ex) {
 			log.warn("Nx Witness 健康檢查失敗: {}", ex.getMessage());
@@ -175,27 +199,48 @@ public class NxWitnessAdapter implements VmsAdapter {
 			.build();
 	}
 
+	// ── 狀態映射 ──────────────────────────────────────────────
+
+	/** 將 Nx Witness 狀態字串映射為本地 CameraStatus。 */
+	private CameraStatus mapStatus(String nxStatus) {
+		if (nxStatus == null)
+			return CameraStatus.ERROR;
+		return switch (nxStatus) {
+			case "Online", "Recording" -> CameraStatus.ONLINE;
+			case "Offline", "Unauthorized" -> CameraStatus.OFFLINE;
+			default -> CameraStatus.ERROR;
+		};
+	}
+
 	// ── Nx Witness API 請求/回應 DTO（內部類別） ────────────────
 
+	/** ec2: 即時串流請求 */
 	private record StreamRequest(String streamType) {
 	}
 
+	/** ec2: 回放串流請求 */
 	private record PlaybackStreamRequest(String streamType, String startTime, String endTime) {
 	}
 
+	/** ec2: PTZ 請求 */
 	private record NxPtzRequest(String command, Integer speed) {
 	}
 
+	/** ec2: 串流回應 */
 	private record NxStreamResponse(String streamUrl) {
 	}
 
-	private record NxCameraInfoResponse(String id, String displayName) {
+	/** REST API v1: 系統資訊回應（免授權健康檢查） */
+	private record NxSystemInfoResponse(String name, String version, String customization) {
 	}
 
-	private record NxCameraListResponse(List<NxCameraItem> cameras) {
+	/** REST API v1: 裝置回應（GET /rest/v1/devices 與 GET /rest/v1/devices/{id} 共用） */
+	private record NxDevice(String id, String name, String physicalId, String url, String status, String deviceType,
+			String vendor, String model, NxDeviceGroup group, boolean isLicenseUsed) {
 	}
 
-	private record NxCameraItem(String id, String displayName) {
+	/** REST API v1: 裝置群組 */
+	private record NxDeviceGroup(String id, String name) {
 	}
 
 }
