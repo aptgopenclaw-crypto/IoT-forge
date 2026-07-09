@@ -37,7 +37,10 @@ export default {
     endTime: '结束时间',
     warning: '警告',
     deleted: '已删除',
+    success: '操作成功',
     saveSuccess: '保存成功',
+    operations: '操作',
+    test: '测试连接',
     refresh: '刷新',
   },
   lang: {

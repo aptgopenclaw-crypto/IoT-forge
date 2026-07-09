@@ -1,6 +1,7 @@
 package com.taipei.iot.vms.service;
 
 import com.taipei.iot.common.context.TenantContext;
+import com.taipei.iot.common.dept.port.VisibleDeptScopeProvider;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.VmsAdapter;
@@ -51,6 +52,9 @@ class VmsAdminServiceTest {
 	@Mock
 	private VmsAdapter vmsAdapter;
 
+	@Mock
+	private VisibleDeptScopeProvider visibleDeptScopeProvider;
+
 	private VmsAdminService service;
 
 	private final VmsServer testServer = VmsServer.builder()
@@ -65,7 +69,8 @@ class VmsAdminServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		service = new VmsAdminService(vmsServerRepository, vmsCameraRepository, vmsAdapterManager);
+		service = new VmsAdminService(vmsServerRepository, vmsCameraRepository, vmsAdapterManager,
+				visibleDeptScopeProvider);
 		TenantContext.setCurrentTenantId("tenant-1");
 	}
 
@@ -187,7 +192,7 @@ class VmsAdminServiceTest {
 			when(vmsServerRepository.findByIdAndTenantId(1L, "tenant-1")).thenReturn(Optional.of(testServer));
 			when(vmsCameraRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-			var request = new VmsCameraRequest(1L, "cam-002", "新攝影機", null);
+			var request = new VmsCameraRequest(1L, "cam-002", "新攝影機", null, null);
 			VmsCameraResponse result = service.createCamera(request);
 
 			assertThat(result.displayName()).isEqualTo("新攝影機");
@@ -199,7 +204,7 @@ class VmsAdminServiceTest {
 		void createCamera_serverNotFound() {
 			when(vmsServerRepository.findByIdAndTenantId(999L, "tenant-1")).thenReturn(Optional.empty());
 
-			var request = new VmsCameraRequest(999L, "cam-x", "x", null);
+			var request = new VmsCameraRequest(999L, "cam-x", "x", null, null);
 			assertThatThrownBy(() -> service.createCamera(request)).isInstanceOf(BusinessException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.VMS_SERVER_NOT_FOUND);
 		}

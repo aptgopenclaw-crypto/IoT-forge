@@ -68,6 +68,9 @@ public class VmsCamera implements TenantAware {
 	@Column(name = "device_id")
 	private Long deviceId;
 
+	@Column(name = "dept_id")
+	private Long deptId;
+
 	@Column(name = "rtsp_url", length = 500)
 	private String rtspUrl;
 

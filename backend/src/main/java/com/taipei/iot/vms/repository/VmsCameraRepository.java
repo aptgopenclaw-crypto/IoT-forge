@@ -17,4 +17,9 @@ public interface VmsCameraRepository extends JpaRepository<VmsCamera, Long>, Ten
 
 	List<VmsCamera> findByServerIdAndTenantId(Long serverId, String tenantId);
 
+	List<VmsCamera> findByTenantIdAndDeptIdIn(String tenantId, java.util.Collection<Long> deptIds);
+
+	List<VmsCamera> findByServerIdAndTenantIdAndDeptIdIn(Long serverId, String tenantId,
+			java.util.Collection<Long> deptIds);
+
 }

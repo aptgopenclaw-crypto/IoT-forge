@@ -37,7 +37,10 @@ export default {
     endTime: 'End time',
     warning: 'Warning',
     deleted: 'Deleted',
+    success: 'Success',
     saveSuccess: 'Saved',
+    operations: 'Operations',
+    test: 'Test Connection',
     refresh: 'Refresh',
   },
   lang: {

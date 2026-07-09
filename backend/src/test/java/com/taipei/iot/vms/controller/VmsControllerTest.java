@@ -3,6 +3,7 @@ package com.taipei.iot.vms.controller;
 import com.taipei.iot.auth.config.SecurityConfig;
 import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.common.config.CorsProperties;
+import com.taipei.iot.common.dept.port.VisibleDeptScopeProvider;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
@@ -19,6 +20,7 @@ import com.taipei.iot.vms.service.VmsStreamService;
 import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,6 +32,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +73,15 @@ class VmsControllerTest {
 	@MockitoBean
 	private TenantEnabledCache tenantEnabledCache;
 
+	@MockitoBean
+	private VisibleDeptScopeProvider visibleDeptScopeProvider;
+
 	private static final String TOKEN = "valid.jwt.token";
+
+	@BeforeEach
+	void setUp() {
+		when(visibleDeptScopeProvider.getVisibleDeptIds()).thenReturn(Collections.emptyList());
+	}
 
 	private void mockJwt(List<String> permissions) {
 		Map<String, Object> claims = new HashMap<>();

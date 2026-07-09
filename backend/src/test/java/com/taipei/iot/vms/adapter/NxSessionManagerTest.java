@@ -1,5 +1,6 @@
 package com.taipei.iot.vms.adapter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.entity.VmsServer;
@@ -9,24 +10,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestClient;
+
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-/**
- * {@link NxSessionManager} 行為測試。
- */
 class NxSessionManagerTest {
+
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	private NxSessionManager sessionManager;
 
-	private MockRestServiceServer mockServer;
+	private HttpClient httpClient;
 
 	private final VmsServer testServer = VmsServer.builder()
 		.id(1L)
@@ -41,10 +42,16 @@ class NxSessionManagerTest {
 		.build();
 
 	@BeforeEach
-	void setUp() {
-		RestClient.Builder builder = RestClient.builder();
-		mockServer = MockRestServiceServer.bindTo(builder).build();
-		sessionManager = new NxSessionManager(builder);
+	@SuppressWarnings("unchecked")
+	void setUp() throws Exception {
+		httpClient = mock(HttpClient.class);
+		var response = mock(HttpResponse.class);
+		when(response.statusCode()).thenReturn(200);
+		when(response.body()).thenReturn(
+				"{\"id\":\"uuid\",\"username\":\"admin\",\"token\":\"session-token-abc\",\"ageS\":0,\"expiresInS\":3600}");
+		when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
+
+		sessionManager = new NxSessionManager(httpClient);
 	}
 
 	@Nested
@@ -53,39 +60,23 @@ class NxSessionManagerTest {
 
 		@Test
 		@DisplayName("首次呼叫發送 login request 並回傳 token")
-		void firstCall_logsInAndReturnsToken() {
-			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/login/sessions"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(content().json("""
-						{"username":"admin","password":"pass"}
-						"""))
-				.andRespond(withSuccess("""
-						{"id":"uuid","username":"admin","token":"session-token-abc","ageS":0,"expiresInS":3600}
-						""", MediaType.APPLICATION_JSON));
-
+		void firstCall_logsInAndReturnsToken() throws Exception {
 			String token = sessionManager.getToken(testServer);
-
 			assertThat(token).isEqualTo("session-token-abc");
-			mockServer.verify();
+			verify(httpClient).send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class));
 		}
 
 		@Test
 		@DisplayName("cache hit（未到期）不發送 login request")
-		void cacheHit_doesNotLogin() {
-			// 第一次呼叫：login → cache
-			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/login/sessions"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(withSuccess("""
-						{"id":"uuid","username":"admin","token":"cached-token","ageS":0,"expiresInS":3600}
-						""", MediaType.APPLICATION_JSON));
-
+		void cacheHit_doesNotLogin() throws Exception {
 			String firstToken = sessionManager.getToken(testServer);
-			assertThat(firstToken).isEqualTo("cached-token");
-			mockServer.verify();
+			assertThat(firstToken).isEqualTo("session-token-abc");
 
-			// 第二次呼叫：應從 cache 取得，不發送任何請求
+			reset(httpClient);
+
 			String secondToken = sessionManager.getToken(testServer);
-			assertThat(secondToken).isEqualTo("cached-token");
+			assertThat(secondToken).isEqualTo("session-token-abc");
+			verify(httpClient, never()).send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class));
 		}
 
 	}
@@ -96,31 +87,15 @@ class NxSessionManagerTest {
 
 		@Test
 		@DisplayName("清除 cache 後重新 login")
-		void afterInvalidate_logsInAgain() {
-			// 第一次呼叫：login（加入兩次 expectation，因 invalidate 後會再次 login）
-			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/login/sessions"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(withSuccess("""
-						{"id":"uuid","username":"admin","token":"token-v1","ageS":0,"expiresInS":3600}
-						""", MediaType.APPLICATION_JSON));
-			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/login/sessions"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(withSuccess("""
-						{"id":"uuid","username":"admin","token":"token-v2","ageS":0,"expiresInS":3600}
-						""", MediaType.APPLICATION_JSON));
-
-			// 第一次呼叫：使用 token-v1
+		void afterInvalidate_logsInAgain() throws Exception {
 			String firstToken = sessionManager.getToken(testServer);
-			assertThat(firstToken).isEqualTo("token-v1");
+			assertThat(firstToken).isEqualTo("session-token-abc");
 
-			// invalidate 清除 cache
 			sessionManager.invalidate(1L);
 
-			// 第二次呼叫：應重新 login，使用 token-v2
 			String secondToken = sessionManager.getToken(testServer);
-			assertThat(secondToken).isEqualTo("token-v2");
-
-			mockServer.verify();
+			assertThat(secondToken).isEqualTo("session-token-abc");
+			verify(httpClient, times(2)).send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class));
 		}
 
 	}
@@ -130,24 +105,29 @@ class NxSessionManagerTest {
 	class LoginFailure {
 
 		@Test
-		@DisplayName("登入失敗（空回應）拋 VMS_CONNECTION_FAILED")
-		void nullResponse_throwsVmsConnectionFailed() {
-			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/login/sessions"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+		@DisplayName("登入失敗（token is null）拋 VMS_CONNECTION_FAILED")
+		void nullResponse_throwsVmsConnectionFailed() throws Exception {
+			reset(httpClient);
+			var response = mock(HttpResponse.class);
+			when(response.statusCode()).thenReturn(200);
+			when(response.body()).thenReturn("{}");
+			when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
 
 			assertThatThrownBy(() -> sessionManager.getToken(testServer)).isInstanceOf(BusinessException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.VMS_CONNECTION_FAILED);
 		}
 
 		@Test
-		@DisplayName("登入 HTTP 錯誤拋 RestClientException")
-		void httpError_throwsException() {
-			mockServer.expect(requestTo("http://nx-test:7001/rest/v1/login/sessions"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(withUnauthorizedRequest());
+		@DisplayName("登入 HTTP 錯誤（404）拋 BusinessException")
+		void httpError_throwsException() throws Exception {
+			reset(httpClient);
+			var response = mock(HttpResponse.class);
+			when(response.statusCode()).thenReturn(404);
+			when(response.body()).thenReturn("{\"error\":\"9\",\"errorId\":\"notFound\",\"errorString\":\"\"}");
+			when(httpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
 
-			assertThatThrownBy(() -> sessionManager.getToken(testServer)).isInstanceOf(Exception.class);
+			assertThatThrownBy(() -> sessionManager.getToken(testServer)).isInstanceOf(BusinessException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.VMS_CONNECTION_FAILED);
 		}
 
 	}

@@ -1,6 +1,8 @@
 package com.taipei.iot.vms.controller;
 
+import com.taipei.iot.common.dept.port.VisibleDeptScopeProvider;
 import com.taipei.iot.common.response.BaseResponse;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.vms.dto.CameraLiveResponse;
 import com.taipei.iot.vms.dto.CameraPlaybackResponse;
 import com.taipei.iot.vms.dto.PtzCommand;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -40,15 +43,26 @@ public class VmsController {
 
 	private final VmsCameraRepository vmsCameraRepository;
 
+	private final VisibleDeptScopeProvider visibleDeptScopeProvider;
+
 	@GetMapping("/cameras")
 	@PreAuthorize("hasAuthority('VMS_VIEW')")
-	@Operation(summary = "攝影機列表", description = "列出當前租戶所有攝影機")
+	@Operation(summary = "攝影機列表", description = "依資料權限 scope 列出當前使用者可見的攝影機")
 	public BaseResponse<List<VmsCameraResponse>> listCameras() {
-		List<VmsCameraResponse> cameras = vmsCameraRepository
-			.findByTenantId(com.taipei.iot.common.context.TenantContext.getCurrentTenantId())
-			.stream()
-			.map(VmsCameraResponse::from)
-			.toList();
+		String tenantId = TenantContext.getCurrentTenantId();
+		List<Long> visibleDeptIds = visibleDeptScopeProvider.getVisibleDeptIds();
+
+		List<VmsCameraResponse> cameras;
+		if (visibleDeptIds.isEmpty()) {
+			// ALL scope — 不限制部門
+			cameras = vmsCameraRepository.findByTenantId(tenantId).stream().map(VmsCameraResponse::from).toList();
+		}
+		else {
+			cameras = vmsCameraRepository.findByTenantIdAndDeptIdIn(tenantId, visibleDeptIds)
+				.stream()
+				.map(VmsCameraResponse::from)
+				.toList();
+		}
 		return BaseResponse.success(cameras);
 	}
 

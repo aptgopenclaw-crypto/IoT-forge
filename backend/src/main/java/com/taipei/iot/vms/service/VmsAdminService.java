@@ -1,6 +1,7 @@
 package com.taipei.iot.vms.service;
 
 import com.taipei.iot.common.context.TenantContext;
+import com.taipei.iot.common.dept.port.VisibleDeptScopeProvider;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.VmsAdapterManager;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,6 +32,8 @@ public class VmsAdminService {
 	private final VmsCameraRepository vmsCameraRepository;
 
 	private final VmsAdapterManager vmsAdapterManager;
+
+	private final VisibleDeptScopeProvider visibleDeptScopeProvider;
 
 	// ── Servers ─────────────────────────────────────────────────
 
@@ -113,12 +117,26 @@ public class VmsAdminService {
 	@Transactional(readOnly = true)
 	public List<VmsCameraResponse> listCameras(Long serverId) {
 		String tenantId = TenantContext.getCurrentTenantId();
+		List<Long> visibleDeptIds = visibleDeptScopeProvider.getVisibleDeptIds();
+		Collection<Long> deptFilter = visibleDeptIds.isEmpty() ? null : visibleDeptIds;
+
 		List<VmsCamera> cameras;
-		if (serverId != null) {
-			cameras = vmsCameraRepository.findByServerIdAndTenantId(serverId, tenantId);
+		if (deptFilter != null) {
+			if (serverId != null) {
+				cameras = vmsCameraRepository.findByServerIdAndTenantIdAndDeptIdIn(serverId, tenantId, deptFilter);
+			}
+			else {
+				cameras = vmsCameraRepository.findByTenantIdAndDeptIdIn(tenantId, deptFilter);
+			}
 		}
 		else {
-			cameras = vmsCameraRepository.findByTenantId(tenantId);
+			// ALL scope — 不限制部門
+			if (serverId != null) {
+				cameras = vmsCameraRepository.findByServerIdAndTenantId(serverId, tenantId);
+			}
+			else {
+				cameras = vmsCameraRepository.findByTenantId(tenantId);
+			}
 		}
 		return cameras.stream().map(VmsCameraResponse::from).toList();
 	}
@@ -135,6 +153,7 @@ public class VmsAdminService {
 			.vmsCameraId(request.vmsCameraId())
 			.displayName(request.displayName())
 			.deviceId(request.deviceId())
+			.deptId(request.deptId())
 			.status(com.taipei.iot.vms.enums.CameraStatus.ONLINE)
 			.build();
 		camera = vmsCameraRepository.save(camera);

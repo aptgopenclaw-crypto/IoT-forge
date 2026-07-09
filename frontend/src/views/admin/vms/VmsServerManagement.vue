@@ -228,19 +228,21 @@ onMounted(loadServers)
         style="width: 100%"
       >
         <el-table-column prop="name" :label="t('vms.serverName')" min-width="140" />
-        <el-table-column prop="vmsType" :label="t('vms.vmsType')" width="110" />
+        <el-table-column prop="vmsType" :label="t('vms.vmsType')" width="160" />
         <el-table-column prop="baseUrl" :label="t('vms.baseUrl')" min-width="160" show-overflow-tooltip />
-        <el-table-column :label="t('common.operations')" width="200" fixed="right">
+        <el-table-column :label="t('common.operations')" min-width="260" fixed="right">
           <template #default="{ row }: { row: VmsServer }">
-            <el-button v-if="canManage" size="small" @click="openEditDialog(row)">
-              {{ t('common.edit') }}
-            </el-button>
-            <el-button size="small" @click="handleTestConnection(row.id)">
-              {{ t('common.test') }}
-            </el-button>
-            <el-button v-if="canManage" size="small" type="danger" @click="handleServerDelete(row.id)">
-              {{ t('common.delete') }}
-            </el-button>
+            <div class="table-actions">
+              <el-button v-if="canManage" size="small" @click="openEditDialog(row)">
+                {{ t('common.edit') }}
+              </el-button>
+              <el-button size="small" @click="handleTestConnection(row.id)">
+                {{ t('common.test') }}
+              </el-button>
+              <el-button v-if="canManage" size="small" type="danger" @click="handleServerDelete(row.id)">
+                {{ t('common.delete') }}
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -376,5 +378,11 @@ onMounted(loadServers)
 .panel-header h3 {
   font-size: 16px;
   margin: 0;
+}
+.table-actions {
+  white-space: nowrap;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 </style>

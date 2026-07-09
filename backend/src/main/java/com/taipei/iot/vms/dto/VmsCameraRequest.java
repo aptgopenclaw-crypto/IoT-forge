@@ -10,7 +10,8 @@ import jakarta.validation.constraints.NotNull;
  * @param vmsCameraId VMS 端的攝影機 ID
  * @param displayName 顯示名稱（選用）
  * @param deviceId 關聯 IoT 裝置 ID（選用）
+ * @param deptId 所屬部門 ID（選用，用於 data scope 過濾）
  */
-public record VmsCameraRequest(@NotNull Long serverId, @NotBlank String vmsCameraId, String displayName,
-		Long deviceId) {
+public record VmsCameraRequest(@NotNull Long serverId, @NotBlank String vmsCameraId, String displayName, Long deviceId,
+		Long deptId) {
 }
