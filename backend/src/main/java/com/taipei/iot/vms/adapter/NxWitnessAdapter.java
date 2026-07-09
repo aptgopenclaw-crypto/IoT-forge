@@ -13,9 +13,11 @@ import com.taipei.iot.vms.repository.VmsServerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -189,13 +191,20 @@ public class NxWitnessAdapter implements VmsAdapter {
 
 	/**
 	 * 建立針對特定 VMS 伺服器的 RestClient。 使用 {@link NxSessionManager#getToken(VmsServer)} 取得
-	 * session token 作為 Bearer token。 package-private 以便測試覆寫。
+	 * session token 作為 Bearer token。 內建連線逾時（5s）與讀取逾時（15s），避免 VMS 掛掉時 thread hung。
+	 * package-private 以便測試覆寫。
 	 */
 	RestClient buildRestClient(VmsServer server) {
 		String token = nxSessionManager.getToken(server);
+
+		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+		factory.setConnectTimeout(Duration.ofSeconds(5));
+		factory.setReadTimeout(Duration.ofSeconds(15));
+
 		return RestClient.builder()
 			.baseUrl(server.getBaseUrl())
 			.defaultHeader("Authorization", "Bearer " + token)
+			.requestFactory(factory)
 			.build();
 	}
 
