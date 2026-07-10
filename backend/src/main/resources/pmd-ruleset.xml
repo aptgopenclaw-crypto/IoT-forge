@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<ruleset name="unused-imports" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0">
+    <description>Only check for unnecessary imports</description>
+
+    <rule ref="category/java/codestyle.xml/UnnecessaryImport" />
+</ruleset>
