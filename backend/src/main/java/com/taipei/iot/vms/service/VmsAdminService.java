@@ -152,6 +152,7 @@ public class VmsAdminService {
 			.server(server)
 			.vmsCameraId(request.vmsCameraId())
 			.displayName(request.displayName())
+			.rtspUrl(request.rtspUrl())
 			.deviceId(request.deviceId())
 			.deptId(request.deptId())
 			.status(com.taipei.iot.vms.enums.CameraStatus.ONLINE)

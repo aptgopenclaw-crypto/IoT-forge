@@ -39,6 +39,7 @@ export interface VmsCamera {
   vmsCameraId: string
   displayName: string
   deviceId?: number
+  deptId?: number
   status: CameraStatus
   rtspUrl?: string
 }
@@ -47,7 +48,9 @@ export interface VmsCameraRequest {
   serverId: number
   vmsCameraId: string
   displayName?: string
+  rtspUrl?: string
   deviceId?: number
+  deptId?: number
 }
 
 // ── Stream ─────────────────────────────────────────────────────────────────

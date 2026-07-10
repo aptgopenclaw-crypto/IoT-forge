@@ -9,9 +9,10 @@ import jakarta.validation.constraints.NotNull;
  * @param serverId 所屬 VMS 伺服器 ID
  * @param vmsCameraId VMS 端的攝影機 ID
  * @param displayName 顯示名稱（選用）
+ * @param rtspUrl RTSP 串流 URL（選用）
  * @param deviceId 關聯 IoT 裝置 ID（選用）
  * @param deptId 所屬部門 ID（選用，用於 data scope 過濾）
  */
-public record VmsCameraRequest(@NotNull Long serverId, @NotBlank String vmsCameraId, String displayName, Long deviceId,
-		Long deptId) {
+public record VmsCameraRequest(@NotNull Long serverId, @NotBlank String vmsCameraId, String displayName, String rtspUrl,
+		Long deviceId, Long deptId) {
 }

@@ -45,7 +45,16 @@ public class CsvParser implements FileParser {
 			for (CSVRecord record : csvParser) {
 				Map<String, String> rowMap = new LinkedHashMap<>();
 				for (Map.Entry<String, String> entry : headerLowerMap.entrySet()) {
-					rowMap.put(entry.getKey(), record.get(entry.getValue()));
+					String originalHeader = entry.getValue();
+					String value;
+					try {
+						value = record.get(originalHeader);
+					}
+					catch (IllegalArgumentException e) {
+						// 該列缺少此欄位（如尾端欄位遺漏），以空字串取代
+						value = "";
+					}
+					rowMap.put(entry.getKey(), value);
 				}
 				// 略過全空列
 				if (rowMap.values().stream().allMatch(v -> v == null || v.isBlank())) {

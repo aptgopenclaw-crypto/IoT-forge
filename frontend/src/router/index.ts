@@ -254,6 +254,11 @@ const tenantStaticAdminRoutes: RouteRecordRaw[] = [
     component: () => import('@/views/admin/vms/VmsPlaybackView.vue'),
   },
   {
+    path: '/vms/cameras',
+    name: 'VmsCameras',
+    component: () => import('@/views/admin/vms/VmsCameraListView.vue'),
+  },
+  {
     path: '/vms/servers',
     name: 'VmsServers',
     component: () => import('@/views/admin/vms/VmsServerManagement.vue'),

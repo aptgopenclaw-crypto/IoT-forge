@@ -1,0 +1,5 @@
+server_name,vms_camera_id,display_name,rtsp_url,device_code,dept_name
+UB,e3e9a385-7fe0-3ba5-5482-a86cde7faf40,Test,,,Dept-A
+UB,e3e9a385-7fe0-3ba5-5482-a86cde7faf41,大門入口,,,Dept-A
+UB,e3e9a385-7fe0-3ba5-5482-a86cde7faf42,停車場,,,,Dept-A
+UB,e3e9a385-7fe0-3ba5-5482-a86cde7faf43,倉庫,,,Dept-A

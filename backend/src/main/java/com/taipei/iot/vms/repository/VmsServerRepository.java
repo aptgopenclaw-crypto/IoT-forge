@@ -15,4 +15,6 @@ public interface VmsServerRepository extends JpaRepository<VmsServer, Long>, Ten
 
 	Optional<VmsServer> findByIdAndTenantId(Long id, String tenantId);
 
+	Optional<VmsServer> findByTenantIdAndName(String tenantId, String name);
+
 }

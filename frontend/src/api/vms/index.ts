@@ -1,5 +1,6 @@
 import axiosIns from '@/api/axios/axiosIns'
 import type { BaseResponse } from '@/types/device'
+import type { ImportResponse } from '@/types/device'
 import type {
   CameraLiveResponse,
   CameraPlaybackResponse,
@@ -44,6 +45,18 @@ export const createCamera = (data: VmsCameraRequest) =>
 
 export const deleteCamera = (id: number) =>
   axiosIns.delete<unknown, BaseResponse<null>>(`/auth/vms/cameras/${id}`)
+
+// ── Import ───────────────────────────────────────────────────
+
+export const importCameras = (file: File) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return axiosIns.post<unknown, BaseResponse<ImportResponse>>(
+    '/auth/vms/cameras/import',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  )
+}
 
 // ── Stream ─────────────────────────────────────────────────────────────────
 
