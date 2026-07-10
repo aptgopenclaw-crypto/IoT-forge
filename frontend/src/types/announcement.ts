@@ -7,14 +7,6 @@ export interface AnnouncementAttachmentResponse {
   createdAt: string
 }
 
-/** 公告多語系翻譯（單一語言）。 */
-export interface AnnouncementTranslationDto {
-  /** BCP-47 語言代碼：zh-TW / zh-CN / en 。 */
-  langCode: string
-  title: string
-  content: string
-}
-
 export interface AnnouncementResponse {
   id: number
   title: string
@@ -40,10 +32,6 @@ export interface AnnouncementResponse {
   editable: boolean
   version: number
   attachments?: AnnouncementAttachmentResponse[]
-  /** 本筆回應 title / content 實際使用的語言（可能 fallback） */
-  resolvedLang?: string
-  /** 所有翻譯（含預設 zh-TW）；管理端編輯使用 */
-  translations?: AnnouncementTranslationDto[]
 }
 
 export interface AnnouncementRequest {
@@ -63,8 +51,6 @@ export interface AnnouncementRequest {
   expireAt?: string | null
   /** 樂觀鎖版本號；編輯時必填，新增時可省略 */
   version?: number
-  /** 额外語言翻譯（不含預設語言 zh-TW）；title/content 即代表 zh-TW 版本 */
-  translations?: AnnouncementTranslationDto[]
 }
 
 export const ANNOUNCEMENT_CATEGORIES = [

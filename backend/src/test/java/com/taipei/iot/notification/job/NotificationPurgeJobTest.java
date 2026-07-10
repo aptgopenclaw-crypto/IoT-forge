@@ -2,7 +2,6 @@ package com.taipei.iot.notification.job;
 
 import com.taipei.iot.notification.repository.NotificationRepository;
 import com.taipei.iot.setting.entity.SystemSettingEntity;
-import com.taipei.iot.setting.enums.SettingKey;
 import com.taipei.iot.setting.repository.SystemSettingRepository;
 import com.taipei.iot.tenant.entity.TenantEntity;
 import com.taipei.iot.tenant.repository.TenantRepository;

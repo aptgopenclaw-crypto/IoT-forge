@@ -1,6 +1,5 @@
 package com.taipei.iot.import_.device;
 
-import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

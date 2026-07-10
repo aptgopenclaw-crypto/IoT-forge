@@ -1,7 +1,6 @@
 package com.taipei.iot.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.taipei.iot.auth.security.JwtAuthenticationFilter;
 import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.common.exception.GlobalExceptionHandler;
 import com.taipei.iot.common.config.CorsProperties;
@@ -17,8 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import com.taipei.iot.common.interceptor.RateLimitInterceptor;
-import com.taipei.iot.tenant.interceptor.TenantInterceptor;
 import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.web.servlet.MockMvc;

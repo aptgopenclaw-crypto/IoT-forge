@@ -5,7 +5,7 @@ import com.taipei.iot.announcement.dto.AnnouncementUnreadUserResponse;
 import com.taipei.iot.announcement.dto.UnreadCountResponse;
 import com.taipei.iot.announcement.entity.Announcement;
 import com.taipei.iot.announcement.entity.AnnouncementDept;
-import com.taipei.iot.announcement.entity.AnnouncementScope;
+import com.taipei.iot.announcement.enums.AnnouncementScope;
 import com.taipei.iot.announcement.repository.AnnouncementDeptRepository;
 import com.taipei.iot.announcement.repository.AnnouncementReadRepository;
 import com.taipei.iot.announcement.repository.AnnouncementRepository;

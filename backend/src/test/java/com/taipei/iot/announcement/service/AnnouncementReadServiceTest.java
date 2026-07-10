@@ -5,7 +5,6 @@ import com.taipei.iot.announcement.repository.AnnouncementDeptRepository;
 import com.taipei.iot.announcement.repository.AnnouncementReadRepository;
 import com.taipei.iot.announcement.repository.AnnouncementRepository;
 import com.taipei.iot.announcement.repository.AnnouncementStatsRepository;
-import com.taipei.iot.common.dto.UserInfo;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.util.JwtClaimKeys;

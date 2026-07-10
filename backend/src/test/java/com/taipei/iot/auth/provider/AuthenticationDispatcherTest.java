@@ -1,7 +1,6 @@
 package com.taipei.iot.auth.provider;
 
 import com.taipei.iot.common.enums.AuthType;
-import com.taipei.iot.user.entity.UserEntity;
 import com.taipei.iot.auth.provider.config.entity.TenantAuthConfigEntity;
 import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository;
 import com.taipei.iot.auth.provider.crypto.AuthConfigEncryptor;

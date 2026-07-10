@@ -9,7 +9,6 @@ import com.taipei.iot.auth.provider.config.entity.TenantAuthConfigEntity;
 import com.taipei.iot.auth.provider.config.repository.TenantAuthConfigRepository;
 import com.taipei.iot.auth.provider.config.service.impl.TenantAuthConfigServiceImpl;
 import com.taipei.iot.auth.provider.crypto.AuthConfigEncryptor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

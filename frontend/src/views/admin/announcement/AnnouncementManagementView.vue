@@ -19,7 +19,7 @@ import {
   reorderPinnedAnnouncements,
 } from '@/api/announcement'
 import { getDeptOptions } from '@/api/dept'
-import type { AnnouncementResponse, AnnouncementRequest, AnnouncementTranslationDto, AnnouncementAttachmentResponse, AnnouncementReadStatsResponse, AnnouncementUnreadUserResponse } from '@/types/announcement'
+import type { AnnouncementResponse, AnnouncementRequest, AnnouncementAttachmentResponse, AnnouncementReadStatsResponse, AnnouncementUnreadUserResponse } from '@/types/announcement'
 import { ANNOUNCEMENT_CATEGORIES } from '@/types/announcement'
 import type { DeptOptionVO } from '@/types/dept'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -124,52 +124,6 @@ const form = reactive<AnnouncementRequest & { publishMode: 'now' | 'schedule'; n
   publishMode: 'now',
   neverExpire: false,
 })
-
-// ── 多語系：zh-TW 對應 form.title / form.content（canonical）；其他語言放在 extraTranslations ──
-const DEFAULT_LANG = 'zh-TW'
-const EXTRA_LANGS = ['zh-CN', 'en'] as const
-type ExtraLang = typeof EXTRA_LANGS[number]
-const extraTranslations = reactive<Record<ExtraLang, { title: string; content: string }>>({
-  'zh-CN': { title: '', content: '' },
-  'en': { title: '', content: '' },
-})
-/** 表單目前顯示的語言 tab；預設為使用者目前 locale（若在支援清單內） */
-function initialLangTab(): string {
-  try {
-    const stored = localStorage.getItem('locale') || ''
-    if (stored === DEFAULT_LANG || (EXTRA_LANGS as readonly string[]).includes(stored)) return stored
-  } catch {
-    /* ignore */
-  }
-  return DEFAULT_LANG
-}
-const currentLangTab = ref<string>(initialLangTab())
-
-/** 將 extraTranslations 轉成送往後端的清單；過濾掉 title+content 皆空的語言 */
-function buildTranslationsPayload(): AnnouncementTranslationDto[] {
-  const out: AnnouncementTranslationDto[] = []
-  for (const lang of EXTRA_LANGS) {
-    const entry = extraTranslations[lang]
-    if (entry.title.trim() || entry.content.trim()) {
-      out.push({ langCode: lang, title: entry.title, content: entry.content })
-    }
-  }
-  return out
-}
-
-/** 將回應的 translations[] 套入 extraTranslations（zh-TW 由 form.title/content 承接） */
-function applyResponseTranslations(translations: AnnouncementTranslationDto[] | undefined) {
-  for (const lang of EXTRA_LANGS) {
-    extraTranslations[lang] = { title: '', content: '' }
-  }
-  if (!translations) return
-  for (const t of translations) {
-    if (t.langCode === DEFAULT_LANG) continue
-    if ((EXTRA_LANGS as readonly string[]).includes(t.langCode)) {
-      extraTranslations[t.langCode as ExtraLang] = { title: t.title ?? '', content: t.content ?? '' }
-    }
-  }
-}
 
 const expireManuallyEdited = ref(false)
 
@@ -327,7 +281,6 @@ function snapshotForm(): string {
   return JSON.stringify({
     title: form.title,
     content: form.content,
-    translations: buildTranslationsPayload(),
     scope: form.scope,
     category: form.category,
     targetDeptIds: form.targetDeptIds,
@@ -356,7 +309,6 @@ async function autoSaveDraft() {
   const payload: AnnouncementRequest = {
     title: form.title,
     content: form.content,
-    translations: buildTranslationsPayload(),
     status: 'DRAFT',
     scope: form.scope,
     category: form.category || 'GENERAL',
@@ -499,8 +451,6 @@ function resetForm() {
   form.neverExpire = false
   expireManuallyEdited.value = false
   attachments.value = []
-  for (const lang of EXTRA_LANGS) extraTranslations[lang] = { title: '', content: '' }
-  currentLangTab.value = initialLangTab()
 }
 
 function openCreate() {
@@ -520,11 +470,8 @@ function openCreate() {
 function openEdit(row: AnnouncementResponse) {
   dialogMode.value = 'edit'
   editingId.value = row.id
-  // \u540e\u7aef\u4e00\u5b9a\u4ee5 translations[] \u5305\u542b zh-TW canonical\uff1b\u4ee5\u6b64\u70ba\u4e3b\uff0c\u5426\u5247 fallback \u5230 row.title/content
-  const zhTw = row.translations?.find((t) => t.langCode === DEFAULT_LANG)
-  form.title = zhTw?.title ?? row.title
-  form.content = zhTw?.content ?? row.content
-  applyResponseTranslations(row.translations)
+  form.title = row.title
+  form.content = row.content
   form.status = row.status
   form.scope = row.scope
   form.category = row.category || 'GENERAL'
@@ -584,7 +531,6 @@ async function handleSave() {
   const payload: AnnouncementRequest = {
     title: form.title,
     content: form.content,
-    translations: buildTranslationsPayload(),
     status: form.status,
     scope: form.scope,
     category: form.category || 'GENERAL',
@@ -687,11 +633,6 @@ function getExpireLabel(row: AnnouncementResponse): string {
 }
 
 // ── 初始化 ──
-// 切換 i18n locale 時：重新撈列表（後端會依 Accept-Language 回不同翻譯）
-watch(locale, () => {
-  fetchList()
-})
-
 onMounted(async () => {
   fetchList()
   // 載入部門選項
@@ -842,39 +783,12 @@ onMounted(async () => {
       destroy-on-close
     >
       <el-form label-position="top" :aria-label="dialogMode === 'create' ? t('announcement.admin.create') : t('announcement.admin.edit')">
-        <!-- 多語系輸入：zh-TW 為主表（必填）；zh-CN / en 為選填翻譯 -->
-        <el-tabs v-model="currentLangTab">
-          <el-tab-pane :label="t('announcement.lang.zhTW') + ' *'" name="zh-TW">
-            <el-form-item :label="t('announcement.field.title')" required>
-              <el-input v-model="form.title" maxlength="200" show-word-limit />
-            </el-form-item>
-            <el-form-item :label="t('announcement.field.content')" required>
-              <RichTextEditor v-model="form.content" />
-            </el-form-item>
-          </el-tab-pane>
-          <el-tab-pane :label="t('announcement.lang.zhCN')" name="zh-CN">
-            <el-form-item :label="t('announcement.field.title')">
-              <el-input v-model="extraTranslations['zh-CN'].title" maxlength="200" show-word-limit />
-            </el-form-item>
-            <el-form-item :label="t('announcement.field.content')">
-              <RichTextEditor v-model="extraTranslations['zh-CN'].content" />
-            </el-form-item>
-            <el-alert type="info" :closable="false" show-icon>
-              {{ t('announcement.lang.optionalHint') }}
-            </el-alert>
-          </el-tab-pane>
-          <el-tab-pane :label="t('announcement.lang.en')" name="en">
-            <el-form-item :label="t('announcement.field.title')">
-              <el-input v-model="extraTranslations['en'].title" maxlength="200" show-word-limit />
-            </el-form-item>
-            <el-form-item :label="t('announcement.field.content')">
-              <RichTextEditor v-model="extraTranslations['en'].content" />
-            </el-form-item>
-            <el-alert type="info" :closable="false" show-icon>
-              {{ t('announcement.lang.optionalHint') }}
-            </el-alert>
-          </el-tab-pane>
-        </el-tabs>
+        <el-form-item :label="t('announcement.field.title')" required>
+          <el-input v-model="form.title" maxlength="200" show-word-limit />
+        </el-form-item>
+        <el-form-item :label="t('announcement.field.content')" required>
+          <RichTextEditor v-model="form.content" />
+        </el-form-item>
 
         <el-form-item :label="t('announcement.field.category')">
           <el-select v-model="form.category" style="width: 100%">

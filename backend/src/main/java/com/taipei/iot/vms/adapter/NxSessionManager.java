@@ -6,7 +6,6 @@ import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.entity.VmsServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 
 import javax.net.ssl.SSLParameters;
 import java.io.IOException;

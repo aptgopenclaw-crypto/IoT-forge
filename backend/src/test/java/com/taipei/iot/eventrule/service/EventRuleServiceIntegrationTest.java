@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.schema.port.SchemaProviderPort;
-import com.taipei.iot.device.entity.Device;
-import com.taipei.iot.device.enums.DeviceStatus;
 import com.taipei.iot.device.repository.DeviceRepository;
 import com.taipei.iot.eventrule.dto.EventRuleRequest;
 import com.taipei.iot.eventrule.dto.EventRuleResponse;

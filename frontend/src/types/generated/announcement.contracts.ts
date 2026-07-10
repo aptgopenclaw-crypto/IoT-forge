@@ -41,8 +41,6 @@ export interface AnnouncementResponse {
   editable: boolean;
   version: number;
   attachments: AnnouncementAttachmentResponse[];
-  resolvedLang: string;
-  translations: AnnouncementTranslationDto[];
 }
 
 // GET /v1/auth/announcements/unread-count  (AnnouncementController.getUnreadCount)
@@ -108,8 +106,6 @@ export interface AnnouncementRequest {
   expireAt: string;
   /** 樂觀鎖版本號；編輯時必填，新增時可省略 */
   version: number;
-  /** 額外語言翻譯（不含預設語言 zh-TW） */
-  translations: AnnouncementTranslationDto[];
 }
 
 // GET /v1/auth/announcements/{id}/attachments  (AnnouncementController.listAttachments)

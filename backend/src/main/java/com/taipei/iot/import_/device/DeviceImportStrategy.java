@@ -2,10 +2,7 @@ package com.taipei.iot.import_.device;
 
 import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.common.exception.BusinessException;
-import com.taipei.iot.dept.entity.DeptInfoEntity;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
-import com.taipei.iot.device.entity.Circuit;
-import com.taipei.iot.device.entity.Contract;
 import com.taipei.iot.device.entity.Device;
 import com.taipei.iot.device.enums.ConnectivityType;
 import com.taipei.iot.device.enums.DeviceStatus;

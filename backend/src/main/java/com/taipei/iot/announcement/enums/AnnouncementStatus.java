@@ -1,4 +1,4 @@
-package com.taipei.iot.announcement.entity;
+package com.taipei.iot.announcement.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

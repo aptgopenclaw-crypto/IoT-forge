@@ -1,6 +1,5 @@
 package com.taipei.iot.vms.controller;
 
-import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.vms.enums.VmsType;
 import com.taipei.iot.vms.service.VmsEventService;
 import org.junit.jupiter.api.DisplayName;

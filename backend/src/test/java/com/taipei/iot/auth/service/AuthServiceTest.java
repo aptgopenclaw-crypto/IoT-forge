@@ -19,7 +19,6 @@ import com.taipei.iot.auth.repository.UserResetPasswordTokenRepository;
 import com.taipei.iot.user.repository.UserTenantMappingRepository;
 import com.taipei.iot.auth.security.JwtUtil;
 import com.taipei.iot.auth.service.impl.AuthServiceImpl;
-import com.taipei.iot.auth.service.TurnstileService;
 import com.taipei.iot.rbac.repository.PermissionRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import com.taipei.iot.common.enums.ErrorCode;

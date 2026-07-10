@@ -1,8 +1,5 @@
 package com.taipei.iot.dept.aspect;
 
-import com.taipei.iot.dept.annotation.DataPermission;
-import com.taipei.iot.dept.context.DataScopeContext;
-import com.taipei.iot.dept.context.DataScopeFilter;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

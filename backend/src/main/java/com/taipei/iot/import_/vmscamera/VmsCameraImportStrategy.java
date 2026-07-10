@@ -1,9 +1,7 @@
 package com.taipei.iot.import_.vmscamera;
 
 import com.taipei.iot.common.context.TenantContext;
-import com.taipei.iot.dept.entity.DeptInfoEntity;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
-import com.taipei.iot.device.entity.Device;
 import com.taipei.iot.device.repository.DeviceRepository;
 import com.taipei.iot.import_.ImportError;
 import com.taipei.iot.import_.ImportStrategy;

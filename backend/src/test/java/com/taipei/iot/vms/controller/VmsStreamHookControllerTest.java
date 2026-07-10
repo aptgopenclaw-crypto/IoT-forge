@@ -1,6 +1,5 @@
 package com.taipei.iot.vms.controller;
 
-import com.taipei.iot.common.config.CorsProperties;
 import com.taipei.iot.vms.service.StreamTokenService;
 import com.taipei.iot.vms.service.StreamTokenService.TokenValidation;
 import com.taipei.iot.vms.service.ZlMediaKitClient;
