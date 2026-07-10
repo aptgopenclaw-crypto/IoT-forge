@@ -79,6 +79,14 @@ public class AnnouncementService {
 		return listVisible(category, page, size, DEFAULT_LANG);
 	}
 
+	/**
+	 * 取得可見公告列表（前台使用）。
+	 * @param category 公告分類
+	 * @param page 分頁頁碼
+	 * @param size 每頁筆數
+	 * @param langCode 語言代碼
+	 * @return 分頁結果
+	 */
 	@Transactional(readOnly = true)
 	public PageResponse<AnnouncementResponse> listVisible(String category, int page, int size, String langCode) {
 		UserInfo user = SecurityContextUtils.getUserInfo();
@@ -97,12 +105,32 @@ public class AnnouncementService {
 
 	// ── 管理頁面查詢 ──
 
+	/**
+	 * 取得管理端公告列表。
+	 * @param statusFilter 狀態篩選
+	 * @param category 公告分類
+	 * @param keyword 關鍵字
+	 * @param page 分頁頁碼
+	 * @param size 每頁筆數
+	 * @param langCode 語言代碼
+	 * @return 分頁結果
+	 */
 	@Transactional(readOnly = true)
 	public PageResponse<AnnouncementResponse> listAdmin(String statusFilter, String category, String keyword, int page,
 			int size) {
 		return listAdmin(statusFilter, category, keyword, page, size, DEFAULT_LANG);
 	}
 
+	/**
+	 * 取得管理端公告列表。
+	 * @param statusFilter 狀態篩選
+	 * @param category 公告分類
+	 * @param keyword 關鍵字
+	 * @param page 分頁頁碼
+	 * @param size 每頁筆數
+	 * @param langCode 語言代碼
+	 * @return
+	 */
 	@Transactional(readOnly = true)
 	public PageResponse<AnnouncementResponse> listAdmin(String statusFilter, String category, String keyword, int page,
 			int size, String langCode) {
@@ -138,11 +166,24 @@ public class AnnouncementService {
 
 	// ── 單筆查詢 ──
 
+	/**
+	 * 取得單筆公告。
+	 * @param id 公告 ID
+	 * @param hasManagePermission 是否具有管理權限
+	 * @return 公告詳細資訊
+	 */
 	@Transactional(readOnly = true)
 	public AnnouncementResponse getById(Long id, boolean hasManagePermission) {
 		return getById(id, hasManagePermission, DEFAULT_LANG);
 	}
 
+	/**
+	 * 取得單筆公告。
+	 * @param id 公告 ID
+	 * @param hasManagePermission 是否具有管理權限
+	 * @param langCode 語言代碼
+	 * @return 公告詳細資訊
+	 */
 	@Transactional(readOnly = true)
 	public AnnouncementResponse getById(Long id, boolean hasManagePermission, String langCode) {
 		UserInfo user = SecurityContextUtils.getUserInfo();
@@ -169,6 +210,11 @@ public class AnnouncementService {
 
 	// ── 新增 ──
 
+	/**
+	 * 新增公告。
+	 * @param request 公告請求物件
+	 * @return
+	 */
 	@Transactional
 	public AnnouncementResponse create(AnnouncementRequest request) {
 		UserInfo user = SecurityContextUtils.getUserInfo();
@@ -226,6 +272,12 @@ public class AnnouncementService {
 
 	// ── 編輯 ──
 
+	/**
+	 * 編輯公告。
+	 * @param id 公告 ID
+	 * @param request 公告請求物件
+	 * @return 公告詳細資訊
+	 */
 	@Transactional
 	public AnnouncementResponse update(Long id, AnnouncementRequest request) {
 		UserInfo user = SecurityContextUtils.getUserInfo();
@@ -299,6 +351,10 @@ public class AnnouncementService {
 
 	// ── 刪除 ──
 
+	/**
+	 * 刪除公告。
+	 * @param id 公告 ID
+	 */
 	@Transactional
 	public void delete(Long id) {
 		UserInfo user = SecurityContextUtils.getUserInfo();

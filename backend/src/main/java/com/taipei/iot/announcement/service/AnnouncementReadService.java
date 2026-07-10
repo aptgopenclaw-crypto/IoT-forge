@@ -43,6 +43,9 @@ public class AnnouncementReadService {
 
 	private final AnnouncementStatsRepository announcementStatsRepository;
 
+	/**
+	 * 取得當前使用者的未讀公告數量。
+	 */
 	@Transactional(readOnly = true)
 	public UnreadCountResponse getUnreadCount() {
 		UserInfo user = SecurityContextUtils.getUserInfo();
@@ -51,6 +54,10 @@ public class AnnouncementReadService {
 		return UnreadCountResponse.builder().count((int) count).build();
 	}
 
+	/**
+	 * 將指定公告標記為已讀（若尚未存在則新增一筆）。
+	 * @param announcementId
+	 */
 	@Transactional
 	public void markAsRead(Long announcementId) {
 		String userId = SecurityContextUtils.getCurrentUserId();
@@ -62,6 +69,9 @@ public class AnnouncementReadService {
 		announcementReadRepository.markAsRead(announcementId, userId);
 	}
 
+	/**
+	 * 將當前使用者的所有公告標記為已讀（僅限 scope=ALL 或 scope=DEPT 且使用者部門在 announcement_depts 中）。
+	 */
 	@Transactional
 	public void markAllAsRead() {
 		UserInfo user = SecurityContextUtils.getUserInfo();

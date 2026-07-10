@@ -15,6 +15,7 @@ import com.taipei.iot.auth.config.SecurityConfig;
 import com.taipei.iot.tenant.cache.TenantEnabledCache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.impl.DefaultClaims;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -39,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AnnouncementController.class)
 @Import({ SecurityConfig.class, GlobalExceptionHandler.class, CorsProperties.class })
 @TestPropertySource(properties = "cors.allowed-origins=http://localhost")
+@DisplayName("AnnouncementController — 整合測試（F1~F6 Controller 層權限 / 驗證）")
 class AnnouncementControllerTest {
 
 	@Autowired
@@ -104,9 +106,36 @@ class AnnouncementControllerTest {
 			.build();
 	}
 
-	// ─── GET /v1/auth/announcements (前台) ──────────────────────────────────
+	// ═══════════════════════════════════════════════════════════════════════════
+	// F1 — 前台查詢（AC-F1）
+	// ═══════════════════════════════════════════════════════════════════════════
 
 	@Test
+	@DisplayName("[AC-F1-4] GET /v1/auth/announcements/{id} - 具 ANNOUNCEMENT_MANAGE 回傳 editable=true")
+	void AC_F1_4_getById_withManagePermission_passesTrue() throws Exception {
+		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
+		AnnouncementResponse resp = AnnouncementResponse.builder()
+			.id(1L)
+			.title("Draft")
+			.content("C")
+			.status("DRAFT")
+			.scope("ALL")
+			.build();
+		when(announcementService.getById(eq(1L), eq(true), any())).thenReturn(resp);
+
+		mockMvc.perform(get("/v1/auth/announcements/1").header("Authorization", AUTH_HEADER))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.body.status").value("DRAFT"));
+	}
+
+	@Test
+	@DisplayName("[AC-F1-11] GET /v1/auth/announcements - 未登入回傳 401")
+	void AC_F1_11_list_unauthenticated_returns401() throws Exception {
+		mockMvc.perform(get("/v1/auth/announcements")).andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	@DisplayName("[AC-F1-11] GET /v1/auth/announcements - 已登入回傳 200")
 	void list_authenticated_returnsOk() throws Exception {
 		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
 		when(announcementService.listVisible(isNull(), eq(0), eq(10), any())).thenReturn(emptyPage());
@@ -117,49 +146,7 @@ class AnnouncementControllerTest {
 	}
 
 	@Test
-	void list_unauthenticated_returns401() throws Exception {
-		mockMvc.perform(get("/v1/auth/announcements")).andExpect(status().isUnauthorized());
-	}
-
-	// ─── GET /v1/auth/announcements/admin ──────────────────────────────────
-
-	@Test
-	void listAdmin_withPermission_returnsOk() throws Exception {
-		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		when(announcementService.listAdmin(eq("ALL"), isNull(), isNull(), eq(0), eq(10), any()))
-			.thenReturn(emptyPage());
-
-		mockMvc.perform(get("/v1/auth/announcements/admin").header("Authorization", AUTH_HEADER))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.errorCode").value("00000"));
-	}
-
-	@Test
-	void listAdmin_withoutPermission_returns403() throws Exception {
-		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
-
-		mockMvc.perform(get("/v1/auth/announcements/admin").header("Authorization", AUTH_HEADER))
-			.andExpect(status().isForbidden());
-	}
-
-	@Test
-	void listAdmin_withKeywordAndFilter_passesParams() throws Exception {
-		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		when(announcementService.listAdmin(eq("DRAFT"), isNull(), eq("test"), eq(1), eq(20), any()))
-			.thenReturn(emptyPage());
-
-		mockMvc
-			.perform(get("/v1/auth/announcements/admin").param("statusFilter", "DRAFT")
-				.param("keyword", "test")
-				.param("page", "1")
-				.param("size", "20")
-				.header("Authorization", AUTH_HEADER))
-			.andExpect(status().isOk());
-	}
-
-	// ─── GET /v1/auth/announcements/{id} ────────────────────────────────────
-
-	@Test
+	@DisplayName("GET /v1/auth/announcements/{id} - 已登入回傳 200")
 	void getById_authenticated_returnsOk() throws Exception {
 		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
 		AnnouncementResponse resp = AnnouncementResponse.builder()
@@ -177,106 +164,27 @@ class AnnouncementControllerTest {
 	}
 
 	@Test
-	void getById_withManagePermission_passesTrue() throws Exception {
-		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		AnnouncementResponse resp = AnnouncementResponse.builder()
-			.id(1L)
-			.title("Draft")
-			.content("C")
-			.status("DRAFT")
-			.scope("ALL")
-			.build();
-		when(announcementService.getById(eq(1L), eq(true), any())).thenReturn(resp);
-
-		mockMvc.perform(get("/v1/auth/announcements/1").header("Authorization", AUTH_HEADER))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.body.status").value("DRAFT"));
-	}
-
-	// ─── POST /v1/auth/announcements ────────────────────────────────────────
-
-	@Test
-	void create_withPermission_returnsOk() throws Exception {
-		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		AnnouncementResponse resp = AnnouncementResponse.builder().id(1L).title("Test Announcement").build();
-		when(announcementService.create(any())).thenReturn(resp);
-
-		mockMvc
-			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(validRequest())))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.body.id").value(1));
-	}
-
-	@Test
-	void create_withoutPermission_returns403() throws Exception {
+	@DisplayName("GET /v1/auth/announcements - page/size 參數驗證")
+	void list_pageSizeValidation() throws Exception {
 		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
 
-		mockMvc
-			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(validRequest())))
-			.andExpect(status().isForbidden());
-	}
+		mockMvc.perform(get("/v1/auth/announcements").param("size", "200").header("Authorization", AUTH_HEADER))
+			.andExpect(status().isBadRequest());
 
-	// ─── POST validation ────────────────────────────────────────────────────
+		mockMvc.perform(get("/v1/auth/announcements").param("size", "0").header("Authorization", AUTH_HEADER))
+			.andExpect(status().isBadRequest());
 
-	@Test
-	void create_invalidStatus_returnsBadRequest() throws Exception {
-		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		AnnouncementRequest req = validRequest();
-		req.setStatus("INVALID");
-
-		mockMvc
-			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(req)))
+		mockMvc.perform(get("/v1/auth/announcements").param("page", "-1").header("Authorization", AUTH_HEADER))
 			.andExpect(status().isBadRequest());
 	}
 
-	@Test
-	void create_invalidScope_returnsBadRequest() throws Exception {
-		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		AnnouncementRequest req = validRequest();
-		req.setScope("INVALID_SCOPE");
-
-		mockMvc
-			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(req)))
-			.andExpect(status().isBadRequest());
-	}
+	// ═══════════════════════════════════════════════════════════════════════════
+	// F2 — 管理端 CRUD（AC-F2-14, AC-F2-17）
+	// ═══════════════════════════════════════════════════════════════════════════
 
 	@Test
-	void create_blankTitle_returnsBadRequest() throws Exception {
-		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		AnnouncementRequest req = validRequest();
-		req.setTitle("");
-
-		mockMvc
-			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(req)))
-			.andExpect(status().isBadRequest());
-	}
-
-	@Test
-	void create_blankContent_returnsBadRequest() throws Exception {
-		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		AnnouncementRequest req = validRequest();
-		req.setContent("");
-
-		mockMvc
-			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(req)))
-			.andExpect(status().isBadRequest());
-	}
-
-	@Test
-	void create_expireBeforePublish_returnsBadRequest() throws Exception {
-		// 跨欄位驗證：expireAt 早於 publishAt 應被 @AssertTrue 攔下
+	@DisplayName("[AC-F2-14] POST /v1/auth/announcements - expireAt < publishAt 回傳 400")
+	void AC_F2_14_create_expireBeforePublish_returnsBadRequest() throws Exception {
 		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
 		AnnouncementRequest req = validRequest();
 		LocalDateTime now = LocalDateTime.now();
@@ -293,8 +201,8 @@ class AnnouncementControllerTest {
 	}
 
 	@Test
+	@DisplayName("[AC-F2-14] POST /v1/auth/announcements - expireAt = publishAt 回傳 400")
 	void create_expireEqualsPublish_returnsBadRequest() throws Exception {
-		// expireAt == publishAt（同一時刻）也應被擋下（必須嚴格晚於）
 		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
 		AnnouncementRequest req = validRequest();
 		LocalDateTime at = LocalDateTime.now().plusDays(1);
@@ -309,8 +217,106 @@ class AnnouncementControllerTest {
 	}
 
 	@Test
+	@DisplayName("[AC-F2-17] POST /v1/auth/announcements - 無 ANNOUNCEMENT_MANAGE 回傳 403")
+	void AC_F2_17_create_withoutPermission_returns403() throws Exception {
+		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
+
+		mockMvc
+			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(validRequest())))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("[AC-F2-17] PUT /v1/auth/announcements/{id} - 無權限回傳 403")
+	void AC_F2_17_update_withoutPermission_returns403() throws Exception {
+		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
+
+		mockMvc
+			.perform(put("/v1/auth/announcements/1").header("Authorization", AUTH_HEADER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(validRequest())))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("[AC-F2-17] DELETE /v1/auth/announcements/{id} - 無權限回傳 403")
+	void AC_F2_17_delete_withoutPermission_returns403() throws Exception {
+		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
+
+		mockMvc.perform(delete("/v1/auth/announcements/1").header("Authorization", AUTH_HEADER))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("[AC-F2-17] GET /v1/auth/announcements/admin - 無權限回傳 403")
+	void AC_F2_17_listAdmin_withoutPermission_returns403() throws Exception {
+		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
+
+		mockMvc.perform(get("/v1/auth/announcements/admin").header("Authorization", AUTH_HEADER))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("[AC-F2-17] POST 驗證 - invalid status 回傳 400")
+	void create_invalidStatus_returnsBadRequest() throws Exception {
+		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
+		AnnouncementRequest req = validRequest();
+		req.setStatus("INVALID");
+
+		mockMvc
+			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@DisplayName("POST 驗證 - invalid scope 回傳 400")
+	void create_invalidScope_returnsBadRequest() throws Exception {
+		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
+		AnnouncementRequest req = validRequest();
+		req.setScope("INVALID_SCOPE");
+
+		mockMvc
+			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@DisplayName("POST 驗證 - blank title 回傳 400")
+	void create_blankTitle_returnsBadRequest() throws Exception {
+		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
+		AnnouncementRequest req = validRequest();
+		req.setTitle("");
+
+		mockMvc
+			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@DisplayName("POST 驗證 - blank content 回傳 400")
+	void create_blankContent_returnsBadRequest() throws Exception {
+		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
+		AnnouncementRequest req = validRequest();
+		req.setContent("");
+
+		mockMvc
+			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@DisplayName("POST - expireAt=null（永不過期）通過驗證")
 	void create_neverExpire_returnsOk() throws Exception {
-		// expireAt 為 null（永不過期）應通過跨欄位驗證
 		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
 		when(announcementService.create(any())).thenReturn(AnnouncementResponse.builder().id(1L).build());
 
@@ -325,9 +331,23 @@ class AnnouncementControllerTest {
 			.andExpect(status().isOk());
 	}
 
-	// ─── PUT /v1/auth/announcements/{id} ────────────────────────────────────
+	@Test
+	@DisplayName("POST /v1/auth/announcements - 有權限回傳 200")
+	void create_withPermission_returnsOk() throws Exception {
+		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
+		AnnouncementResponse resp = AnnouncementResponse.builder().id(1L).title("Test Announcement").build();
+		when(announcementService.create(any())).thenReturn(resp);
+
+		mockMvc
+			.perform(post("/v1/auth/announcements").header("Authorization", AUTH_HEADER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(validRequest())))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.body.id").value(1));
+	}
 
 	@Test
+	@DisplayName("PUT /v1/auth/announcements/{id} - 有權限回傳 200")
 	void update_withPermission_returnsOk() throws Exception {
 		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
 		AnnouncementResponse resp = AnnouncementResponse.builder().id(1L).title("Updated").build();
@@ -342,17 +362,7 @@ class AnnouncementControllerTest {
 	}
 
 	@Test
-	void update_withoutPermission_returns403() throws Exception {
-		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
-
-		mockMvc
-			.perform(put("/v1/auth/announcements/1").header("Authorization", AUTH_HEADER)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(validRequest())))
-			.andExpect(status().isForbidden());
-	}
-
-	@Test
+	@DisplayName("PUT version conflict 回傳 409")
 	void update_versionConflict_returns409() throws Exception {
 		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
 		when(announcementService.update(eq(1L), any())).thenThrow(new com.taipei.iot.common.exception.BusinessException(
@@ -369,9 +379,8 @@ class AnnouncementControllerTest {
 			.andExpect(jsonPath("$.errorCode").value("50002"));
 	}
 
-	// ─── DELETE /v1/auth/announcements/{id} ──────────────────────────────────
-
 	@Test
+	@DisplayName("DELETE /v1/auth/announcements/{id} - 有權限回傳 200")
 	void delete_withPermission_returnsOk() throws Exception {
 		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
 		doNothing().when(announcementService).delete(1L);
@@ -381,16 +390,39 @@ class AnnouncementControllerTest {
 	}
 
 	@Test
-	void delete_withoutPermission_returns403() throws Exception {
-		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
+	@DisplayName("GET /v1/auth/announcements/admin - 有權限回傳 200")
+	void listAdmin_withPermission_returnsOk() throws Exception {
+		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
+		when(announcementService.listAdmin(eq("ALL"), isNull(), isNull(), eq(0), eq(10), any()))
+			.thenReturn(emptyPage());
 
-		mockMvc.perform(delete("/v1/auth/announcements/1").header("Authorization", AUTH_HEADER))
-			.andExpect(status().isForbidden());
+		mockMvc.perform(get("/v1/auth/announcements/admin").header("Authorization", AUTH_HEADER))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.errorCode").value("00000"));
 	}
 
-	// ─── GET /v1/auth/announcements/unread-count ────────────────────────────
+	@Test
+	@DisplayName("GET /v1/auth/announcements/admin - 傳遞參數正確")
+	void listAdmin_withKeywordAndFilter_passesParams() throws Exception {
+		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
+		when(announcementService.listAdmin(eq("DRAFT"), isNull(), eq("test"), eq(1), eq(20), any()))
+			.thenReturn(emptyPage());
+
+		mockMvc
+			.perform(get("/v1/auth/announcements/admin").param("statusFilter", "DRAFT")
+				.param("keyword", "test")
+				.param("page", "1")
+				.param("size", "20")
+				.header("Authorization", AUTH_HEADER))
+			.andExpect(status().isOk());
+	}
+
+	// ═══════════════════════════════════════════════════════════════════════════
+	// F3 — 未讀標記
+	// ═══════════════════════════════════════════════════════════════════════════
 
 	@Test
+	@DisplayName("GET /v1/auth/announcements/unread-count - 回傳未讀計數")
 	void getUnreadCount_authenticated_returnsOk() throws Exception {
 		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
 		when(announcementReadService.getUnreadCount()).thenReturn(UnreadCountResponse.builder().count(3).build());
@@ -400,9 +432,8 @@ class AnnouncementControllerTest {
 			.andExpect(jsonPath("$.body.count").value(3));
 	}
 
-	// ─── POST /v1/auth/announcements/{id}/read ──────────────────────────────
-
 	@Test
+	@DisplayName("POST /v1/auth/announcements/{id}/read - 標記已讀")
 	void markAsRead_authenticated_returnsOk() throws Exception {
 		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
 		doNothing().when(announcementReadService).markAsRead(1L);
@@ -411,9 +442,8 @@ class AnnouncementControllerTest {
 			.andExpect(status().isOk());
 	}
 
-	// ─── POST /v1/auth/announcements/read-all ───────────────────────────────
-
 	@Test
+	@DisplayName("POST /v1/auth/announcements/read-all - 全部標為已讀")
 	void markAllAsRead_authenticated_returnsOk() throws Exception {
 		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
 		doNothing().when(announcementReadService).markAllAsRead();
@@ -422,30 +452,11 @@ class AnnouncementControllerTest {
 			.andExpect(status().isOk());
 	}
 
-	// ─── page/size validation ───────────────────────────────────────────────
+	// ═══════════════════════════════════════════════════════════════════════════
+	// F5 — 置頂排序（AC-F5-3）
+	// ═══════════════════════════════════════════════════════════════════════════
 
-	@Test
-	void list_sizeExceedsMax_returnsBadRequest() throws Exception {
-		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
-
-		mockMvc.perform(get("/v1/auth/announcements").param("size", "200").header("Authorization", AUTH_HEADER))
-			.andExpect(status().isBadRequest());
-	}
-
-	@Test
-	void list_negativeSize_returnsBadRequest() throws Exception {
-		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
-
-		mockMvc.perform(get("/v1/auth/announcements").param("size", "0").header("Authorization", AUTH_HEADER))
-			.andExpect(status().isBadRequest());
-	}
-
-	@Test
-	void list_negativePage_returnsBadRequest() throws Exception {
-		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
-
-		mockMvc.perform(get("/v1/auth/announcements").param("page", "-1").header("Authorization", AUTH_HEADER))
-			.andExpect(status().isBadRequest());
-	}
+	// AC-F5-3 由 Controller 層權限檢查覆蓋，GET/PUT pinned 皆需 ANNOUNCEMENT_MANAGE
+	// 若無權限則被 Spring Security 攔截回傳 403 — 與 F2 共用 AC-F2-17 的檢查模式
 
 }
