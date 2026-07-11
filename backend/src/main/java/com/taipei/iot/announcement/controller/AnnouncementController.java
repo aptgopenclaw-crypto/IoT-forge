@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -65,10 +64,9 @@ public class AnnouncementController {
 	@PreAuthorize("isAuthenticated()")
 	@Operation(summary = "前台公告列表", description = "回傳已發佈、未過期、且受眾涵蓋當前使用者部門的公告（分頁），可選用 category 過濾")
 	public BaseResponse<PageResponse<AnnouncementResponse>> list(@RequestParam(required = false) String category,
-			@PaginationParams(defaultSize = 10) PageQuery pageQuery, @RequestParam(required = false) String lang,
-			@RequestHeader(name = "Accept-Language", required = false) String acceptLanguage) {
-		return BaseResponse.success(announcementService.listVisible(category, pageQuery.getPage(), pageQuery.getSize(),
-				resolveLang(lang, acceptLanguage)));
+			@PaginationParams(defaultSize = 10) PageQuery pageQuery) {
+		return BaseResponse
+			.success(announcementService.listVisible(category, pageQuery.getPage(), pageQuery.getSize()));
 	}
 
 	/**
@@ -80,11 +78,9 @@ public class AnnouncementController {
 			description = "ADMIN 看全部；DEPT_ADMIN 看自建 + 受眾包含自己部門。支援 status / category / keyword 過濾")
 	public BaseResponse<PageResponse<AnnouncementResponse>> listAdmin(
 			@RequestParam(defaultValue = "ALL") String statusFilter, @RequestParam(required = false) String category,
-			@RequestParam(required = false) String keyword, @PaginationParams(defaultSize = 10) PageQuery pageQuery,
-			@RequestParam(required = false) String lang,
-			@RequestHeader(name = "Accept-Language", required = false) String acceptLanguage) {
+			@RequestParam(required = false) String keyword, @PaginationParams(defaultSize = 10) PageQuery pageQuery) {
 		return BaseResponse.success(announcementService.listAdmin(statusFilter, category, keyword, pageQuery.getPage(),
-				pageQuery.getSize(), resolveLang(lang, acceptLanguage)));
+				pageQuery.getSize()));
 	}
 
 	/**
@@ -93,11 +89,8 @@ public class AnnouncementController {
 	@GetMapping("/{id}")
 	@PreAuthorize("isAuthenticated()")
 	@Operation(summary = "公告詳情", description = "取得單筆公告；具 ANNOUNCEMENT_MANAGE 權限者額外回傳 editable 欄位")
-	public BaseResponse<AnnouncementResponse> getById(@PathVariable Long id,
-			@RequestParam(required = false) String lang,
-			@RequestHeader(name = "Accept-Language", required = false) String acceptLanguage) {
-		return BaseResponse
-			.success(announcementService.getById(id, hasManagePermission(), resolveLang(lang, acceptLanguage)));
+	public BaseResponse<AnnouncementResponse> getById(@PathVariable Long id) {
+		return BaseResponse.success(announcementService.getById(id, hasManagePermission()));
 	}
 
 	/**
@@ -133,9 +126,7 @@ public class AnnouncementController {
 	}
 
 	/**
-	 * 管理端：取得已讀統計（已讀人數 / 受眾總數 / 已讀比例）。
-	 * <p>
-	 * 對需確認類公告特別有用，可即時掌握傳達率。
+	 * 管理端：取得已讀統計（已讀人數 / 受眾總數 / 已讀比例）。 對需確認類公告特別有用，可即時掌握傳達率。
 	 */
 	@GetMapping("/{id}/read-stats")
 	@PreAuthorize("hasAuthority('ANNOUNCEMENT_MANAGE')")
@@ -213,32 +204,15 @@ public class AnnouncementController {
 		return BaseResponse.success(null);
 	}
 
+	/**
+	 * 檢查呼叫者是否具有 ANNOUNCEMENT_MANAGE 權限。
+	 * @return 是否具有管理公告的權限
+	 */
 	private boolean hasManagePermission() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth == null)
 			return false;
 		return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ANNOUNCEMENT_MANAGE"));
-	}
-
-	/**
-	 * Lang resolution 優先順序：query ?lang= > Accept-Language header > null（service 端
-	 * fallback DEFAULT_LANG）。
-	 * <p>
-	 * 只取 Accept-Language 的第一個 token（忽略 q=），最長 16 字元；service 端在白名單以外會再次 fallback。
-	 */
-	private String resolveLang(String queryLang, String acceptLanguage) {
-		if (queryLang != null && !queryLang.isBlank())
-			return queryLang;
-		if (acceptLanguage == null || acceptLanguage.isBlank())
-			return null;
-		// 取首個，忽略 q=
-		String first = acceptLanguage.split(",")[0].trim();
-		int semi = first.indexOf(';');
-		if (semi >= 0)
-			first = first.substring(0, semi).trim();
-		if (first.length() > 16)
-			return null;
-		return first.isBlank() ? null : first;
 	}
 
 	// ── 附件 ──

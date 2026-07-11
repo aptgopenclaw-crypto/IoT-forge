@@ -7,7 +7,7 @@ import com.taipei.iot.announcement.entity.AnnouncementDept;
 import com.taipei.iot.announcement.repository.AnnouncementDeptRepository;
 import com.taipei.iot.announcement.repository.AnnouncementReadRepository;
 import com.taipei.iot.announcement.repository.AnnouncementRepository;
-import com.taipei.iot.announcement.repository.AnnouncementTranslationRepository;
+
 import com.taipei.iot.user.entity.UserEntity;
 import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.common.enums.ErrorCode;
@@ -59,9 +59,6 @@ class AnnouncementServiceTest {
 	private AnnouncementReadRepository announcementReadRepository;
 
 	@Mock
-	private AnnouncementTranslationRepository announcementTranslationRepository;
-
-	@Mock
 	private DeptInfoRepository deptInfoRepository;
 
 	@Mock
@@ -80,8 +77,6 @@ class AnnouncementServiceTest {
 	@BeforeEach
 	void setUp() {
 		TenantContext.setCurrentTenantId("TENANT_A");
-		when(announcementTranslationRepository.findByAnnouncementId(anyLong())).thenReturn(List.of());
-		when(announcementTranslationRepository.findByAnnouncementIdIn(any())).thenReturn(List.of());
 		when(attachmentService.listByAnnouncementIds(anyList())).thenReturn(Collections.emptyMap());
 	}
 
@@ -176,32 +171,6 @@ class AnnouncementServiceTest {
 			result.getContent().forEach(r -> map.put(r.getId(), r));
 			assertTrue(map.get(1L).getIsRead());
 			assertFalse(map.get(2L).getIsRead());
-		}
-
-		// ── AC-F1-3: lang=en 優先翻譯子表，無則 fallback zh-TW ──────────
-
-		@Test
-		@DisplayName("[AC-F1-3] listVisible - lang=en 優先翻譯子表，無則 fallback zh-TW")
-		void AC_F1_3_listVisible_langEn_fallsBackToZhTW() {
-			setSecurityContext("user-1", 3L, "DEPT");
-			LocalDateTime past = LocalDateTime.now().minusHours(1);
-			Announcement a1 = buildAnnouncement(1L, "PUBLISHED", "ALL", "admin-1", past, null);
-			a1.setTitle("中文標題");
-			a1.setContent("中文內容");
-			Page<Announcement> page = new PageImpl<>(List.of(a1));
-			when(announcementRepository.findVisibleAnnouncements(anyLong(), isNull(), any(), any())).thenReturn(page);
-			when(announcementReadRepository.findByAnnouncementIdInAndUserId(anyList(), eq("user-1")))
-				.thenReturn(List.of());
-			when(announcementDeptRepository.findByAnnouncementIdIn(anyList())).thenReturn(List.of());
-			when(deptInfoRepository.findByDeptIdIn(any())).thenReturn(List.of());
-			// 回覆空翻譯清單 → fallback 到主表 zh-TW
-			when(announcementTranslationRepository.findByAnnouncementIdIn(anyList())).thenReturn(List.of());
-
-			PageResponse<AnnouncementResponse> result = announcementService.listVisible(null, 0, 10, "en");
-
-			assertEquals(1, result.getContent().size());
-			assertEquals("中文標題", result.getContent().get(0).getTitle());
-			assertEquals("zh-TW", result.getContent().get(0).getResolvedLang());
 		}
 
 		// ── AC-F1-4: getById 管理員可以看到草稿 ─────────────────────────
@@ -389,44 +358,6 @@ class AnnouncementServiceTest {
 
 			assertNotNull(resp);
 			verify(announcementDeptRepository).saveAll(argThat(list -> ((List<?>) list).size() == 2));
-		}
-
-		// ── AC-F2-3: 帶 translations 新增，zh-TW 不重複寫入 ─────────────
-
-		@Test
-		@DisplayName("[AC-F2-3] create - 帶翻譯新增，zh-TW 不重複寫入子表")
-		void AC_F2_3_create_withTranslations_zhTWNotDuplicated() {
-			setSecurityContext("admin-1", 1L, "ALL");
-			when(userRepository.findById("admin-1"))
-				.thenReturn(Optional.of(UserEntity.builder().displayName("Admin").build()));
-			when(announcementRepository.save(any())).thenAnswer(inv -> {
-				Announcement a = inv.getArgument(0);
-				a.setId(5L);
-				return a;
-			});
-			when(announcementDeptRepository.findByAnnouncementId(5L)).thenReturn(List.of());
-			when(announcementReadRepository.findByAnnouncementIdInAndUserId(any(), any())).thenReturn(List.of());
-
-			AnnouncementRequest req = AnnouncementRequest.builder()
-				.title("MainTitle")
-				.content("MainContent")
-				.status("PUBLISHED")
-				.scope("ALL")
-				.pinned(false)
-				.translations(List.of(
-						new com.taipei.iot.announcement.dto.AnnouncementTranslationDto("en", "English Title",
-								"English Content"),
-						new com.taipei.iot.announcement.dto.AnnouncementTranslationDto("zh-CN", "中文標題簡體", "簡體內容")))
-				.build();
-
-			announcementService.create(req);
-
-			// saveAll 應該被呼叫（寫入翻譯）
-			verify(announcementTranslationRepository).saveAll(argThat(list -> {
-				@SuppressWarnings("unchecked")
-				var l = (List<com.taipei.iot.announcement.entity.AnnouncementTranslation>) list;
-				return l.size() == 2 && l.stream().noneMatch(t -> "zh-TW".equals(t.getLangCode()));
-			}));
 		}
 
 		// ── AC-F2-4: 正確 version 編輯成功 ──────────────────────────────

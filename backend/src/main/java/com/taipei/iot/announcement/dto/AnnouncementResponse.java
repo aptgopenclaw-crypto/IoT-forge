@@ -81,10 +81,4 @@ public class AnnouncementResponse {
 	@Schema(description = "附件清單（依上傳順序）")
 	private List<AnnouncementAttachmentResponse> attachments;
 
-	@Schema(description = "本筆回應 title / content 對應的解析後語言（lang resolution 結果；可能 fallback）", example = "zh-TW")
-	private String resolvedLang;
-
-	@Schema(description = "所有語言翻譯（含預設語言 zh-TW）；給管理端編輯使用")
-	private List<AnnouncementTranslationDto> translations;
-
 }

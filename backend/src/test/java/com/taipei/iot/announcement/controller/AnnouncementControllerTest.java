@@ -121,7 +121,7 @@ class AnnouncementControllerTest {
 			.status("DRAFT")
 			.scope("ALL")
 			.build();
-		when(announcementService.getById(eq(1L), eq(true), any())).thenReturn(resp);
+		when(announcementService.getById(eq(1L), eq(true))).thenReturn(resp);
 
 		mockMvc.perform(get("/v1/auth/announcements/1").header("Authorization", AUTH_HEADER))
 			.andExpect(status().isOk())
@@ -138,7 +138,7 @@ class AnnouncementControllerTest {
 	@DisplayName("[AC-F1-11] GET /v1/auth/announcements - 已登入回傳 200")
 	void list_authenticated_returnsOk() throws Exception {
 		mockJwtValid("user-1", "T1", List.of("ROLE_USER"), List.of("ANNOUNCEMENT_VIEW"));
-		when(announcementService.listVisible(isNull(), eq(0), eq(10), any())).thenReturn(emptyPage());
+		when(announcementService.listVisible(isNull(), eq(0), eq(10))).thenReturn(emptyPage());
 
 		mockMvc.perform(get("/v1/auth/announcements").header("Authorization", AUTH_HEADER))
 			.andExpect(status().isOk())
@@ -156,7 +156,7 @@ class AnnouncementControllerTest {
 			.status("PUBLISHED")
 			.scope("ALL")
 			.build();
-		when(announcementService.getById(eq(1L), eq(false), any())).thenReturn(resp);
+		when(announcementService.getById(eq(1L), eq(false))).thenReturn(resp);
 
 		mockMvc.perform(get("/v1/auth/announcements/1").header("Authorization", AUTH_HEADER))
 			.andExpect(status().isOk())
@@ -393,8 +393,7 @@ class AnnouncementControllerTest {
 	@DisplayName("GET /v1/auth/announcements/admin - 有權限回傳 200")
 	void listAdmin_withPermission_returnsOk() throws Exception {
 		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		when(announcementService.listAdmin(eq("ALL"), isNull(), isNull(), eq(0), eq(10), any()))
-			.thenReturn(emptyPage());
+		when(announcementService.listAdmin(eq("ALL"), isNull(), isNull(), eq(0), eq(10))).thenReturn(emptyPage());
 
 		mockMvc.perform(get("/v1/auth/announcements/admin").header("Authorization", AUTH_HEADER))
 			.andExpect(status().isOk())
@@ -405,8 +404,7 @@ class AnnouncementControllerTest {
 	@DisplayName("GET /v1/auth/announcements/admin - 傳遞參數正確")
 	void listAdmin_withKeywordAndFilter_passesParams() throws Exception {
 		mockJwtValid("admin-1", "T1", List.of("ROLE_ADMIN"), List.of("ANNOUNCEMENT_MANAGE"));
-		when(announcementService.listAdmin(eq("DRAFT"), isNull(), eq("test"), eq(1), eq(20), any()))
-			.thenReturn(emptyPage());
+		when(announcementService.listAdmin(eq("DRAFT"), isNull(), eq("test"), eq(1), eq(20))).thenReturn(emptyPage());
 
 		mockMvc
 			.perform(get("/v1/auth/announcements/admin").param("statusFilter", "DRAFT")

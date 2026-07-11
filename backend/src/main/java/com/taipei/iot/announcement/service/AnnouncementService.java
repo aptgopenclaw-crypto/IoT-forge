@@ -3,21 +3,17 @@ package com.taipei.iot.announcement.service;
 import com.taipei.iot.announcement.dto.AnnouncementAttachmentResponse;
 import com.taipei.iot.announcement.dto.AnnouncementRequest;
 import com.taipei.iot.announcement.dto.AnnouncementResponse;
-import com.taipei.iot.announcement.dto.AnnouncementTranslationDto;
 import com.taipei.iot.announcement.entity.Announcement;
 import com.taipei.iot.announcement.entity.AnnouncementDept;
 import com.taipei.iot.announcement.enums.AnnouncementScope;
-import com.taipei.iot.announcement.entity.AnnouncementTranslation;
 import com.taipei.iot.announcement.repository.AnnouncementDeptRepository;
 import com.taipei.iot.announcement.repository.AnnouncementReadRepository;
 import com.taipei.iot.announcement.repository.AnnouncementRepository;
-import com.taipei.iot.announcement.repository.AnnouncementTranslationRepository;
 import com.taipei.iot.user.entity.UserEntity;
 import com.taipei.iot.user.repository.UserRepository;
 import com.taipei.iot.common.dto.UserInfo;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
-import com.taipei.iot.common.util.LangNormalizer;
 import com.taipei.iot.common.util.PageConversionHelper;
 import com.taipei.iot.common.util.SecurityContextUtils;
 import com.taipei.iot.common.util.SqlLikeEscaper;
@@ -34,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +46,6 @@ public class AnnouncementService {
 
 	private final AnnouncementReadRepository announcementReadRepository;
 
-	private final AnnouncementTranslationRepository announcementTranslationRepository;
-
 	private final DeptInfoRepository deptInfoRepository;
 
 	private final UserRepository userRepository;
@@ -61,45 +54,30 @@ public class AnnouncementService {
 
 	private final AnnouncementAttachmentService attachmentService;
 
-	/**
-	 * 系統預設語言；同時是前端 i18n 的 fallback，也是 announcements 主表 title/content 所代表的語言。
-	 */
-	public static final String DEFAULT_LANG = "zh-TW";
-
-	/** 支援語言白名單，避免任意輸入。 */
-	private static final Set<String> SUPPORTED_LANGS = Set.of("zh-TW", "zh-CN", "en");
-
 	private static final Sort DEFAULT_SORT = Sort.by(Sort.Order.desc("pinned"), Sort.Order.asc("pinOrder").nullsLast(),
 			Sort.Order.desc("publishAt"));
 
 	// ── 前台查詢 ──
-
-	@Transactional(readOnly = true)
-	public PageResponse<AnnouncementResponse> listVisible(String category, int page, int size) {
-		return listVisible(category, page, size, DEFAULT_LANG);
-	}
 
 	/**
 	 * 取得可見公告列表（前台使用）。
 	 * @param category 公告分類
 	 * @param page 分頁頁碼
 	 * @param size 每頁筆數
-	 * @param langCode 語言代碼
 	 * @return 分頁結果
 	 */
 	@Transactional(readOnly = true)
-	public PageResponse<AnnouncementResponse> listVisible(String category, int page, int size, String langCode) {
+	public PageResponse<AnnouncementResponse> listVisible(String category, int page, int size) {
 		UserInfo user = SecurityContextUtils.getUserInfo();
 		LocalDateTime now = LocalDateTime.now();
 		Long deptId = user.getDeptId() != null ? user.getDeptId() : -1L;
 		String safeCategory = normalizeCategoryFilter(category);
-		String safeLang = normalizeLang(langCode);
 
 		Pageable pageable = PageRequest.of(page, size, DEFAULT_SORT);
 		Page<Announcement> pageResult = announcementRepository.findVisibleAnnouncements(deptId, safeCategory, now,
 				pageable);
 
-		List<AnnouncementResponse> content = toResponseList(pageResult.getContent(), user.getUserId(), false, safeLang);
+		List<AnnouncementResponse> content = toResponseList(pageResult.getContent(), user.getUserId(), false);
 		return PageConversionHelper.from(content, pageResult);
 	}
 
@@ -112,30 +90,12 @@ public class AnnouncementService {
 	 * @param keyword 關鍵字
 	 * @param page 分頁頁碼
 	 * @param size 每頁筆數
-	 * @param langCode 語言代碼
 	 * @return 分頁結果
 	 */
 	@Transactional(readOnly = true)
 	public PageResponse<AnnouncementResponse> listAdmin(String statusFilter, String category, String keyword, int page,
 			int size) {
-		return listAdmin(statusFilter, category, keyword, page, size, DEFAULT_LANG);
-	}
-
-	/**
-	 * 取得管理端公告列表。
-	 * @param statusFilter 狀態篩選
-	 * @param category 公告分類
-	 * @param keyword 關鍵字
-	 * @param page 分頁頁碼
-	 * @param size 每頁筆數
-	 * @param langCode 語言代碼
-	 * @return
-	 */
-	@Transactional(readOnly = true)
-	public PageResponse<AnnouncementResponse> listAdmin(String statusFilter, String category, String keyword, int page,
-			int size, String langCode) {
 		UserInfo user = SecurityContextUtils.getUserInfo();
-		String safeLang = normalizeLang(langCode);
 		LocalDateTime now = LocalDateTime.now();
 		String safeFilter = statusFilter != null ? statusFilter : "ALL";
 		String safeCategory = normalizeCategoryFilter(category);
@@ -160,7 +120,7 @@ public class AnnouncementService {
 					safeCategory, safeKeyword, now, pageable);
 		}
 
-		List<AnnouncementResponse> content = toResponseList(pageResult.getContent(), user.getUserId(), true, safeLang);
+		List<AnnouncementResponse> content = toResponseList(pageResult.getContent(), user.getUserId(), true);
 		return PageConversionHelper.from(content, pageResult);
 	}
 
@@ -174,20 +134,7 @@ public class AnnouncementService {
 	 */
 	@Transactional(readOnly = true)
 	public AnnouncementResponse getById(Long id, boolean hasManagePermission) {
-		return getById(id, hasManagePermission, DEFAULT_LANG);
-	}
-
-	/**
-	 * 取得單筆公告。
-	 * @param id 公告 ID
-	 * @param hasManagePermission 是否具有管理權限
-	 * @param langCode 語言代碼
-	 * @return 公告詳細資訊
-	 */
-	@Transactional(readOnly = true)
-	public AnnouncementResponse getById(Long id, boolean hasManagePermission, String langCode) {
 		UserInfo user = SecurityContextUtils.getUserInfo();
-		String safeLang = normalizeLang(langCode);
 		Announcement entity = announcementRepository.findById(id)
 			.orElseThrow(() -> new BusinessException(ErrorCode.ANNOUNCEMENT_NOT_FOUND));
 
@@ -205,7 +152,7 @@ public class AnnouncementService {
 			}
 		}
 
-		return toResponse(entity, user.getUserId(), false, safeLang);
+		return toResponse(entity, user.getUserId(), false);
 	}
 
 	// ── 新增 ──
@@ -264,10 +211,7 @@ public class AnnouncementService {
 			saveAnnouncementDepts(entity.getId(), targetDeptIds);
 		}
 
-		// 儲存额外語言翻譯（zh-TW 以主表為準，不重複寫入子表）
-		replaceTranslations(entity.getId(), request.getTranslations());
-
-		return toResponse(entity, user.getUserId(), false, DEFAULT_LANG);
+		return toResponse(entity, user.getUserId(), false);
 	}
 
 	// ── 編輯 ──
@@ -343,10 +287,7 @@ public class AnnouncementService {
 			saveAnnouncementDepts(entity.getId(), targetDeptIds);
 		}
 
-		// 重建語言翻譯
-		replaceTranslations(entity.getId(), request.getTranslations());
-
-		return toResponse(entity, user.getUserId(), false, DEFAULT_LANG);
+		return toResponse(entity, user.getUserId(), false);
 	}
 
 	// ── 刪除 ──
@@ -392,7 +333,7 @@ public class AnnouncementService {
 			Long deptId = user.getDeptId() != null ? user.getDeptId() : -1L;
 			entities = announcementRepository.findPinnedForDeptAdmin(user.getUserId(), deptId);
 		}
-		return toResponseList(entities, user.getUserId(), true, DEFAULT_LANG);
+		return toResponseList(entities, user.getUserId(), true);
 	}
 
 	/**
@@ -501,25 +442,17 @@ public class AnnouncementService {
 		return userRepository.findById(userId).map(UserEntity::getDisplayName).orElse(userId);
 	}
 
-	private AnnouncementResponse toResponse(Announcement entity, String currentUserId, boolean includeEditable,
-			String langCode) {
+	private AnnouncementResponse toResponse(Announcement entity, String currentUserId, boolean includeEditable) {
 		List<AnnouncementDept> depts = announcementDeptRepository.findByAnnouncementId(entity.getId());
 		List<Long> deptIds = depts.stream().map(AnnouncementDept::getDeptId).toList();
 		Set<Long> deptIdSet = depts.stream().map(AnnouncementDept::getDeptId).collect(Collectors.toSet());
 		Map<Long, String> nameMap = resolveDeptNameMap(deptIdSet);
 		List<String> deptNames = deptIds.stream().map(id -> nameMap.getOrDefault(id, String.valueOf(id))).toList();
 
-		List<AnnouncementTranslation> translations = announcementTranslationRepository
-			.findByAnnouncementId(entity.getId());
-		List<AnnouncementTranslationDto> allTranslations = synthesizeTranslations(entity, translations);
-		ResolvedTranslation resolved = pickTranslation(entity, translations, langCode);
-
 		AnnouncementResponse.AnnouncementResponseBuilder builder = AnnouncementResponse.builder()
 			.id(entity.getId())
-			.title(resolved.title())
-			.content(resolved.content())
-			.resolvedLang(resolved.lang())
-			.translations(allTranslations)
+			.title(entity.getTitle())
+			.content(entity.getContent())
 			.status(entity.getStatus())
 			.scope(entity.getScope())
 			.category(entity.getCategory())
@@ -550,7 +483,7 @@ public class AnnouncementService {
 	}
 
 	private List<AnnouncementResponse> toResponseList(List<Announcement> entities, String currentUserId,
-			boolean includeEditable, String langCode) {
+			boolean includeEditable) {
 		if (entities.isEmpty())
 			return Collections.emptyList();
 
@@ -565,12 +498,6 @@ public class AnnouncementService {
 
 		// 批次載入附件
 		Map<Long, List<AnnouncementAttachmentResponse>> attachmentMap = attachmentService.listByAnnouncementIds(ids);
-
-		// 批次載入語言翻譯（供 lang resolution + 管理端編輯表單使用）
-		Map<Long, List<AnnouncementTranslation>> translationMap = announcementTranslationRepository
-			.findByAnnouncementIdIn(ids)
-			.stream()
-			.collect(Collectors.groupingBy(AnnouncementTranslation::getAnnouncementId));
 
 		// 收集所有部門 ID 一次查詢名稱
 		Set<Long> allDeptIds = deptMap.values()
@@ -590,17 +517,10 @@ public class AnnouncementService {
 				.map(id -> deptNameMap.getOrDefault(id, String.valueOf(id)))
 				.toList();
 
-			List<AnnouncementTranslation> entityTranslations = translationMap.getOrDefault(entity.getId(),
-					Collections.emptyList());
-			List<AnnouncementTranslationDto> allTranslations = synthesizeTranslations(entity, entityTranslations);
-			ResolvedTranslation resolved = pickTranslation(entity, entityTranslations, langCode);
-
 			AnnouncementResponse.AnnouncementResponseBuilder builder = AnnouncementResponse.builder()
 				.id(entity.getId())
-				.title(resolved.title())
-				.content(resolved.content())
-				.resolvedLang(resolved.lang())
-				.translations(allTranslations)
+				.title(entity.getTitle())
+				.content(entity.getContent())
 				.status(entity.getStatus())
 				.scope(entity.getScope())
 				.category(entity.getCategory())
@@ -641,113 +561,6 @@ public class AnnouncementService {
 		return deptInfoRepository.findByDeptIdIn(deptIds)
 			.stream()
 			.collect(Collectors.toMap(DeptInfoEntity::getDeptId, DeptInfoEntity::getDeptName));
-	}
-
-	// ── 多語系 helpers ──
-
-	/**
-	 * 將 client 傳入的 lang code 限制在白名單內；空值 / 非法值 fallback 為 DEFAULT_LANG。
-	 * <p>
-	 * 底層委派至 {@link LangNormalizer#normalize(String, Set, String)}（common v2 F-17）。
-	 */
-	private String normalizeLang(String langCode) {
-		return LangNormalizer.normalize(langCode, SUPPORTED_LANGS, DEFAULT_LANG);
-	}
-
-	/**
-	 * 解析請求語言後的 title/content。
-	 * <p>
-	 * fallback 順序：requested lang → DEFAULT_LANG 子表 → 主表（zh-TW canonical）。
-	 */
-	private ResolvedTranslation pickTranslation(Announcement entity, List<AnnouncementTranslation> translations,
-			String langCode) {
-		String safe = normalizeLang(langCode);
-		if (!DEFAULT_LANG.equals(safe)) {
-			for (AnnouncementTranslation t : translations) {
-				if (safe.equals(t.getLangCode())) {
-					return new ResolvedTranslation(t.getTitle(), t.getContent(), safe);
-				}
-			}
-		}
-		// fallback：主表 = zh-TW canonical
-		return new ResolvedTranslation(entity.getTitle(), entity.getContent(), DEFAULT_LANG);
-	}
-
-	/**
-	 * 給管理端編輯表單：將 {@link Announcement#getTitle()}/{@link Announcement#getContent()} 合成為
-	 * zh-TW translation； 再串接子表其他語言；最後依 SUPPORTED_LANGS 順序輸出。
-	 */
-	private List<AnnouncementTranslationDto> synthesizeTranslations(Announcement entity,
-			List<AnnouncementTranslation> translations) {
-		Map<String, AnnouncementTranslationDto> byLang = new java.util.LinkedHashMap<>();
-		byLang.put(DEFAULT_LANG,
-				AnnouncementTranslationDto.builder()
-					.langCode(DEFAULT_LANG)
-					.title(entity.getTitle())
-					.content(entity.getContent())
-					.build());
-		for (AnnouncementTranslation t : translations) {
-			if (DEFAULT_LANG.equals(t.getLangCode()))
-				continue; // 已由主表代表
-			byLang.put(t.getLangCode(),
-					AnnouncementTranslationDto.builder()
-						.langCode(t.getLangCode())
-						.title(t.getTitle())
-						.content(t.getContent())
-						.build());
-		}
-		return new ArrayList<>(byLang.values());
-	}
-
-	/**
-	 * 重建公告的翻譯子表。
-	 * <ul>
-	 * <li>清除既有翻譯後重新寫入（簡單一致，數量少）。</li>
-	 * <li>會跳過 lang_code=DEFAULT_LANG（zh-TW）：以主表為唯一來源，避免雙寫不一致。</li>
-	 * <li>每筆 content 都會通過 {@link HtmlSanitizerService#sanitize(String)}。</li>
-	 * <li>同一 lang_code 重複時以後者覆蓋前者。</li>
-	 * </ul>
-	 */
-	private void replaceTranslations(Long announcementId, List<AnnouncementTranslationDto> requested) {
-		announcementTranslationRepository.deleteByAnnouncementId(announcementId);
-		if (requested == null || requested.isEmpty())
-			return;
-
-		Map<String, AnnouncementTranslationDto> dedup = new java.util.LinkedHashMap<>();
-		for (AnnouncementTranslationDto dto : requested) {
-			if (dto == null || dto.getLangCode() == null)
-				continue;
-			String lang = dto.getLangCode();
-			if (DEFAULT_LANG.equals(lang))
-				continue; // 主表代表 zh-TW，子表不重複
-			if (!SUPPORTED_LANGS.contains(lang)) {
-				throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Unsupported lang_code: " + lang);
-			}
-			dedup.put(lang, dto);
-		}
-		if (dedup.isEmpty())
-			return;
-
-		LocalDateTime now = LocalDateTime.now();
-		List<AnnouncementTranslation> rows = new ArrayList<>(dedup.size());
-		for (AnnouncementTranslationDto dto : dedup.values()) {
-			String safeContent = htmlSanitizerService.sanitize(dto.getContent());
-			String contentText = htmlSanitizerService.extractText(safeContent);
-			rows.add(AnnouncementTranslation.builder()
-				.announcementId(announcementId)
-				.langCode(dto.getLangCode())
-				.title(dto.getTitle())
-				.content(safeContent)
-				.contentText(contentText)
-				.createdAt(now)
-				.updatedAt(now)
-				.build());
-		}
-		announcementTranslationRepository.saveAll(rows);
-	}
-
-	/** 內部 record：lang resolution 結果。 */
-	private record ResolvedTranslation(String title, String content, String lang) {
 	}
 
 }

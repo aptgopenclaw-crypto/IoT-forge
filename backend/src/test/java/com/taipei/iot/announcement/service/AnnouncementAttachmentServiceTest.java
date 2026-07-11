@@ -61,6 +61,9 @@ class AnnouncementAttachmentServiceTest {
 
 	private static final String DEFAULT_EXT_CONFIG = "pdf";
 
+	/**
+	 * 設定 TenantContext 與 SecurityContext，並建立 AnnouncementAttachmentService 實例。
+	 */
 	@BeforeEach
 	void setUp() {
 		TenantContext.setCurrentTenantId("TENANT_A");
@@ -69,12 +72,21 @@ class AnnouncementAttachmentServiceTest {
 				announcementDeptRepository, fileStorageService, fileValidationService, DEFAULT_EXT_CONFIG);
 	}
 
+	/**
+	 * 清除 TenantContext 與 SecurityContext。
+	 */
 	@AfterEach
 	void tearDown() {
 		TenantContext.clear();
 		SecurityContextHolder.clearContext();
 	}
 
+	/**
+	 * 設定 SecurityContext 以模擬不同使用者與權限。
+	 * @param userId 使用者 ID
+	 * @param deptId 部門 ID
+	 * @param dataScope 資料範圍
+	 */
 	private void setSecurityContext(String userId, Long deptId, String dataScope) {
 		Map<String, Object> details = new HashMap<>();
 		details.put(JwtClaimKeys.TENANT_ID, "TENANT_A");
@@ -86,6 +98,12 @@ class AnnouncementAttachmentServiceTest {
 		SecurityContextHolder.getContext().setAuthentication(auth);
 	}
 
+	/**
+	 * 建立一個 Announcement 實例，模擬公告資料。
+	 * @param id 公告 ID
+	 * @param createdBy 建立者
+	 * @return 模擬的 Announcement 實例
+	 */
 	private Announcement buildAnnouncement(Long id, String createdBy) {
 		return Announcement.builder()
 			.id(id)
@@ -105,6 +123,12 @@ class AnnouncementAttachmentServiceTest {
 			.build();
 	}
 
+	/**
+	 * 建立一個 AnnouncementAttachment 實例，模擬附件資料。
+	 * @param id 附件 ID
+	 * @param announcementId 公告 ID
+	 * @return 模擬的 AnnouncementAttachment 實例
+	 */
 	private AnnouncementAttachment buildAttachment(Long id, Long announcementId) {
 		return AnnouncementAttachment.builder()
 			.id(id)
@@ -124,28 +148,63 @@ class AnnouncementAttachmentServiceTest {
 
 	// ── AC-F6-1: 未達上限，上傳 PDF，save() 被呼叫 ──────────────────────────
 
+	/**
+	 * [AC-F6-1] upload - 5 個附件時上傳 PDF，save() 被呼叫
+	 */
 	@Test
 	@DisplayName("[AC-F6-1] upload - 5 個附件時上傳 PDF，save() 被呼叫")
 	void AC_F6_1_upload_underLimit_saveCalledAndResponseReturned() {
+
+		// 設置安全上下文，模擬當前登錄用戶為 admin-1，其關聯的租戶ID為1，權限為 "ALL"（通常表示全權限）
+		// 該方法可能是自定義工具方法，用於填充 SecurityContextHolder，使後續權限檢查通過
 		setSecurityContext("admin-1", 1L, "ALL");
+
+		// 構造一個公告對象，ID為1L，創建者為 "admin-1"（用於模擬數據庫中的現有記錄）
 		Announcement announcement = buildAnnouncement(1L, "admin-1");
+
+		// 模擬 announcementRepository.findById(1L) 返回包含上述公告對象的 Optional
+		// 表示數據庫中確實存在該公告，後續上傳操作依賴此公告存在
 		when(announcementRepository.findById(1L)).thenReturn(Optional.of(announcement));
+
+		// 模擬 attachmentRepository.findByAnnouncementIdOrderByIdAsc(1L) 返回空列表
+		// 表示該公告當前沒有任何附件，因此附件總數=0，肯定未達上限（如5），條件成立
 		when(attachmentRepository.findByAnnouncementIdOrderByIdAsc(1L)).thenReturn(List.of()); // 0
 																								// attachments
+
+		// 模擬 fileValidationService.validate(any()) 不做任何操作（即驗證通過）
+		// 表示上傳的文件通過校驗（例如大小、類型等），不拋出異常
 		doNothing().when(fileValidationService).validate(any());
+
+		// 模擬 fileStorageService.store(anyString(), any()) 返回一個存儲路徑字符串
+		// 表示文件被成功保存到存儲系統（如本地磁盤或雲存儲），並返回相對路徑 "announcement/1/test.pdf"
 		when(fileStorageService.store(anyString(), any())).thenReturn("announcement/1/test.pdf");
+
+		// 模擬 attachmentRepository.save(any()) 的行為：
+		// 當調用 save 時，將傳入的 AnnouncementAttachment 對象設置 ID 為 100L，然後返回該對象
+		// 這模擬了數據庫插入後自動生成主鍵的行為，便於後續斷言
 		when(attachmentRepository.save(any())).thenAnswer(inv -> {
+			// 獲取傳入的第一個參數（即待保存的實體）
 			AnnouncementAttachment a = inv.getArgument(0);
 			a.setId(100L);
 			return a;
 		});
 
+		// 構造一個模擬的多部分文件，用於模擬前端上傳的 PDF 文件
+		// 參數：表單字段名 "file"，原始文件名 "test.pdf"，媒體類型 "application/pdf"，內容字節數組
 		MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "pdf-content".getBytes());
 
+		// 調用 attachmentService.upload(1L, file) 執行上傳業務邏輯
+		// 返回的是上傳後生成的附件響應對象
 		AnnouncementAttachmentResponse resp = attachmentService.upload(1L, file);
 
+		// 斷言響應對象不為 null，確保上傳操作返回了有效結果
 		assertNotNull(resp);
+
+		// 斷言響應對象的 ID 等於 100L，與模擬 save 時設置的 ID 一致，驗證保存成功
 		assertEquals(100L, resp.getId());
+
+		// 驗證 attachmentRepository.save(any()) 確實被調用了一次（即上傳過程中執行了保存）
+		// 這符合測試目標：在數量未超限的情況下，保存操作被正確調用
 		verify(attachmentRepository).save(any());
 	}
 

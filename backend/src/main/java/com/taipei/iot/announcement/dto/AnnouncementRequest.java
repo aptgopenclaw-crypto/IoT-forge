@@ -2,7 +2,6 @@ package com.taipei.iot.announcement.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -78,17 +77,6 @@ public class AnnouncementRequest {
 	 */
 	@Schema(description = "樂觀鎖版本號；編輯時必填，新增時可省略", example = "0")
 	private Long version;
-
-	/**
-	 * 額外語言翻譯（非預設語言 zh-TW）；可為空。
-	 * <p>
-	 * {@link #title} / {@link #content} 視為預設語言 zh-TW 的內容； 此欄位可帶入 zh-CN / en
-	 * 等其他語言的翻譯，service 會寫入 announcement_translations 子表。 若清單內出現 lang_code=zh-TW，會以
-	 * {@link #title} / {@link #content} 為準（覆蓋）。
-	 */
-	@Valid
-	@Schema(description = "額外語言翻譯（不含預設語言 zh-TW）")
-	private List<AnnouncementTranslationDto> translations;
 
 	/**
 	 * 跨欄位驗證：expireAt 必須晚於 publishAt。
