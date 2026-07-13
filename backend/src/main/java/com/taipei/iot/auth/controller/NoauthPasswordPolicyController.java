@@ -2,6 +2,7 @@ package com.taipei.iot.auth.controller;
 
 import com.taipei.iot.auth.policy.PasswordPolicyService;
 import com.taipei.iot.auth.policy.dto.PasswordPolicyDto;
+import com.taipei.iot.common.annotation.RateLimit;
 import com.taipei.iot.common.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ public class NoauthPasswordPolicyController {
 
 	private final PasswordPolicyService policyService;
 
+	@RateLimit(key = "pwd-policy", limit = 60, period = 60)
 	@GetMapping("/v1/noauth/password-policy/describe")
 	public BaseResponse<PasswordPolicyDto> describe(
 			@RequestParam(value = "tenantId", required = false) String tenantId) {

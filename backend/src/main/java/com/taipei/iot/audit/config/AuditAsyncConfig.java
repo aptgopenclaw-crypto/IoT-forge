@@ -9,20 +9,21 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * Configuration class for asynchronous audit tasks.
- * Defines a custom TaskExecutor for handling audit-related operations.
+ * Configuration class for asynchronous audit tasks. Defines a custom TaskExecutor for
+ * handling audit-related operations.
  */
-@Configuration 
+@Configuration
 @EnableAsync
 public class AuditAsyncConfig {
 
 	// @Bean("auditExecutor")：在 Spring 容器中註冊一個名為 auditExecutor 的 Bean。
 	// 當其他 Service 需要使用這個專屬線程池時，可以透過 @Async("auditExecutor") 來指定使用它。
-	@Bean("auditExecutor") 
+	@Bean("auditExecutor")
 	public TaskExecutor auditExecutor() {
 
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		// 核心線程數 = 2：線程池初始化時會建立 2 個核心線程。即使這些線程處於空閒狀態，預設也不會被銷毀（除非設定了 allowCoreThreadTimeOut）。
+		// 核心線程數 = 2：線程池初始化時會建立 2 個核心線程。即使這些線程處於空閒狀態，預設也不會被銷毀（除非設定了
+		// allowCoreThreadTimeOut）。
 		// 這保證了隨時有基本的處理能力來應對審計日誌。
 		executor.setCorePoolSize(2);
 
@@ -35,7 +36,8 @@ public class AuditAsyncConfig {
 		// 線程名稱前綴 = "audit-async-"：這有助於在日誌中識別這些線程，方便調試和監控。
 		executor.setThreadNamePrefix("audit-async-");
 
-		// 拒絕策略 = CallerRunsPolicy：這是最關鍵的配置之一。當線程數達到最大（8個）且隊列也滿了（500個）時，新提交的任務會被拒絕。使用 CallerRunsPolicy 策略意味著：誰調用這個異步方法，就由誰（通常是主業務線程）自己來執行這個任務。
+		// 拒絕策略 = CallerRunsPolicy：這是最關鍵的配置之一。當線程數達到最大（8個）且隊列也滿了（500個）時，新提交的任務會被拒絕。使用
+		// CallerRunsPolicy 策略意味著：誰調用這個異步方法，就由誰（通常是主業務線程）自己來執行這個任務。
 		// 好處：審計日誌通常要求不能丟失。這個策略不僅保證了日誌任務絕對不會被丟棄，還能產生「背壓（Back-pressure）」效果——讓主業務線程自己去寫日誌，主線程就會變慢，從而自動減緩新任務提交的速度，給線程池時間消化隊列中的任務。
 		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
 
