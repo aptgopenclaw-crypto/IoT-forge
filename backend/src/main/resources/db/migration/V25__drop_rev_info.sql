@@ -1,0 +1,2 @@
+
+DROP TABLE IF EXISTS rev_info;

@@ -21,13 +21,14 @@ public class AuditAsyncWriter {
 
 	private final UserDisplayInfoProvider userDisplayInfoProvider;
 
+	// @Async("auditExecutor")：指定使用名為 auditExecutor 的線程池來執行此方法，確保審計日誌的寫入操作不會阻塞主線程。
+	// @RunInSystemTenantContext：確保在 SYSTEM tenant context 下執行，以便在多租戶環境中正確處理審計日誌。
 	@Async("auditExecutor")
 	@RunInSystemTenantContext
 	public void saveAsync(String tenantId, String userId, String username, String eventType, String eventDesc,
 			String apiEndpoint, String payload, String errorCode, String ipAddress, String userAgent,
 			long executionTime, Long deptId, String impersonatedBy) {
-		// [Tenant v2 T-13] @RunInSystemTenantContext 已把整段包進 SYSTEM context；
-		// @Async 在新執行緒執行（ThreadLocal 不繼承），aspect 也能正確初始化並 cleanup。
+
 		try {
 			// 查詢使用者 displayName 與 email（best-effort，透過 Port 解除 audit→auth 直接依賴）
 			String userLabel = null;
