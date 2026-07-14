@@ -33,10 +33,8 @@ const videoRef = ref<HTMLVideoElement | null>(null)
 const hlsInstance = shallowRef<Hls | null>(null)
 const sessionToken = ref<string>('')
 const playing = ref(false)
-const currentSpeed = ref(1)
 const errorMsg = ref('')
 const loading = ref(false)
-const streamBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
 
 let retryCount = 0
 const MAX_RETRIES = 3

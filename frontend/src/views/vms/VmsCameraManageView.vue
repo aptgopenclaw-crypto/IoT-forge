@@ -13,6 +13,7 @@ const dialogVisible = ref(false)
 const editingCamera = ref<VmsCamera | null>(null)
 const form = ref<VmsCameraRequest>({ serverId: 0, vmsCameraId: '', displayName: '' })
 const syncLoading = ref(false)
+const syncServerId = ref<number | null>(null)
 
 async function fetchData() {
   loading.value = true
@@ -51,10 +52,11 @@ async function handleDelete(id: number) {
   await fetchData()
 }
 
-async function handleSync(serverId: number) {
+async function handleSync() {
+  if (!syncServerId.value) return
   syncLoading.value = true
   try {
-    await syncVmsCameras(serverId)
+    await syncVmsCameras(syncServerId.value)
     ElMessage.success(t('vms.syncCameras'))
     await fetchData()
   } finally { syncLoading.value = false }
@@ -68,9 +70,12 @@ onMounted(fetchData)
     <div class="page-header">
       <h2>{{ t('vms.cameraList') }}</h2>
       <div class="header-actions">
-        <el-select v-if="servers.length" @change="handleSync" style="width:200px;margin-right:8px">
-          <el-option v-for="s in servers" :key="s.id" :value="s.id" :label="`${t('vms.syncCameras')}: ${s.name}`" />
+        <el-select v-if="servers.length" v-model="syncServerId" placeholder="Select server" style="width:180px;margin-right:8px">
+          <el-option v-for="s in servers" :key="s.id" :value="s.id" :label="s.name" />
         </el-select>
+        <el-button type="primary" size="small" @click="handleSync" :disabled="!syncServerId" :loading="syncLoading">
+          {{ t('vms.syncCameras') }}
+        </el-button>
         <el-button type="primary" @click="openCreate">{{ t('vms.addCamera') }}</el-button>
       </div>
     </div>

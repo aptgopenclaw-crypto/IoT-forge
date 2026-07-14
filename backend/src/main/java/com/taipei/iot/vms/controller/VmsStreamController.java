@@ -1,5 +1,7 @@
 package com.taipei.iot.vms.controller;
 
+import com.taipei.iot.common.enums.ErrorCode;
+import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.vms.dto.StreamRequestDTO;
 import com.taipei.iot.vms.service.HlsProxyService;
@@ -34,19 +36,24 @@ public class VmsStreamController {
 
 	@GetMapping("/stream/{sessionToken}/master.m3u8")
 	public ResponseEntity<byte[]> getMasterPlaylist(@PathVariable String sessionToken,
-			@RequestParam(required = false) String pos) {
+			@RequestParam(required = false) String pos, Authentication auth) {
+		verifySessionOwnership(sessionToken, auth.getName());
 		byte[] playlist = hlsProxyService.fetchMasterPlaylist(sessionToken, pos);
 		return ResponseEntity.ok().contentType(MediaType.valueOf("application/vnd.apple.mpegurl")).body(playlist);
 	}
 
 	@GetMapping("/stream/{sessionToken}/trickplay")
-	public ResponseEntity<byte[]> getTrickplay(@PathVariable String sessionToken, @RequestParam int speed) {
+	public ResponseEntity<byte[]> getTrickplay(@PathVariable String sessionToken, @RequestParam int speed,
+			Authentication auth) {
+		verifySessionOwnership(sessionToken, auth.getName());
 		byte[] playlist = hlsProxyService.fetchTrickplay(sessionToken, speed);
 		return ResponseEntity.ok().contentType(MediaType.valueOf("application/vnd.apple.mpegurl")).body(playlist);
 	}
 
 	@GetMapping("/stream/{sessionToken}/**")
-	public ResponseEntity<byte[]> getSegment(@PathVariable String sessionToken, HttpServletRequest request) {
+	public ResponseEntity<byte[]> getSegment(@PathVariable String sessionToken, HttpServletRequest request,
+			Authentication auth) {
+		verifySessionOwnership(sessionToken, auth.getName());
 		String path = request.getRequestURI();
 		String prefix = "/v1/auth/vms/stream/" + sessionToken;
 		String relativePath = path.substring(prefix.length());
@@ -55,9 +62,17 @@ public class VmsStreamController {
 	}
 
 	@DeleteMapping("/stream/{sessionToken}")
-	public BaseResponse<Void> stopStream(@PathVariable String sessionToken) {
+	public BaseResponse<Void> stopStream(@PathVariable String sessionToken, Authentication auth) {
+		verifySessionOwnership(sessionToken, auth.getName());
 		sessionManager.removeSession(sessionToken);
 		return BaseResponse.success(null);
+	}
+
+	private void verifySessionOwnership(String sessionToken, String userId) {
+		var session = sessionManager.getSession(sessionToken);
+		if (!userId.equals(session.getUserId())) {
+			throw new BusinessException(ErrorCode.PERMISSION_DENIED, "Session does not belong to this user");
+		}
 	}
 
 }
