@@ -50,8 +50,9 @@ public class VmsServerEntity implements TenantAware {
 	@Column(name = "api_token", length = 500)
 	private String apiToken;
 
+	@Builder.Default
 	@Column(name = "is_active", nullable = false)
-	private Boolean isActive;
+	private Boolean isActive = true;
 
 	@CreatedDate
 	@Column(name = "created_at", nullable = false, updatable = false)

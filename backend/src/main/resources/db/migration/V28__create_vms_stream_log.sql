@@ -1,7 +1,7 @@
 -- V28__create_vms_stream_log.sql
 CREATE TABLE vms_stream_log (
     id                  BIGSERIAL PRIMARY KEY,
-    tenant_id           BIGINT NOT NULL,
+    tenant_id           VARCHAR(50) NOT NULL,
     user_id             BIGINT NOT NULL,
     camera_id           BIGINT NOT NULL REFERENCES vms_camera_mapping(id),
     stream_type         VARCHAR(10) NOT NULL,

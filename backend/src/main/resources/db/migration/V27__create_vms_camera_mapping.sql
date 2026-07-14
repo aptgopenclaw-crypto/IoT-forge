@@ -1,7 +1,7 @@
 -- V27__create_vms_camera_mapping.sql
 CREATE TABLE vms_camera_mapping (
     id            BIGSERIAL PRIMARY KEY,
-    tenant_id     BIGINT NOT NULL,
+    tenant_id     VARCHAR(50) NOT NULL,
     server_id     BIGINT NOT NULL REFERENCES vms_server(id) ON DELETE CASCADE,
     vms_camera_id VARCHAR(100) NOT NULL,
     display_name  VARCHAR(200),

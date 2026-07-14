@@ -1,7 +1,7 @@
 -- V26__create_vms_server.sql
 CREATE TABLE vms_server (
     id            BIGSERIAL PRIMARY KEY,
-    tenant_id     BIGINT NOT NULL,
+    tenant_id     VARCHAR(50) NOT NULL,
     name          VARCHAR(100) NOT NULL,
     vms_type      VARCHAR(20) NOT NULL DEFAULT 'NX_WITNESS',
     base_url      VARCHAR(255) NOT NULL,
