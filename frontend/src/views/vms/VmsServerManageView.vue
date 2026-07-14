@@ -59,8 +59,8 @@ async function handleTestConnection(id: number) {
   try {
     await testVmsServerConnection(id)
     ElMessage.success(t('vms.connectionSuccess'))
-  } catch {
-    ElMessage.error(t('vms.connectionFailed'))
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.errorMsg || t('vms.connectionFailed'))
   }
 }
 

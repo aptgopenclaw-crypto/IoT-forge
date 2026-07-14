@@ -71,7 +71,7 @@ public class VmsServerService {
 		entity.setBaseUrl(request.getBaseUrl());
 		entity.setAuthType(request.getAuthType());
 		entity.setAuthUsername(request.getAuthUsername());
-		if (request.getAuthPassword() != null) {
+		if (request.getAuthPassword() != null && !request.getAuthPassword().isEmpty()) {
 			entity.setAuthPassword(encryptor.encrypt(request.getAuthPassword()));
 		}
 		entity.setApiToken(request.getApiToken());
