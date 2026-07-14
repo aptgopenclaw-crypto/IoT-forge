@@ -1,5 +1,7 @@
-package com.taipei.iot.auth.policy;
+package com.taipei.iot.auth.policy.dto;
 
+import com.taipei.iot.auth.policy.PasswordPolicyResolver;
+import com.taipei.iot.auth.policy.PasswordPolicyService;
 import com.taipei.iot.common.annotation.AllowDirectNativeQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

@@ -1,7 +1,8 @@
 package com.taipei.iot.common.annotation;
 
-import com.taipei.iot.auth.policy.PasswordPolicyDao;
 import org.junit.jupiter.api.Test;
+
+import com.taipei.iot.auth.policy.dto.PasswordPolicyDao;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

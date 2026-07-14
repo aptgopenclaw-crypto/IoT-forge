@@ -1,5 +1,6 @@
 package com.taipei.iot.auth.policy;
 
+import com.taipei.iot.auth.policy.dto.PasswordPolicyDao;
 import com.taipei.iot.common.policy.PasswordPolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -242,32 +242,6 @@ const tenantStaticAdminRoutes: RouteRecordRaw[] = [
     name: 'EventRuleNotification',
     component: () => import('@/views/admin/eventrule/EventRuleNotificationView.vue'),
   },
-  // ── VMS (Video Management System) ──────────────────────────────
-  {
-    path: '/vms/live',
-    name: 'VmsLive',
-    component: () => import('@/views/admin/vms/VmsLiveView.vue'),
-  },
-  {
-    path: '/vms/playback',
-    name: 'VmsPlayback',
-    component: () => import('@/views/admin/vms/VmsPlaybackView.vue'),
-  },
-  {
-    path: '/vms/cameras',
-    name: 'VmsCameras',
-    component: () => import('@/views/admin/vms/VmsCameraListView.vue'),
-  },
-  {
-    path: '/vms/servers',
-    name: 'VmsServers',
-    component: () => import('@/views/admin/vms/VmsServerManagement.vue'),
-  },
-  {
-    path: '/vms/events',
-    name: 'VmsEvents',
-    component: () => import('@/views/admin/vms/VmsEventLogs.vue'),
-  },
 ]
 
 const router = createRouter({

@@ -1,5 +1,6 @@
 package com.taipei.iot.auth.policy;
 
+import com.taipei.iot.auth.policy.dto.PasswordPolicyDao;
 import com.taipei.iot.auth.policy.dto.UpdatePasswordPolicyRequest;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
