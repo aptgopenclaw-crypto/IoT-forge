@@ -13,9 +13,11 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const currentTime = ref(0)
+const currentSpeed = ref(1)
 
 function onTimeUpdate(time: number) { currentTime.value = time }
-function onSeek(timestamp: number) { /* StreamPlayer handles via prop change */ }
+function onSeek(timestamp: number) { /* StreamPlayer handles seek */ }
+function onSpeedChange(speed: number) { currentSpeed.value = speed }
 </script>
 
 <template>
@@ -27,6 +29,7 @@ function onSeek(timestamp: number) { /* StreamPlayer handles via prop change */ 
       <VmsStreamPlayer
         :camera-id="cameraId"
         :stream-type="streamType"
+        :speed="currentSpeed"
         :start-time="startTime"
         :end-time="endTime"
         @time-update="onTimeUpdate"
@@ -36,6 +39,7 @@ function onSeek(timestamp: number) { /* StreamPlayer handles via prop change */ 
         :current-time="currentTime"
         :total-duration="0"
         @seek="onSeek"
+        @update:speed="onSpeedChange"
       />
     </template>
   </div>

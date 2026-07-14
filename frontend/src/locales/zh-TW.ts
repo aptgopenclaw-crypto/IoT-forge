@@ -24,6 +24,7 @@ export default {
     enabled: '啟用',
     disabled: '停用',
     confirmDelete: '確定刪除',
+    retry: '重試',
     retryLater: '請稍後再試',
     enable: '啟用',
     disable: '停用',

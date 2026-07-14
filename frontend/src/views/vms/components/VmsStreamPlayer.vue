@@ -3,12 +3,12 @@ import { ref, onMounted, onBeforeUnmount, watch, shallowRef } from 'vue'
 import Hls from 'hls.js'
 import { createStream, stopStream } from '@/api/vms'
 import { useAuthStore } from '@/stores/authStore'
-import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   cameraId: number
   streamType: 'live' | 'playback'
+  speed?: number
   startTime?: string
   endTime?: string
 }>()
@@ -21,6 +21,14 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const authStore = useAuthStore()
+const videoRef = ref<HTMLVideoElement | null>(null)
+const hlsInstance = shallowRef<Hls | null>(null)
+const sessionToken = ref<string>('')
+const playing = ref(false)
+const currentSpeed = ref(1)
+const errorMsg = ref('')
+const loading = ref(false)
+const streamBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
 const videoRef = ref<HTMLVideoElement | null>(null)
 const hlsInstance = shallowRef<Hls | null>(null)
 const sessionToken = ref<string>('')
@@ -140,6 +148,12 @@ async function destroyStream() {
 watch(() => props.cameraId, () => {
   retryCount = 0
   destroyStream().then(() => initStream())
+})
+
+watch(() => props.speed, (newSpeed) => {
+  if (newSpeed && newSpeed !== currentSpeed.value) {
+    changeSpeed(newSpeed)
+  }
 })
 
 onMounted(() => initStream())

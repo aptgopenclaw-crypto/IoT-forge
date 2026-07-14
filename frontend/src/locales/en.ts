@@ -24,6 +24,7 @@ export default {
     enabled: 'Enabled',
     disabled: 'Disabled',
     confirmDelete: 'Confirm Delete',
+    retry: 'Retry',
     retryLater: 'Please try again later',
     enable: 'Enable',
     disable: 'Disable',
