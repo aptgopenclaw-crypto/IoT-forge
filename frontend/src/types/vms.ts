@@ -8,6 +8,7 @@ export type { BaseResponse, PageResponse }
 
 export type VmsType = 'NX_WITNESS' | 'MILESTONE' | 'AXXON'
 export type VmsAuthType = 'BASIC' | 'TOKEN' | 'CERT'
+export type CameraStatus = 'ONLINE' | 'OFFLINE' | 'ERROR'
 
 export interface VmsServer {
   id: number
@@ -15,6 +16,7 @@ export interface VmsServer {
   vmsType: VmsType
   baseUrl: string
   authType: VmsAuthType
+  authUsername?: string
   isActive: boolean
   createdAt: string
 }
@@ -27,74 +29,59 @@ export interface VmsServerRequest {
   authUsername?: string
   authPassword?: string
   apiToken?: string
+  isActive?: boolean
 }
 
-// ── Camera ─────────────────────────────────────────────────────────────────
-
-export type CameraStatus = 'ONLINE' | 'OFFLINE' | 'ERROR'
+// ── Camera Mapping ─────────────────────────────────────────────────────────
 
 export interface VmsCamera {
   id: number
   serverId: number
+  serverName?: string
   vmsCameraId: string
-  displayName: string
-  deviceId?: number
+  displayName?: string
   deptId?: number
+  deptName?: string
   status: CameraStatus
   rtspUrl?: string
+  createdAt?: string
 }
 
 export interface VmsCameraRequest {
   serverId: number
   vmsCameraId: string
   displayName?: string
-  rtspUrl?: string
-  deviceId?: number
   deptId?: number
+  rtspUrl?: string
 }
 
 // ── Stream ─────────────────────────────────────────────────────────────────
 
-export interface CameraLiveResponse {
-  cameraId: number
-  displayName: string
-  playUrl: string
+export interface StreamCreateRequest {
+  type: 'live' | 'playback'
+  startTime?: string
+  endTime?: string
+}
+
+export interface StreamCreateResponse {
+  sessionToken: string
   expiresAt: string
-  status: CameraStatus
-}
-
-export interface CameraPlaybackResponse {
   cameraId: number
-  displayName: string
-  playUrl: string
-  startTime: string
-  endTime: string
-  status: CameraStatus
+  streamType: string
 }
 
-// ── PTZ ────────────────────────────────────────────────────────────────────
+// ── Stream Log ─────────────────────────────────────────────────────────────
 
-export interface PtzCommand {
-  direction: 'LEFT' | 'RIGHT' | 'UP' | 'DOWN' | 'ZOOM_IN' | 'ZOOM_OUT'
-  speed?: number
-  presetPoint?: number
-}
-
-// ── Event ──────────────────────────────────────────────────────────────────
-
-export type VmsEventType =
-  | 'MOTION_DETECT'
-  | 'CAMERA_OFFLINE'
-  | 'CAMERA_ONLINE'
-  | 'VIDEO_LOST'
-  | 'RECORDING_STARTED'
-  | 'RECORDING_STOPPED'
-  | 'UNKNOWN'
-
-export interface VmsCameraEvent {
+export interface VmsStreamLog {
   id: number
+  userId: number
+  userName?: string
   cameraId: number
-  eventType: VmsEventType
-  payload?: Record<string, unknown>
-  occurredAt: string
+  cameraName?: string
+  streamType: string
+  startedAt: string
+  endedAt?: string
+  durationSeconds?: number
+  playbackStartTime?: string
+  playbackEndTime?: string
 }

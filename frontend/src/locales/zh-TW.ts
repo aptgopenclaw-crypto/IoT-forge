@@ -2262,5 +2262,9 @@ export default {
     id: '編號',
     add: '新增',
     delete: '刪除',
+    streamLogs: '串流記錄',
+    reverse: '倒放',
+    selectTimeRangeHint: '請選擇回放的開始與結束時間',
+    connectionSuccess: '連線成功',
   },
 }

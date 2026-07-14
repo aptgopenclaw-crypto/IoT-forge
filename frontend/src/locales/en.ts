@@ -2213,5 +2213,9 @@ export default {
     id: 'ID',
     add: 'Add',
     delete: 'Delete',
+    streamLogs: 'Stream Logs',
+    reverse: 'Reverse',
+    selectTimeRangeHint: 'Select start and end time for playback',
+    connectionSuccess: 'Connection successful',
   },
 }
