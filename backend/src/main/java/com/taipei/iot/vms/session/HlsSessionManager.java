@@ -45,7 +45,10 @@ public class HlsSessionManager {
 	public void touchSession(String sessionToken) {
 		HlsSession session = sessions.get(sessionToken);
 		if (session != null) {
-			// Re-insert to refresh position in ConcurrentHashMap
+			HlsSession refreshed = new HlsSession(session.getSessionToken(), session.getUserId(), session.getCameraId(),
+					session.getServerId(), session.getNxToken(), session.getStreamType(), session.getStartTime(),
+					session.getEndTime(), Instant.now());
+			sessions.replace(sessionToken, session, refreshed);
 		}
 	}
 
