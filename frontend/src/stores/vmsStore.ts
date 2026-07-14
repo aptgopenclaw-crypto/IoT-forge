@@ -18,7 +18,11 @@ export const useVmsStore = defineStore('vms', () => {
     loading.value = true
     try {
       const res = await listVmsCameras()
-      cameras.value = res.body ?? []
+      if (res.errorCode === '00000') {
+        cameras.value = res.body ?? []
+      }
+    } catch (e) {
+      console.error('Failed to fetch VMS cameras:', e)
     } finally {
       loading.value = false
     }
