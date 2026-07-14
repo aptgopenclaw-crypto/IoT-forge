@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { publicRoutes } from '@/router/publicRoutes'
+import { vmsRoutes } from '@/views/vms'
 import { resolveScopeRedirect } from '@/router/guards'
 import TenantLayout from '@/layouts/TenantLayout.vue'
 import PlatformLayout from '@/layouts/PlatformLayout.vue'
@@ -269,6 +270,7 @@ const router = createRouter({
       children: [
         ...publicRoutes,
         ...tenantStaticAdminRoutes,
+        ...vmsRoutes,
       ],
     },
   ],
