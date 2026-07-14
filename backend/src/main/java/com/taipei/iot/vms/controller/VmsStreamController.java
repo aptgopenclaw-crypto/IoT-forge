@@ -4,6 +4,7 @@ import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.vms.dto.StreamRequestDTO;
 import com.taipei.iot.vms.service.HlsProxyService;
 import com.taipei.iot.vms.service.VmsStreamService;
+import com.taipei.iot.vms.session.HlsSessionManager;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -21,6 +22,8 @@ public class VmsStreamController {
 	private final VmsStreamService vmsStreamService;
 
 	private final HlsProxyService hlsProxyService;
+
+	private final HlsSessionManager sessionManager;
 
 	@PostMapping("/{cameraId}/stream")
 	public BaseResponse<Map<String, Object>> createStream(@PathVariable Long cameraId,
@@ -53,7 +56,7 @@ public class VmsStreamController {
 
 	@DeleteMapping("/stream/{sessionToken}")
 	public BaseResponse<Void> stopStream(@PathVariable String sessionToken) {
-		// Session auto-expires; explicit removal allowed
+		sessionManager.removeSession(sessionToken);
 		return BaseResponse.success(null);
 	}
 

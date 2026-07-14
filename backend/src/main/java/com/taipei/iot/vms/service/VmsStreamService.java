@@ -1,5 +1,6 @@
 package com.taipei.iot.vms.service;
 
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.dto.StreamRequestDTO;
@@ -51,8 +52,9 @@ public class VmsStreamService {
 				startTime, endTime);
 
 		// Write stream log
+		String currentTenantId = TenantContext.getCurrentTenantId();
 		VmsStreamLogEntity logEntry = VmsStreamLogEntity.builder()
-			.tenantId("0")
+			.tenantId(currentTenantId != null ? currentTenantId : "0")
 			.userId(Long.valueOf(userId))
 			.cameraId(cameraId)
 			.streamType(streamType)
