@@ -5,6 +5,7 @@ import com.taipei.iot.vms.dto.VmsStreamLogDTO;
 import com.taipei.iot.vms.service.VmsStreamLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,7 +21,8 @@ public class VmsStreamLogController {
 	private final VmsStreamLogService vmsStreamLogService;
 
 	@GetMapping
-	public BaseResponse<Page<VmsStreamLogDTO>> query(@RequestParam(required = false) Long userId,
+	@PreAuthorize("hasAuthority('VMS_STREAM_LOG')")
+	public BaseResponse<Page<VmsStreamLogDTO>> query(@RequestParam(required = false) String userId,
 			@RequestParam(required = false) Long cameraId, @RequestParam(required = false) String streamType,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,

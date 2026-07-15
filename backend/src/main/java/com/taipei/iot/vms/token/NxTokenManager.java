@@ -6,13 +6,23 @@ import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.entity.VmsServerEntity;
 import com.taipei.iot.vms.exception.NxTokenNotAvailableException;
 import com.taipei.iot.vms.repository.VmsServerRepository;
+import com.taipei.iot.common.context.TenantContext;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +37,7 @@ public class NxTokenManager {
 
 	private final Map<Long, TokenInfo> tokens = new ConcurrentHashMap<>();
 
-	private final RestTemplate restTemplate = new RestTemplate();
+	private final RestTemplate restTemplate;
 
 	private final VmsServerRepository vmsServerRepository;
 
@@ -40,18 +50,67 @@ public class NxTokenManager {
 		this.vmsServerRepository = vmsServerRepository;
 		this.encryptor = encryptor;
 		this.taskScheduler = taskScheduler;
+		this.restTemplate = createLenientRestTemplate();
+	}
+
+	/**
+	 * Create a RestTemplate that accepts all SSL certificates (self-signed, expired,
+	 * etc.). Suitable for development environments where the NX server uses a self-signed
+	 * certificate. The SSL leniency is scoped to this RestTemplate instance only, not the
+	 * entire JVM.
+	 */
+	private static RestTemplate createLenientRestTemplate() {
+		try {
+			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+			TrustManager[] trustAll = new TrustManager[] { new X509TrustManager() {
+				@Override
+				public X509Certificate[] getAcceptedIssuers() {
+					return new X509Certificate[0];
+				}
+
+				@Override
+				public void checkClientTrusted(X509Certificate[] chain, String authType) {
+				}
+
+				@Override
+				public void checkServerTrusted(X509Certificate[] chain, String authType) {
+				}
+			} };
+			sslContext.init(null, trustAll, new SecureRandom());
+
+			SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
+				@Override
+				protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+					if (connection instanceof HttpsURLConnection httpsConn) {
+						httpsConn.setSSLSocketFactory(sslContext.getSocketFactory());
+						httpsConn.setHostnameVerifier((hostname, session) -> true);
+					}
+					super.prepareConnection(connection, httpMethod);
+				}
+			};
+			factory.setConnectTimeout(5_000);
+			factory.setReadTimeout(10_000);
+			factory.setBufferRequestBody(false);
+
+			return new RestTemplate(factory);
+		}
+		catch (Exception e) {
+			throw new RuntimeException("Failed to create lenient RestTemplate", e);
+		}
 	}
 
 	@PostConstruct
 	public void init() {
-		for (VmsServerEntity server : vmsServerRepository.findByIsActiveTrue()) {
-			try {
-				refreshToken(server);
+		TenantContext.runInSystemContext(() -> {
+			for (VmsServerEntity server : vmsServerRepository.findByIsActiveTrue()) {
+				try {
+					refreshToken(server);
+				}
+				catch (Exception e) {
+					log.warn("Initial NX login failed for server [{}]: {}", server.getId(), e.getMessage());
+				}
 			}
-			catch (Exception e) {
-				log.warn("Initial NX login failed for server [{}]: {}", server.getId(), e.getMessage());
-			}
-		}
+		});
 	}
 
 	public synchronized void refreshToken(Long serverId) {
@@ -64,13 +123,14 @@ public class NxTokenManager {
 		String password = encryptor.decrypt(server.getAuthPassword());
 		String url = server.getBaseUrl() + "/rest/v1/login/sessions";
 
-		var body = Map.of("username", server.getAuthUsername(), "password",
-				password != null ? password : server.getAuthPassword());
+		String effectivePassword = password != null ? password : server.getAuthPassword();
+		String jsonBody = "{" + "\"username\":\"" + escapeJson(server.getAuthUsername()) + "\"," + "\"password\":\""
+				+ escapeJson(effectivePassword) + "\"" + "}";
 		var headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		try {
-			var response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(body, headers), Map.class);
+			var response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(jsonBody, headers), Map.class);
 
 			var responseBody = response.getBody();
 			if (responseBody == null || responseBody.get("token") == null) {
@@ -104,6 +164,19 @@ public class NxTokenManager {
 				throw new NxTokenNotAvailableException("Initial NX login failed for server " + server.getId(), e);
 			}
 		}
+	}
+
+	/**
+	 * Escape a string for safe inclusion in a JSON string value.
+	 */
+	private static String escapeJson(String value) {
+		if (value == null)
+			return "";
+		return value.replace("\\", "\\\\")
+			.replace("\"", "\\\"")
+			.replace("\n", "\\n")
+			.replace("\r", "\\r")
+			.replace("\t", "\\t");
 	}
 
 	public String getToken(Long serverId) {

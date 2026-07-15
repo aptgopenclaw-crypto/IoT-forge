@@ -1,6 +1,7 @@
 package com.taipei.iot.vms.service;
 
 import com.taipei.iot.auth.provider.crypto.AuthConfigEncryptor;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.dto.VmsServerDTO;
@@ -36,7 +37,7 @@ public class VmsServerService {
 				: null;
 
 		VmsServerEntity entity = VmsServerEntity.builder()
-			.tenantId("0")
+			.tenantId(TenantContext.getCurrentTenantId())
 			.name(request.getName())
 			.vmsType(request.getVmsType())
 			.baseUrl(request.getBaseUrl())

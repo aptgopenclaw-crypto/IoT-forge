@@ -52,10 +52,9 @@ public class VmsStreamService {
 				startTime, endTime);
 
 		// Write stream log
-		String currentTenantId = TenantContext.getCurrentTenantId();
 		VmsStreamLogEntity logEntry = VmsStreamLogEntity.builder()
-			.tenantId(currentTenantId != null ? currentTenantId : "0")
-			.userId(Long.valueOf(userId))
+			.tenantId(TenantContext.getCurrentTenantId())
+			.userId(userId)
 			.cameraId(cameraId)
 			.streamType(streamType)
 			.sessionToken(sessionToken)

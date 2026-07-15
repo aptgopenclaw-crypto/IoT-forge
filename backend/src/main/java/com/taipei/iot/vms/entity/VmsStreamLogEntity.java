@@ -27,8 +27,8 @@ public class VmsStreamLogEntity implements TenantAware {
 	@Column(name = "tenant_id", nullable = false)
 	private String tenantId;
 
-	@Column(name = "user_id", nullable = false)
-	private Long userId;
+	@Column(name = "user_id", nullable = false, length = 50)
+	private String userId;
 
 	@Column(name = "camera_id", nullable = false)
 	private Long cameraId;

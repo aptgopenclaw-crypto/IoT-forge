@@ -1,12 +1,18 @@
 -- V29__seed_vms_menus.sql
--- The actual menu seed data depends on the menu system format.
--- Insert a parent VMS menu and 5 child menus referencing the route paths.
--- Use the same pattern as existing seed migrations.
-INSERT INTO sys_menu (tenant_id, parent_id, name, permission, route_path, type, sort_order, icon, component, is_frame, is_cache, visible, status, created_by, created_at)
-VALUES
-(0, NULL, 'VMS', 'vms:manage', NULL, 'M', 1, 'video', NULL, 0, 1, 1, 1, 'system', NOW()),
-(0, (SELECT id FROM sys_menu WHERE name = 'VMS' AND parent_id IS NULL), '即時播放', 'vms:live', '/vms/live', 'C', 1, 'video', 'vms/VmsLiveView', 0, 1, 1, 1, 'system', NOW()),
-(0, (SELECT id FROM sys_menu WHERE name = 'VMS' AND parent_id IS NULL), '歷史播放', 'vms:playback', '/vms/playback', 'C', 2, 'time', 'vms/VmsPlaybackView', 0, 1, 1, 1, 'system', NOW()),
-(0, (SELECT id FROM sys_menu WHERE name = 'VMS' AND parent_id IS NULL), 'VMS 伺服器', 'vms:server', '/vms/servers', 'C', 3, 'server', 'vms/VmsServerManageView', 0, 1, 1, 1, 'system', NOW()),
-(0, (SELECT id FROM sys_menu WHERE name = 'VMS' AND parent_id IS NULL), '攝影機管理', 'vms:camera', '/vms/cameras', 'C', 4, 'camera', 'vms/VmsCameraManageView', 0, 1, 1, 1, 'system', NOW()),
-(0, (SELECT id FROM sys_menu WHERE name = 'VMS' AND parent_id IS NULL), '串流記錄', 'vms:stream-log', '/vms/stream-logs', 'C', 5, 'document', 'vms/VmsStreamLogView', 0, 1, 1, 1, 'system', NOW());
+-- Sync the IDENTITY sequence with existing rows (pg_dump inserts explicit IDs without updating the sequence)
+SELECT setval(pg_get_serial_sequence('menus', 'menu_id'), MAX(menu_id)) FROM menus;
+
+INSERT INTO menus (parent_id, name, menu_type, route_path, component, permission_code, icon, sort_order, visible, keep_alive, scope)
+VALUES (NULL, 'VMS', 'DIRECTORY', NULL, NULL, NULL, 'video', 50, true, false, 'TENANT');
+
+INSERT INTO menus (parent_id, name, menu_type, route_name, route_path, component, permission_code, icon, sort_order, visible, keep_alive, scope)
+SELECT m.menu_id, child.name, child.menu_type, child.route_name, child.route_path, child.component, child.permission_code, child.icon, child.sort_order, true, false, 'TENANT'
+FROM menus m
+CROSS JOIN (VALUES
+    ('即時播放',   'PAGE', 'VmsLive',        '/vms/live',         'views/vms/VmsLiveView.vue',         'VMS_LIVE',         'video',    10),
+    ('歷史播放',   'PAGE', 'VmsPlayback',    '/vms/playback',     'views/vms/VmsPlaybackView.vue',     'VMS_PLAYBACK',     'time',     20),
+    ('VMS 伺服器', 'PAGE', 'VmsServers',     '/vms/servers',      'views/vms/VmsServerManageView.vue', 'VMS_SERVER',       'server',   30),
+    ('攝影機管理', 'PAGE', 'VmsCameras',     '/vms/cameras',      'views/vms/VmsCameraManageView.vue', 'VMS_CAMERA',       'camera',   40),
+    ('串流記錄',   'PAGE', 'VmsStreamLogs',  '/vms/stream-logs',  'views/vms/VmsStreamLogView.vue',    'VMS_STREAM_LOG',   'document', 50)
+) AS child(name, menu_type, route_name, route_path, component, permission_code, icon, sort_order)
+WHERE m.name = 'VMS' AND m.parent_id IS NULL;

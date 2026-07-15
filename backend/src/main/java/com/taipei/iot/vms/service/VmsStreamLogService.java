@@ -20,7 +20,7 @@ public class VmsStreamLogService {
 
 	private final VmsStreamLogRepository repository;
 
-	public Page<VmsStreamLogDTO> queryLogs(Long userId, Long cameraId, String streamType, LocalDateTime startDate,
+	public Page<VmsStreamLogDTO> queryLogs(String userId, Long cameraId, String streamType, LocalDateTime startDate,
 			LocalDateTime endDate, Pageable pageable) {
 		Specification<VmsStreamLogEntity> spec = (root, query, cb) -> {
 			List<Predicate> predicates = new ArrayList<>();

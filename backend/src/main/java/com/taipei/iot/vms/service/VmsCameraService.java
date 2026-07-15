@@ -1,5 +1,6 @@
 package com.taipei.iot.vms.service;
 
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.vms.dto.VmsCameraMappingDTO;
@@ -43,7 +44,7 @@ public class VmsCameraService {
 			.orElseThrow(() -> new BusinessException(ErrorCode.VMS_SERVER_NOT_FOUND));
 
 		VmsCameraMappingEntity entity = VmsCameraMappingEntity.builder()
-			.tenantId("0")
+			.tenantId(TenantContext.getCurrentTenantId())
 			.serverId(request.getServerId())
 			.vmsCameraId(request.getVmsCameraId())
 			.displayName(request.getDisplayName())
@@ -102,7 +103,7 @@ public class VmsCameraService {
 					var existing = repository.findByVmsCameraId(nxCameraId);
 					if (existing.isEmpty()) {
 						VmsCameraMappingEntity newCam = VmsCameraMappingEntity.builder()
-							.tenantId("0")
+							.tenantId(TenantContext.getCurrentTenantId())
 							.serverId(serverId)
 							.vmsCameraId(nxCameraId)
 							.displayName(deviceName)

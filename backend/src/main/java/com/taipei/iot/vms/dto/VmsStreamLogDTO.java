@@ -12,7 +12,7 @@ public class VmsStreamLogDTO {
 
 	private Long id;
 
-	private Long userId;
+	private String userId;
 
 	private String userName;
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, shallowRef } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, shallowRef, nextTick } from 'vue'
 import Hls from 'hls.js'
 import { createStream, stopStream } from '@/api/vms'
 import { useAuthStore } from '@/stores/authStore'
@@ -29,12 +29,6 @@ const currentSpeed = ref(1)
 const errorMsg = ref('')
 const loading = ref(false)
 const streamBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
-const videoRef = ref<HTMLVideoElement | null>(null)
-const hlsInstance = shallowRef<Hls | null>(null)
-const sessionToken = ref<string>('')
-const playing = ref(false)
-const errorMsg = ref('')
-const loading = ref(false)
 
 let retryCount = 0
 const MAX_RETRIES = 3
@@ -49,6 +43,8 @@ async function initStream() {
       endTime: props.endTime,
     })
     sessionToken.value = res.body!.sessionToken
+    loading.value = false
+    await nextTick()
     loadHls()
   } catch (e: any) {
     errorMsg.value = e?.response?.data?.errorMsg || t('vms.connectionFailed')
@@ -59,7 +55,7 @@ async function initStream() {
 }
 
 function getStreamUrl(path: string): string {
-  return `${streamBaseUrl}/v1/auth/vms/stream/${sessionToken.value}${path}`
+  return `${streamBaseUrl}/auth/vms/stream/${sessionToken.value}${path}`
 }
 
 function loadHls() {

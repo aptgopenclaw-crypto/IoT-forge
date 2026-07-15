@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ public class VmsStreamController {
 	private final HlsSessionManager sessionManager;
 
 	@PostMapping("/{cameraId}/stream")
+	@PreAuthorize("hasAuthority('VMS_LIVE')")
 	public BaseResponse<Map<String, Object>> createStream(@PathVariable Long cameraId,
 			@RequestBody StreamRequestDTO request, Authentication auth) {
 		String userId = auth.getName();
@@ -35,6 +37,7 @@ public class VmsStreamController {
 	}
 
 	@GetMapping("/stream/{sessionToken}/master.m3u8")
+	@PreAuthorize("hasAuthority('VMS_LIVE')")
 	public ResponseEntity<byte[]> getMasterPlaylist(@PathVariable String sessionToken,
 			@RequestParam(required = false) String pos, Authentication auth) {
 		verifySessionOwnership(sessionToken, auth.getName());
@@ -43,6 +46,7 @@ public class VmsStreamController {
 	}
 
 	@GetMapping("/stream/{sessionToken}/trickplay")
+	@PreAuthorize("hasAuthority('VMS_LIVE')")
 	public ResponseEntity<byte[]> getTrickplay(@PathVariable String sessionToken, @RequestParam int speed,
 			Authentication auth) {
 		verifySessionOwnership(sessionToken, auth.getName());
@@ -51,17 +55,23 @@ public class VmsStreamController {
 	}
 
 	@GetMapping("/stream/{sessionToken}/**")
+	@PreAuthorize("hasAuthority('VMS_LIVE')")
 	public ResponseEntity<byte[]> getSegment(@PathVariable String sessionToken, HttpServletRequest request,
 			Authentication auth) {
 		verifySessionOwnership(sessionToken, auth.getName());
 		String path = request.getRequestURI();
 		String prefix = "/v1/auth/vms/stream/" + sessionToken;
 		String relativePath = path.substring(prefix.length());
+		String queryString = request.getQueryString();
+		if (queryString != null && !queryString.isBlank()) {
+			relativePath += "?" + queryString;
+		}
 		byte[] data = hlsProxyService.fetchSegment(sessionToken, relativePath);
 		return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(data);
 	}
 
 	@DeleteMapping("/stream/{sessionToken}")
+	@PreAuthorize("hasAuthority('VMS_VIEW')")
 	public BaseResponse<Void> stopStream(@PathVariable String sessionToken, Authentication auth) {
 		verifySessionOwnership(sessionToken, auth.getName());
 		sessionManager.removeSession(sessionToken);
