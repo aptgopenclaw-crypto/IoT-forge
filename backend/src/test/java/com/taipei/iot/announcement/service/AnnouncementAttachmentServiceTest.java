@@ -11,7 +11,7 @@ import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.service.FileStorageService;
 import com.taipei.iot.common.service.FileValidationService;
 import com.taipei.iot.common.util.JwtClaimKeys;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

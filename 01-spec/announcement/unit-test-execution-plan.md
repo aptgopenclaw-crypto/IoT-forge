@@ -227,7 +227,7 @@ import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.service.FileStorageService;
 import com.taipei.iot.common.service.FileValidationService;
 import com.taipei.iot.common.util.JwtClaimKeys;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;

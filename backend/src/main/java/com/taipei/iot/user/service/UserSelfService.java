@@ -66,10 +66,10 @@ public class UserSelfService {
 			throw new BusinessException(ErrorCode.OLD_PASSWORD_INCORRECT);
 		}
 
-		passwordValidator.validate(com.taipei.iot.tenant.TenantContext.getCurrentTenantId(), req.getNewPassword(),
-				new PasswordValidator.UserContext(user.getEmail(), user.getEmail()));
-		passwordValidator.checkNotRecentlyUsed(com.taipei.iot.tenant.TenantContext.getCurrentTenantId(), currentUserId,
-				req.getNewPassword());
+		passwordValidator.validate(com.taipei.iot.common.context.TenantContext.getCurrentTenantId(),
+				req.getNewPassword(), new PasswordValidator.UserContext(user.getEmail(), user.getEmail()));
+		passwordValidator.checkNotRecentlyUsed(com.taipei.iot.common.context.TenantContext.getCurrentTenantId(),
+				currentUserId, req.getNewPassword());
 
 		String newHash = passwordEncoder.encode(req.getNewPassword());
 		user.setPasswordHash(newHash);

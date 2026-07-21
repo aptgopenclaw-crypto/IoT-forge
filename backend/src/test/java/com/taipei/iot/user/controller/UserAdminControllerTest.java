@@ -152,8 +152,8 @@ class UserAdminControllerTest {
 	// java.util.concurrent.atomic.AtomicReference<String> capturedTenantId = new
 	// java.util.concurrent.atomic.AtomicReference<>();
 	// when(userAdminService.listUsers(0, 20, null, null)).thenAnswer(inv -> {
-	// capturedImpersonator.set(com.taipei.iot.tenant.TenantContext.getImpersonator());
-	// capturedTenantId.set(com.taipei.iot.tenant.TenantContext.getCurrentTenantId());
+	// capturedImpersonator.set(com.taipei.iot.common.context.TenantContext.getImpersonator());
+	// capturedTenantId.set(com.taipei.iot.common.context.TenantContext.getCurrentTenantId());
 	// return PageResponse.<UserListItemDto>builder()
 	// .content(List.of())
 	// .totalElements(0)

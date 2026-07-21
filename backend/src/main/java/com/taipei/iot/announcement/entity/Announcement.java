@@ -1,5 +1,6 @@
 package com.taipei.iot.announcement.entity;
 
+import com.taipei.iot.announcement.enums.AnnouncementCategory;
 import com.taipei.iot.common.tenant.TenantAware;
 import com.taipei.iot.common.tenant.TenantEntityListener;
 import jakarta.persistence.Column;

@@ -24,9 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * <p>
  * Replaces {@link TenantAuthConfigController} which resolved {@code tenantId} implicitly
- * from {@link com.taipei.iot.tenant.TenantContext}. The new path carries {@code tenantId}
- * as a path variable, making cross-tenant management explicit and removing the
- * SUPER_ADMIN "context switch" requirement.
+ * from {@link com.taipei.iot.common.context.TenantContext}. The new path carries
+ * {@code tenantId} as a path variable, making cross-tenant management explicit and
+ * removing the SUPER_ADMIN "context switch" requirement.
  *
  * <ul>
  * <li>{@code GET /v1/platform/tenants/{tenantId}/auth-config}</li>

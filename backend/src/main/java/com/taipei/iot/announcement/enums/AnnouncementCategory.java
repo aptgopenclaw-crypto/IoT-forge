@@ -1,9 +1,9 @@
 package com.taipei.iot.announcement.enums;
 
-import java.util.Arrays;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
 
 /**
  * 公告分類。預設 GENERAL（一般）；其餘為對使用者具有不同語意提示的類別， 由前端依分類給予不同顏色標籤呈現。

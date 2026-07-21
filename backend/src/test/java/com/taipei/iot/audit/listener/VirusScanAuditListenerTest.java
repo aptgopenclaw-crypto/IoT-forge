@@ -5,7 +5,7 @@ import com.taipei.iot.common.audit.enums.AuditCategory;
 import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.event.VirusScanAuditEvent;
 import com.taipei.iot.common.util.SecurityContextUtils;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

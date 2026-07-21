@@ -5,7 +5,7 @@ import com.taipei.iot.audit.async.AuditAsyncWriter;
 import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.enums.ErrorCode;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

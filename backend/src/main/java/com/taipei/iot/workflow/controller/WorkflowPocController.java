@@ -1,5 +1,7 @@
 package com.taipei.iot.workflow.controller;
 
+import com.taipei.iot.common.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 import com.taipei.iot.common.response.BaseResponse;
 import com.taipei.iot.common.util.SecurityContextUtils;
 import com.taipei.iot.workflow.dto.DelegateSetRequest;
@@ -64,6 +66,7 @@ public class WorkflowPocController {
 	@PostMapping("/start")
 	@PreAuthorize("isAuthenticated()")
 	@Operation(summary = "啟動流程", description = "依 workflowCode 建立新的流程實例並寫入第一個待辦步驟")
+	@AuditEvent(AuditEventType.WORKFLOW_SUBMIT)
 	public BaseResponse<WorkflowInstanceEntity> start(@Valid @RequestBody WorkflowStartRequest req) {
 		String applicantId = SecurityContextUtils.requireCurrentUserIdStrict();
 		WorkflowContext context = WorkflowContext.builder()
@@ -82,6 +85,7 @@ public class WorkflowPocController {
 	@PostMapping("/approve")
 	@PreAuthorize("isAuthenticated()")
 	@Operation(summary = "流程審核通過", description = "將指定流程實例推進到下一步")
+	@AuditEvent(AuditEventType.WORKFLOW_APPROVE)
 	public BaseResponse<WorkflowInstanceEntity> approve(@Valid @RequestBody WorkflowApproveRequest req) {
 		String userId = SecurityContextUtils.requireCurrentUserIdStrict();
 		WorkflowInstanceEntity result = workflowEngine.approve(req.instanceId(), req.comment(), userId);
@@ -91,6 +95,7 @@ public class WorkflowPocController {
 	@PostMapping("/reject")
 	@PreAuthorize("isAuthenticated()")
 	@Operation(summary = "流程退回", description = "將指定流程實例退回到 targetStepId")
+	@AuditEvent(AuditEventType.WORKFLOW_REJECT)
 	public BaseResponse<WorkflowInstanceEntity> reject(@Valid @RequestBody WorkflowRejectRequest req) {
 		String userId = SecurityContextUtils.requireCurrentUserIdStrict();
 		WorkflowInstanceEntity result = workflowEngine.reject(req.instanceId(), req.targetStepId(), req.comment(),
@@ -100,6 +105,7 @@ public class WorkflowPocController {
 
 	@PostMapping("/resubmit")
 	@PreAuthorize("isAuthenticated()")
+	@AuditEvent(AuditEventType.WORKFLOW_RESUBMIT)
 	@Operation(summary = "流程重送", description = "將已退回的流程重送回最近一次退回來源步驟")
 	public BaseResponse<WorkflowInstanceEntity> resubmit(@Valid @RequestBody WorkflowResubmitRequest req) {
 		String userId = SecurityContextUtils.requireCurrentUserIdStrict();
@@ -109,6 +115,7 @@ public class WorkflowPocController {
 
 	@PostMapping("/cancel")
 	@PreAuthorize("isAuthenticated()")
+	@AuditEvent(AuditEventType.WORKFLOW_CANCEL)
 	@Operation(summary = "取消流程", description = "申請人主動取消進行中的流程，僅限申請人本人操作")
 	public BaseResponse<WorkflowInstanceEntity> cancel(@Valid @RequestBody WorkflowCancelRequest req) {
 		String userId = SecurityContextUtils.requireCurrentUserIdStrict();
@@ -154,6 +161,7 @@ public class WorkflowPocController {
 
 	@PostMapping("/delegate")
 	@PreAuthorize("isAuthenticated()")
+	@AuditEvent(AuditEventType.SET_DELEGATE)
 	@Operation(summary = "設定代理人", description = "為當前登入使用者建立代理設定；delegateFor 由 SecurityContext 取得，不接受由請求方指定")
 	public BaseResponse<DelegateSettingEntity> setDelegate(@Valid @RequestBody DelegateSetRequest req) {
 		String currentUserId = SecurityContextUtils.requireCurrentUserIdStrict();

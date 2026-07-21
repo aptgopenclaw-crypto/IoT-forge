@@ -1,6 +1,6 @@
 package com.taipei.iot.common.util;
 
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.junit.jupiter.api.AfterEach;

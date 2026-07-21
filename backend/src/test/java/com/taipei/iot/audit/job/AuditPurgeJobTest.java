@@ -37,7 +37,7 @@ class AuditPurgeJobTest {
 
 	@AfterEach
 	void tearDown() {
-		com.taipei.iot.tenant.TenantContext.clear();
+		com.taipei.iot.common.context.TenantContext.clear();
 	}
 
 	@Test

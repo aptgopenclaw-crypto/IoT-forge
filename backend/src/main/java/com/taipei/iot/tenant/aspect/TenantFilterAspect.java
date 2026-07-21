@@ -1,7 +1,7 @@
 package com.taipei.iot.tenant.aspect;
 
 import com.taipei.iot.common.tenant.TenantScopedRepository;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.aspectj.lang.JoinPoint;

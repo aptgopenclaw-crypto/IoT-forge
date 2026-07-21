@@ -6,7 +6,7 @@ import com.taipei.iot.common.tenant.RunInSystemTenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
-
+import com.taipei.iot.common.context.*;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 

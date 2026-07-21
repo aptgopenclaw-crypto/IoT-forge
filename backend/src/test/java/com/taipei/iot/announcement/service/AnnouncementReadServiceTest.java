@@ -13,7 +13,7 @@ import com.taipei.iot.common.dto.PageResponse;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.common.util.JwtClaimKeys;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

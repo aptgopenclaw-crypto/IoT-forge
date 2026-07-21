@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.taipei.iot.common.audit.annotation.AuditEvent;
+import com.taipei.iot.common.audit.enums.AuditEventType;
 
 import java.util.List;
 
@@ -40,6 +42,7 @@ public class WorkflowDefinitionController {
 	@PostMapping
 	@PreAuthorize("hasAuthority('WORKFLOW_DEFINITION_MANAGE')")
 	@Operation(summary = "新增工作流程定義")
+	@AuditEvent(AuditEventType.WORKFLOW_CREATE)
 	public BaseResponse<WorkflowDefinitionEntity> create(@Valid @RequestBody WorkflowDefinitionRequest req) {
 		return BaseResponse.success(service.create(req));
 	}
@@ -47,6 +50,7 @@ public class WorkflowDefinitionController {
 	@PutMapping("/{id}")
 	@PreAuthorize("hasAuthority('WORKFLOW_DEFINITION_MANAGE')")
 	@Operation(summary = "更新工作流程定義")
+	@AuditEvent(AuditEventType.WORKFLOW_UPDATE)
 	public BaseResponse<WorkflowDefinitionEntity> update(@PathVariable Long id,
 			@Valid @RequestBody WorkflowDefinitionRequest req) {
 		return BaseResponse.success(service.update(id, req));
@@ -55,6 +59,7 @@ public class WorkflowDefinitionController {
 	@PatchMapping("/{id}/enabled")
 	@PreAuthorize("hasAuthority('WORKFLOW_DEFINITION_MANAGE')")
 	@Operation(summary = "切換啟用狀態")
+	@AuditEvent(AuditEventType.WORKFLOW_SWITCH_ENABLED)
 	public BaseResponse<Void> toggleEnabled(@PathVariable Long id, @RequestParam boolean enabled) {
 		service.toggleEnabled(id, enabled);
 		return BaseResponse.success(null);
@@ -63,6 +68,7 @@ public class WorkflowDefinitionController {
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('WORKFLOW_DEFINITION_MANAGE')")
 	@Operation(summary = "刪除工作流程定義")
+	@AuditEvent(AuditEventType.WORKFLOW_DELETE)
 	public BaseResponse<Void> delete(@PathVariable Long id) {
 		service.delete(id);
 		return BaseResponse.success(null);

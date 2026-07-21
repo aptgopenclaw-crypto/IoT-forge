@@ -11,7 +11,7 @@ import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
 import com.taipei.iot.dept.service.DataScopeHelper;
 import com.taipei.iot.rbac.service.RoleService;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.tenant.entity.TenantEntity;
 import com.taipei.iot.tenant.repository.TenantRepository;
 import com.taipei.iot.user.dto.request.AddTenantRoleRequest;

@@ -6,7 +6,7 @@ import com.taipei.iot.audit.entity.UserEventLogEntity;
 import com.taipei.iot.audit.repository.UserEventLogRepository;
 import com.taipei.iot.common.dept.port.VisibleDeptScopeProvider;
 import com.taipei.iot.common.user.port.SuperAdminDirectory;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

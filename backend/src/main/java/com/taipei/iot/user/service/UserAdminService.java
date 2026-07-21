@@ -198,12 +198,12 @@ public class UserAdminService {
 			if (req.getInitialPassword() == null || req.getInitialPassword().isBlank()) {
 				throw new BusinessException(ErrorCode.VALIDATION_ERROR, "LOCAL 帳號必須提供初始密碼");
 			}
-			passwordValidator.validate(com.taipei.iot.tenant.TenantContext.getCurrentTenantId(),
+			passwordValidator.validate(com.taipei.iot.common.context.TenantContext.getCurrentTenantId(),
 					req.getInitialPassword(), new PasswordValidator.UserContext(req.getEmail(), req.getEmail()));
 			passwordHash = passwordEncoder.encode(req.getInitialPassword());
 			// [Phase 3] Honour password.force_change_on_first_login policy
 			com.taipei.iot.common.policy.PasswordPolicy policy = passwordPolicyResolver
-				.resolve(com.taipei.iot.tenant.TenantContext.getCurrentTenantId());
+				.resolve(com.taipei.iot.common.context.TenantContext.getCurrentTenantId());
 			forceChange = policy.isForceChangeOnFirstLogin();
 		}
 		else {

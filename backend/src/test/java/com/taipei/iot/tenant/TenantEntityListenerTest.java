@@ -3,7 +3,7 @@ package com.taipei.iot.tenant;
 import com.taipei.iot.common.tenant.TenantEntityListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
+import com.taipei.iot.common.context.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TenantEntityListenerTest {

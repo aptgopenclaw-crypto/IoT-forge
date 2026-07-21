@@ -1,6 +1,6 @@
 package com.taipei.iot.tenant.interceptor;
 
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.tenant.config.TenantProperties;
 import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.enums.SecurityEvent;

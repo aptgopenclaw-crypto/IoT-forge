@@ -12,7 +12,7 @@ import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.dept.entity.DeptInfoEntity;
 import com.taipei.iot.dept.repository.DeptInfoRepository;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.workflow.entity.WorkflowInstanceEntity;
 import com.taipei.iot.workflow.entity.WorkflowStepLogEntity;
 import com.taipei.iot.workflow.model.WorkflowAction;

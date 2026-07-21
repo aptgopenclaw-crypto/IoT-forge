@@ -25,7 +25,7 @@ import com.taipei.iot.common.enums.ErrorCode;
 import com.taipei.iot.common.exception.BusinessException;
 import com.taipei.iot.user.repository.PasswordHistoryRepository;
 import com.taipei.iot.user.service.PasswordValidator;
-import com.taipei.iot.tenant.TenantContext;
+import com.taipei.iot.common.context.TenantContext;
 import com.taipei.iot.tenant.entity.TenantEntity;
 import com.taipei.iot.tenant.repository.TenantRepository;
 import io.jsonwebtoken.Claims;
