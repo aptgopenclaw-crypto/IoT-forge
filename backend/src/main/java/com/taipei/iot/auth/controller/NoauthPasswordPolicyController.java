@@ -5,6 +5,8 @@ import com.taipei.iot.auth.policy.dto.PasswordPolicyDto;
 import com.taipei.iot.common.annotation.RateLimit;
 import com.taipei.iot.common.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.auth.enabled", havingValue = "true", matchIfMissing = false)
 public class NoauthPasswordPolicyController {
 
 	private final PasswordPolicyService policyService;

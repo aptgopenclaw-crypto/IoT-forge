@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -47,6 +49,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @PreAuthorize("hasAuthority('PLATFORM_USER_TENANT_MAPPING')")
+@ConditionalOnProperty(name = "features.user.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Platform / Users / Tenant Roles", description = "平台層跨租戶使用者角色映射管理")
 public class PlatformUserTenantMappingController {
 

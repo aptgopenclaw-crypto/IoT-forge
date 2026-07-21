@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/auth/event-rules")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.eventrule.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Event Rule", description = "事件規則 CRUD + 啟用/停用")
 public class EventRuleController {
 

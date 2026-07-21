@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -34,6 +36,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/auth/audit")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.audit.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Audit", description = "稽核與使用者操作紀錄查詢 / 匯出")
 public class AuditController {
 

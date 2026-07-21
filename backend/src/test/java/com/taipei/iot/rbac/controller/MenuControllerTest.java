@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(MenuController.class)
 @Import({ SecurityConfig.class, GlobalExceptionHandler.class, CorsProperties.class })
-@TestPropertySource(properties = "cors.allowed-origins=http://localhost")
+@TestPropertySource(properties = { "cors.allowed-origins=http://localhost", "features.rbac.enabled=true" })
 class MenuControllerTest {
 
 	@Autowired

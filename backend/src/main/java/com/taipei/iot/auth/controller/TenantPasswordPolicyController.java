@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,6 +42,7 @@ import java.util.Map;
 @RequestMapping("/v1/auth/password-policy")
 @RequiredArgsConstructor
 @Validated
+@ConditionalOnProperty(name = "features.auth.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "PasswordPolicy", description = "租戶密碼政策：查詢有效規則 / 管理租戶覆寫")
 public class TenantPasswordPolicyController {
 

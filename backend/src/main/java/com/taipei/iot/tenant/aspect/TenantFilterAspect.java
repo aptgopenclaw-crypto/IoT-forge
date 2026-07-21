@@ -28,6 +28,7 @@ public class TenantFilterAspect {
 	 */
 	@Before("execution(* com.taipei.iot..*.repository..*Repository.*(..))")
 	public void enableTenantFilter(JoinPoint jp) {
+
 		// 只處理 TenantScopedRepository — 全域 Repository 直接放行
 		if (!(jp.getThis() instanceof TenantScopedRepository)) {
 			return;

@@ -195,3 +195,38 @@ import:
   max-rows: 500
   max-file-size: 10485760
   allowed-extensions: xlsx,csv
+
+
+feature:
+  setting:
+    enabled: true
+  audit:
+    enabled: true
+  tenant:
+    enabled: true
+  dept:
+    enabled: true
+  rbac:
+    enabled: true
+  user:
+    enabled: true
+  auth:
+    enabled: true 
+  notification:
+    enabled: true
+  workflow:
+    enabled: true
+  schema:
+    enabled: true
+  device:
+    enabled: true
+  announcement:
+    enabled: true
+  dispatch:
+    enabled: tru
+  assettransfer:
+    enabled: true
+  platform:
+    enabled: true
+  eventrule:
+    enabled: true

@@ -7,6 +7,8 @@ import com.taipei.iot.platform.announcement.service.PlatformAnnouncementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/auth/platform-announcements")
 @RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
+@ConditionalOnProperty(name = "features.platform.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "PlatformAnnouncementRead", description = "平台公告（租戶端唯讀）")
 public class PlatformAnnouncementReadController {
 

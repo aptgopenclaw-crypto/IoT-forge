@@ -6,6 +6,8 @@ import com.taipei.iot.rbac.service.PermissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/auth/permissions")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.rbac.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Permission", description = "權限查詢：列出系統可用的權限清單")
 public class PermissionController {
 

@@ -20,6 +20,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,6 +50,7 @@ import java.util.List;
 @RequestMapping("/v1/auth/announcements")
 @RequiredArgsConstructor
 @Validated
+@ConditionalOnProperty(name = "features.announcement.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Announcement", description = "公告：前台檢視 / 已讀標記 / 管理端 CRUD")
 public class AnnouncementController {
 

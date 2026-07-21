@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Validated
 @PreAuthorize("hasAuthority('PLATFORM_ANNOUNCEMENT_MANAGE')")
+@ConditionalOnProperty(name = "features.platform.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "PlatformAnnouncement", description = "平台公告管理（super_admin）")
 public class PlatformAnnouncementController {
 

@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +44,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/auth/asset-transfer")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.assettransfer.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "AssetTransfer", description = "資產異動申請：草稿建立、送出、審核、退回與重送")
 public class AssetTransferController {
 

@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/auth/user")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.user.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "UserSelf", description = "使用者自助功能：更新個人資料、修改密碼")
 public class UserSelfController {
 

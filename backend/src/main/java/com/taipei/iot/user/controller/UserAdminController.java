@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +36,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/auth/users")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.user.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "UserAdmin", description = "使用者管理：查詢、建立、更新、停用與租戶角色映射")
 public class UserAdminController {
 

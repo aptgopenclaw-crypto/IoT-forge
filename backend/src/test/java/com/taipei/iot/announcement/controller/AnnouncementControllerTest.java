@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AnnouncementController.class)
 @Import({ SecurityConfig.class, GlobalExceptionHandler.class, CorsProperties.class })
-@TestPropertySource(properties = "cors.allowed-origins=http://localhost")
+@TestPropertySource(properties = { "cors.allowed-origins=http://localhost", "features.announcement.enabled=true" })
 @DisplayName("AnnouncementController — 整合測試（F1~F6 Controller 層權限 / 驗證）")
 class AnnouncementControllerTest {
 

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/auth/workflow/definitions")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.workflow.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "WorkflowDefinition", description = "工作流程定義管理")
 public class WorkflowDefinitionController {
 

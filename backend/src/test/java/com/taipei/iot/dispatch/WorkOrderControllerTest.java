@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(WorkOrderController.class)
 @Import({ SecurityConfig.class, GlobalExceptionHandler.class, CorsProperties.class })
-@TestPropertySource(properties = "cors.allowed-origins=http://localhost")
+@TestPropertySource(properties = { "cors.allowed-origins=http://localhost", "features.dispatch.enabled=true" })
 class WorkOrderControllerTest {
 
 	@Autowired

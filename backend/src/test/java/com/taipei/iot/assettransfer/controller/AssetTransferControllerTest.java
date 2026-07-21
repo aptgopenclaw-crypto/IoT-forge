@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AssetTransferController.class)
 @Import({ SecurityConfig.class, GlobalExceptionHandler.class, CorsProperties.class })
-@TestPropertySource(properties = "cors.allowed-origins=http://localhost")
+@TestPropertySource(properties = { "cors.allowed-origins=http://localhost", "features.assettransfer.enabled=true" })
 class AssetTransferControllerTest {
 
 	@Autowired

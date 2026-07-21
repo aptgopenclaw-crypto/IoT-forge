@@ -6,6 +6,8 @@ import com.taipei.iot.schema.service.DeviceTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/v1/auth/device-templates")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.schema.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "DeviceTemplate", description = "設備模板管理 — JSON Schema 動態欄位定義")
 public class DeviceTemplateController {
 

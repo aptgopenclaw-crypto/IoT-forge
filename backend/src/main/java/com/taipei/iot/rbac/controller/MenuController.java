@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/v1/auth/menus")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.rbac.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Menu", description = "選單管理：樹狀查詢、我的選單與 CRUD")
 public class MenuController {
 

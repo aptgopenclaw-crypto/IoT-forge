@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +43,7 @@ import java.util.List;
 @RequestMapping("/v1/platform/impersonations")
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('PLATFORM_IMPERSONATE')")
+@ConditionalOnProperty(name = "features.platform.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "PlatformImpersonation", description = "平台代操管理：建立、撤銷與查詢代操會話")
 public class PlatformImpersonationController {
 

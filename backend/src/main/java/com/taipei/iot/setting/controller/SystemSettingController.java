@@ -12,6 +12,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.util.List;
 @RequestMapping("/v1/auth/system-settings")
 @RequiredArgsConstructor
 @Validated
+@ConditionalOnProperty(name = "features.setting.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "SystemSetting", description = "系統設定：查詢與管理平台級設定值")
 public class SystemSettingController {
 

@@ -11,6 +11,8 @@ import com.taipei.iot.notification.dto.UnreadCountResponse;
 import com.taipei.iot.notification.service.NotificationService;
 import com.taipei.iot.common.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/auth/notifications")
 @RequiredArgsConstructor
 @Validated
+@ConditionalOnProperty(name = "features.notification.enabled", havingValue = "true", matchIfMissing = false)
 public class NotificationController {
 
 	private final NotificationService notificationService;

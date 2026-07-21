@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/auth/dept")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.dept.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Dept", description = "部門管理：樹狀查詢、選單、查詢單筆與 CRUD")
 public class DeptController {
 

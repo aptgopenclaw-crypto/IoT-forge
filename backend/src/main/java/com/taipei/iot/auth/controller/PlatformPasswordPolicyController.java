@@ -7,6 +7,8 @@ import com.taipei.iot.auth.policy.dto.UpdatePasswordPolicyRequest;
 import com.taipei.iot.common.response.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,6 +29,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/v1/platform/password-policy")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.auth.enabled", havingValue = "true", matchIfMissing = false)
 @PreAuthorize("hasAuthority('PLATFORM_PASSWORD_POLICY_MANAGE')")
 public class PlatformPasswordPolicyController {
 

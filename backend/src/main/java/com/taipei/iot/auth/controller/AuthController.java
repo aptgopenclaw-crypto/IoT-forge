@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.taipei.iot.common.audit.annotation.AuditEvent;
@@ -45,6 +46,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.auth.enabled", havingValue = "true", matchIfMissing = false)
 public class AuthController {
 
 	private final AuthService authService;

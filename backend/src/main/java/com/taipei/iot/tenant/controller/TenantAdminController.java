@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,6 +31,7 @@ import java.util.List;
 @RequestMapping("/v1/platform/tenants")
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('PLATFORM_TENANT_MANAGE')")
+@ConditionalOnProperty(name = "features.tenant.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "Platform / Tenants", description = "平台層租戶管理（建立、編輯、啟用切換）；需 PLATFORM_TENANT_MANAGE 權限")
 public class TenantAdminController {
 

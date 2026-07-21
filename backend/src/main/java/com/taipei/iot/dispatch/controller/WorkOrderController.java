@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +33,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/v1/auth/work-orders")
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "features.dispatch.enabled", havingValue = "true", matchIfMissing = false)
 @Tag(name = "WorkOrder", description = "工單管理 — 通報/派工/到場/維修/覆核/結案 完整狀態機")
 public class WorkOrderController {
 
